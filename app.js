@@ -1,11 +1,7 @@
-import { loadDrawHunterData } from "./modules/drawhunter.js";
-import { loadFrenchFlairData } from "./modules/frenchflair.js";
+import { getFootballBatch, getRugbyBatch } from "./core/api.js";
 
-const CACHE_KEY = "sportlab_cache_v1";
+const CACHE_KEY = "sportlab_batch_v1";
 
-/**
- * INIT SPORTLAB
- */
 async function init() {
 
   const app = document.getElementById("app");
@@ -18,8 +14,9 @@ async function init() {
 
   try {
 
-    const football = await loadDrawHunterData();
-    const rugby = await loadFrenchFlairData();
+    // 🔥 1 SEUL APPEL PAR TYPE
+    const football = await getFootballBatch();
+    const rugby = await getRugbyBatch();
 
     const data = { football, rugby };
 
@@ -27,79 +24,44 @@ async function init() {
 
     render(app, football, rugby);
 
-  } catch (error) {
-    console.error("SportLab error:", error);
-
-    app.innerHTML = `
-      <h1>❌ Error loading SportLab</h1>
-      <p>${error.message}</p>
-    `;
+  } catch (e) {
+    console.error(e);
+    app.innerHTML = "Error loading SportLab";
   }
 }
 
-/**
- * CACHE SAVE
- */
 function saveCache(data) {
   localStorage.setItem(CACHE_KEY, JSON.stringify({
     ...data,
-    timestamp: Date.now()
+    ts: Date.now()
   }));
 }
 
-/**
- * CACHE GET
- */
 function getCache() {
   const raw = localStorage.getItem(CACHE_KEY);
   if (!raw) return null;
 
-  const parsed = JSON.parse(raw);
+  const data = JSON.parse(raw);
 
-  // cache 60 sec
-  if (Date.now() - parsed.timestamp > 60000) {
-    return null;
-  }
+  if (Date.now() - data.ts > 60000) return null;
 
-  return parsed;
+  return data;
 }
 
-/**
- * DASHBOARD RENDER
- */
 function render(app, football, rugby) {
 
   app.innerHTML = `
-    <h1>🏟️ SportLab V1.1 AI Dashboard</h1>
+    <h1>🏟️ SportLab V1.2 Batch Optimized</h1>
 
-    <hr/>
+    <h2>⚽ Football Batch</h2>
+    <pre>${JSON.stringify(football, null, 2)}</pre>
 
-    <h2>⚽ DrawHunter (Football AI)</h2>
-    <pre>${formatData(football)}</pre>
+    <h2>🏉 Rugby Batch</h2>
+    <pre>${JSON.stringify(rugby, null, 2)}</pre>
 
-    <hr/>
-
-    <h2>🏉 FrenchFlair (Rugby AI)</h2>
-    <pre>${formatData(rugby)}</pre>
-
-    <hr/>
-
-    <p>🧠 AI Layer: ACTIVE</p>
-    <p>📊 Value detection enabled</p>
-    <p>⚙️ Cache: ON (60s)</p>
+    <p>🧠 Batch system active</p>
+    <p>🚀 1 API call per sport</p>
   `;
 }
 
-/**
- * FORMAT SAFE DISPLAY
- */
-function formatData(data) {
-  try {
-    return JSON.stringify(data, null, 2);
-  } catch {
-    return "Invalid data format";
-  }
-}
-
-// 🚀 START
 init();
