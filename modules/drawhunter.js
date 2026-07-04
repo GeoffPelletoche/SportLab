@@ -1,58 +1,82 @@
-import { CONFIG } from "../core/config.js";
+import { calculateValueBet } from "../core/valueEngine.js";
 
 /**
- * SAFE + API LAYER DRAW HUNTER
+ * ⚽ DRAWHUNTER V1.3 ADVANCED VALUE ENGINE
+ * - Football draw strategy
+ * - API SAFE READY
+ * - Value Betting Engine integrated
  */
-export async function loadDrawHunterData() {
 
-  // 🟢 SAFE fallback (toujours dispo)
-  const safeData = {
-    status: "SAFE_MODE",
-    matches: [
-      {
-        home: "PSG",
-        away: "Marseille",
-        league: "Ligue 1",
-        prediction: "DRAW",
-        value: 0.12,
-        edge: 0.08,
-        odds: 3.10
-      }
-    ]
-  };
+export async function loadDrawHunterData() {
 
   try {
 
-    // 🌐 API CALL VIA WORKER
-    const res = await fetch(
-      `${CONFIG.baseUrl}/fixtures?league=39&season=2024`
-    );
+    // 🧪 BASE MATCH DATA (peut être remplacé par API plus tard)
+    const matches = [
+      {
+        id: 1,
+        home: "PSG",
+        away: "Marseille",
+        league: "Ligue 1",
+        odds: 3.10
+      },
+      {
+        id: 2,
+        home: "Real Madrid",
+        away: "Barcelona",
+        league: "La Liga",
+        odds: 3.40
+      },
+      {
+        id: 3,
+        home: "Bayern",
+        away: "Dortmund",
+        league: "Bundesliga",
+        odds: 3.20
+      },
+      {
+        id: 4,
+        home: "Liverpool",
+        away: "Arsenal",
+        league: "Premier League",
+        odds: 3.25
+      }
+    ];
 
-    if (!res.ok) throw new Error("API error");
+    // 🧠 VALUE ENGINE APPLY
+    const enrichedMatches = matches.map(match => {
 
-    const data = await res.json();
-
-    // 🧠 transformation simple API → format SportLab
-    const apiMatches = (data.response || []).slice(0, 5).map(m => {
+      const result = calculateValueBet(match, "football");
 
       return {
-        home: m.teams?.home?.name,
-        away: m.teams?.away?.name,
-        league: "API",
-        prediction: "DRAW",
-        value: Math.random() * 0.2, // placeholder safe value engine
-        edge: Math.random() * 0.1,
-        odds: 3.0
+        ...match,
+        ...result,
+        strategy: "DRAWHUNTER",
+        sport: "football"
       };
     });
 
+    // 📊 STATS ENGINE
+    const valueBets = enrichedMatches.filter(m => m.value > 0.05);
+
     return {
-      status: "API_MODE",
-      matches: apiMatches.length ? apiMatches : safeData.matches
+      status: "VALUE_ENGINE_V1_3_ACTIVE",
+      sport: "football",
+      strategy: "draw_hunter",
+      totalMatches: matches.length,
+      valueBets: valueBets.length,
+      matches: enrichedMatches
     };
 
-  } catch (e) {
-    console.warn("DrawHunter API fallback:", e.message);
-    return safeData;
+  } catch (error) {
+
+    console.error("DrawHunter error:", error);
+
+    // 🟡 SAFE FALLBACK
+    return {
+      status: "SAFE_MODE_FALLBACK",
+      sport: "football",
+      matches: []
+    };
   }
 }
