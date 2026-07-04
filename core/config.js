@@ -1,6 +1,6 @@
 export const CONFIG = {
   apiKey: "YOUR_API_SPORTS_KEY",
-  baseUrl: "https://v3.football.api-sports.io",
+  baseUrl: "https://sportlab-api-bridge.geoffrey-pelletier.workers.dev/",
 
   footballLeagues: {
     ligue1: 61,
