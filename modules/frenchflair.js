@@ -1,21 +1,26 @@
-import { COMPETITIONS } from "../core/competitions.js";
-import { getRugbyFixtures } from "../core/api.js";
-import { analyzeMatch } from "../core/ai.js";
+import { calculateValueBet } from "../core/valueEngine.js";
 
 export async function loadFrenchFlairData() {
 
-  const results = {};
+  const matches = [
+    {
+      home: "France",
+      away: "New Zealand",
+      odds: 1.80
+    },
+    {
+      home: "England",
+      away: "South Africa",
+      odds: 1.95
+    }
+  ];
 
-  for (const comp of COMPETITIONS.frenchflair) {
+  const enriched = matches.map(m =>
+    calculateValueBet(m, "rugby")
+  );
 
-    if (!comp.active) continue;
-
-    const data = await getRugbyFixtures(comp.id);
-
-    results[comp.name] = (data.response || [])
-      .slice(0, 10)
-      .map(match => analyzeMatch(match, "RUGBY"));
-  }
-
-  return results;
+  return {
+    status: "VALUE_ENGINE_ACTIVE",
+    matches: enriched
+  };
 }
