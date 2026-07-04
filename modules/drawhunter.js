@@ -14,7 +14,16 @@ export async function loadDrawHunterData() {
 
     results[comp.name] = (data.response || [])
       .slice(0, 10)
-      .map(match => analyzeMatch(match, "DRAW_ONLY"));
+      .map(match => {
+
+        const ai = analyzeMatch(match, "DRAW_ONLY");
+
+        // 🔥 FORCER LOGIQUE DRAW
+        return {
+          ...ai,
+          betType: "DRAW"
+        };
+      });
   }
 
   return results;
