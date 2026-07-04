@@ -1,27 +1,26 @@
-export function analyzeMatch(match) {
+export function analyzeMatch(match, mode = "FOOTBALL") {
 
-  // base stats (simplifiées V1.1)
-  const homeStrength = Math.random() * 100;
-  const awayStrength = Math.random() * 100;
+  const strength = Math.random() * 100;
 
-  const diff = homeStrength - awayStrength;
-
-  let recommendation = "NO BET";
-  let confidence = 0;
-
-  if (Math.abs(diff) > 20) {
-    recommendation = diff > 0 ? "HOME WIN VALUE" : "AWAY WIN VALUE";
-    confidence = Math.min(95, Math.abs(diff));
+  if (mode === "DRAW_ONLY") {
+    return {
+      match,
+      recommendation: strength > 70 ? "DRAW VALUE" : "NO VALUE",
+      confidence: strength.toFixed(1)
+    };
   }
 
-  if (Math.abs(diff) < 10) {
-    recommendation = "DRAW / LOW VALUE";
-    confidence = 30;
+  if (mode === "RUGBY") {
+    return {
+      match,
+      recommendation: strength > 65 ? "VALUE BET" : "NO VALUE",
+      confidence: strength.toFixed(1)
+    };
   }
 
   return {
     match,
-    recommendation,
-    confidence: confidence.toFixed(1)
+    recommendation: "NO VALUE",
+    confidence: 0
   };
 }
