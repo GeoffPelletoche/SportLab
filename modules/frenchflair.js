@@ -1,25 +1,20 @@
-import { analyzeMatch } from "../core/ai.js";
+import { COMPETITIONS } from "../core/competitions.js";
 import { getRugbyFixtures } from "../core/api.js";
+import { analyzeMatch } from "../core/ai.js";
 
 export async function loadFrenchFlairData() {
 
-  const comps = {
-    top14: "top_14",
-    prod2: "pro_d2",
-    superRugby: "super_rugby_pacific",
-    npc: "bunnings_npc",
-    championsCup: "champions_cup",
-    internationalXV: "international_xv"
-  };
-
   const results = {};
 
-  for (const key in comps) {
-    const data = await getRugbyFixtures(comps[key]);
+  for (const comp of COMPETITIONS.frenchflair) {
 
-    results[key] = (data.response || []).slice(0, 5).map(match => {
-      return analyzeMatch(match);
-    });
+    if (!comp.active) continue;
+
+    const data = await getRugbyFixtures(comp.id);
+
+    results[comp.name] = (data.response || [])
+      .slice(0, 10)
+      .map(match => analyzeMatch(match, "RUGBY"));
   }
 
   return results;
