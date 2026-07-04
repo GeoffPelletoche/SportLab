@@ -1,26 +1,20 @@
+import { computeValue } from "./valueEngine.js";
+
 export function analyzeMatch(match, mode = "FOOTBALL") {
 
-  const strength = Math.random() * 100;
+  // simulation probabilité (sera remplacé plus tard par stats API)
+  const probability = Math.random();
 
-  if (mode === "DRAW_ONLY") {
-    return {
-      match,
-      recommendation: strength > 70 ? "DRAW VALUE" : "NO VALUE",
-      confidence: strength.toFixed(1)
-    };
-  }
+  const odds = 2; // par défaut (sera injecté plus tard API bookmakers)
 
-  if (mode === "RUGBY") {
-    return {
-      match,
-      recommendation: strength > 65 ? "VALUE BET" : "NO VALUE",
-      confidence: strength.toFixed(1)
-    };
-  }
+  const value = computeValue({
+    probability,
+    odds
+  });
 
   return {
     match,
-    recommendation: "NO VALUE",
-    confidence: 0
+    mode,
+    ...value
   };
 }
