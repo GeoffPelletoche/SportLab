@@ -1,15 +1,24 @@
-import { CONFIG } from "../core/config.js";
+import { analyzeMatch } from "../core/ai.js";
 import { getFootballFixtures } from "../core/api.js";
 
 export async function loadDrawHunterData() {
-  const leagues = CONFIG.footballLeagues;
+  const leagues = {
+    ligue1: 61,
+    laLiga: 140,
+    bundesliga: 78,
+    premierLeague: 39,
+    serieA: 135
+  };
 
-  const data = {};
+  const results = {};
 
   for (const key in leagues) {
-    const leagueId = leagues[key];
-    data[key] = await getFootballFixtures(leagueId);
+    const data = await getFootballFixtures(leagues[key]);
+
+    results[key] = (data.response || []).slice(0, 5).map(match => {
+      return analyzeMatch(match);
+    });
   }
 
-  return data;
+  return results;
 }
