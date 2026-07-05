@@ -1,61 +1,133 @@
+/**
+ * 🧠 SPORTLAB V1.3 ADVANCED VALUE ENGINE
+ * - Football (DrawHunter)
+ * - Rugby (FrenchFlair)
+ * - EV / Edge calculation
+ * - ROI ready output
+ */
+
+import { addBet } from "./roiEngine.js";
+
+/**
+ * MAIN ENTRY
+ */
 export function calculateValueBet(match, sport = "football") {
 
   const odds = Number(match.odds || 2);
 
-  // 🧠 PROBABILITÉ IMPLICITE BOOKMAKER
+  // 📊 implied probability (bookmaker)
   const impliedProb = 1 / odds;
 
-  // 🧬 PROBABILITÉ MODÈLE (ADVANCED SIMPLIFIÉ)
+  // 🧠 model probability (advanced logic)
   const modelProb = getModelProbability(match, sport);
 
-  // 📊 VALUE
+  // 💰 VALUE (expected value)
   const value = modelProb - impliedProb;
 
-  // 📈 EDGE (ajustement risque)
+  // 📈 EDGE (risk-adjusted value)
   const edge = value * odds;
 
-  return {
+  // 🎯 DECISION RULE
+  const decision = value > getThreshold(sport)
+    ? "VALUE BET"
+    : "NO BET";
+
+  const result = {
     ...match,
+
+    sport,
     impliedProb: round(impliedProb),
     modelProb: round(modelProb),
     value: round(value),
     edge: round(edge),
-    decision: value > 0.05 ? "VALUE BET" : "NO BET"
+    decision,
+    strategy: sport === "football" ? "DRAWHUNTER" : "FRENCHFLAIR"
   };
+
+  /**
+   * 💰 AUTO ROI INJECTION (ONLY VALUE BETS)
+   */
+  if (decision === "VALUE BET") {
+    addBet({
+      source: result.strategy,
+      sport,
+      match: `${match.home} vs ${match.away}`,
+      odds,
+      stake: 0.5, // safe fixed stake (V1.4 safe mode)
+      decision
+    });
+  }
+
+  return result;
 }
 
 /**
- * 🧠 MODÈLE FOOTBALL / DRAWHUNTER
+ * 🧠 ADVANCED PROBABILITY MODEL
  */
 function getModelProbability(match, sport) {
 
+  // ⚽ FOOTBALL (DRAW HUNTER MODEL)
   if (sport === "football") {
 
-    // logique draw (low scoring + équilibre)
     const baseDraw = 0.28;
 
-    const balanceFactor = 0.1; // teams balance
-    const volatility = 0.05;
+    const balanceFactor = 0.08; // équilibre équipes
+    const leagueFactor = getLeagueFactor(match.league);
 
-    return clamp(baseDraw + balanceFactor - volatility);
-
+    return clamp(baseDraw + balanceFactor + leagueFactor);
   }
 
+  // 🏉 RUGBY (FRENCH FLAIR MODEL)
   if (sport === "rugby") {
 
-    // FrenchFlair model (plus de variance + scoring élevé)
-    const baseWin = 0.55;
+    const baseHomeWin = 0.52;
 
-    const intensityFactor = 0.1;
+    const intensityFactor = 0.06;
+    const competitionFactor = 0.04;
 
-    return clamp(baseWin + intensityFactor);
+    return clamp(baseHomeWin + intensityFactor + competitionFactor);
   }
 
   return 0.5;
 }
 
 /**
- * UTILITIES
+ * 📊 THRESHOLDS (RISK FILTER)
+ */
+function getThreshold(sport) {
+
+  if (sport === "football") {
+    return 0.05; // stricter draw market
+  }
+
+  if (sport === "rugby") {
+    return 0.04;
+  }
+
+  return 0.05;
+}
+
+/**
+ * 🧩 LEAGUE ADJUSTMENT (FOOTBALL ONLY)
+ */
+function getLeagueFactor(league) {
+
+  if (!league) return 0;
+
+  const strongDefensiveLeagues = [
+    "Serie A",
+    "Ligue 1"
+  ];
+
+  if (strongDefensiveLeagues.includes(league)) {
+    return 0.03;
+  }
+
+  return 0.01;
+}
+
+/**
+ * 🛠️ UTILS
  */
 function clamp(v) {
   return Math.max(0.01, Math.min(0.99, v));
