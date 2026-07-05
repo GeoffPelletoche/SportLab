@@ -1,54 +1,48 @@
+import { fetchUpcomingFootballFixtures } from "../core/footballService.js";
 import { computeValue } from "../core/valueEngine.js";
+import { CONFIG } from "../core/config.js";
 
 /**
  * SPORTLAB V3 — DRAWHUNTER MODULE
  * Rôle unique :
- * fournir les matchs foot à analyser sur le marché DRAW.
+ * récupérer les matchs foot à venir et analyser le marché DRAW.
  */
 
 export async function loadDrawHunterMatches() {
-  const matches = [
-    {
-      id: "dh-1",
-      home: "PSG",
-      away: "Marseille",
-      competition: "Ligue 1",
-      drawOdds: 3.1,
-      drawProbability: 0.34
-    },
-    {
-      id: "dh-2",
-      home: "Real Madrid",
-      away: "Barcelona",
-      competition: "La Liga",
-      drawOdds: 3.4,
-      drawProbability: 0.33
-    },
-    {
-      id: "dh-3",
-      home: "Bayern",
-      away: "Dortmund",
-      competition: "Bundesliga",
-      drawOdds: 3.2,
-      drawProbability: 0.3
-    }
-  ];
+  const fixtures = await fetchUpcomingFootballFixtures();
 
-  return matches.map(match => {
+  return fixtures.map(match => {
+    const probability = estimateDrawProbability(match);
+    const odds = estimateDrawOdds(match);
+
     const value = computeValue({
-      probability: match.drawProbability,
-      odds: match.drawOdds,
-      minValue: 0.01
+      probability,
+      odds,
+      minValue: CONFIG.drawhunter.minValue
     });
 
     return {
       ...match,
-      source: "DrawHunter",
-      sport: "football",
       market: "DRAW",
-      odds: match.drawOdds,
-      probability: match.drawProbability,
+      odds,
+      probability,
       ...value
     };
   });
+}
+
+/**
+ * V1 simple : modèle de probabilité temporaire.
+ * Sera amélioré plus tard avec forme récente, H2H, xG, etc.
+ */
+function estimateDrawProbability(match) {
+  return 0.32;
+}
+
+/**
+ * V1 simple : cote temporaire.
+ * Plus tard : récupération odds bookmaker API.
+ */
+function estimateDrawOdds(match) {
+  return 3.1;
 }
