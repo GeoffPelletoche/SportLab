@@ -1,12 +1,11 @@
 /**
- * 🧠 SPORTLAB VALUE ENGINE V2.3
+ * 🧠 SPORTLAB VALUE ENGINE V2.3 FIXED
  * - stable
- * - réaliste
- * - compatible ROI + betsStore + settlement
+ * - compatible modules
+ * - safe execution
  */
 
 export function computeValueEngine(match) {
-
   const {
     odds,
     modelProb,
@@ -15,59 +14,42 @@ export function computeValueEngine(match) {
     league
   } = match;
 
-  // 🧠 sécurité
   if (!odds || !modelProb) {
     return formatResult(match, 0, 0, "NO BET");
   }
 
-  /**
-   * 📊 VALUE CALCULATION
-   * value = edge probabilistic
-   */
-  const value = modelProb - impliedProb;
-
-  /**
-   * 📈 EDGE (profit expectation proxy)
-   */
+  const value = (modelProb || 0) - (impliedProb || 0);
   const edge = (modelProb * odds) - 1;
 
-  /**
-   * 🧠 DECISION ENGINE (OPTIMISED BUT SAFE)
-   */
-  let decision = decide(value, edge, sport, league);
+  const decision = decide(value, edge, sport, league);
 
   return formatResult(match, value, edge, decision);
 }
 
 /**
- * 🎯 DECISION LOGIC (balanced version)
+ * 🎯 DECISION ENGINE SAFE
  */
-function decide(value, edge, sport, league) {
+function decide(value, edge, sport) {
 
-  // 🟢 STRONG VALUE ZONE
   if (value >= 0.02 && edge >= 0.02) {
     return "VALUE BET";
   }
 
-  // 🟡 MEDIUM VALUE ZONE (accept risk)
   if (value >= 0.01 && edge >= 0.015) {
     return "VALUE BET";
   }
 
-  // 🟡 SPORT ADJUSTMENT (rugby / football tolerance)
   if (sport === "rugby" && value >= 0.008) {
     return "VALUE BET";
   }
 
-  // ❌ default
   return "NO BET";
 }
 
 /**
- * 📦 FORMAT FINAL OUTPUT
+ * 📦 FORMAT SAFE OUTPUT
  */
 function formatResult(match, value, edge, decision) {
-
   return {
     ...match,
     value: Number(value.toFixed(4)),
@@ -75,4 +57,15 @@ function formatResult(match, value, edge, decision) {
     decision,
     strategy: match.strategy || "SPORTLAB_V2_3"
   };
+}
+
+/**
+ * 🔁 COMPATIBILITY WRAPPER (IMPORTANT FIX)
+ * utilisé par drawhunter + frenchflair
+ */
+export function calculateValueBet(match, sport = "football") {
+  return computeValueEngine({
+    ...match,
+    sport
+  });
 }
