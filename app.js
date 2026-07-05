@@ -1,3 +1,4 @@
+console.log("APP LOADED");
 import { loadDrawHunterData } from "./modules/drawhunter.js";
 import { loadFrenchFlairData } from "./modules/frenchflair.js";
 import { computeValueEngine } from "./core/valueEngine.js";
