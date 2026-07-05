@@ -1,26 +1,34 @@
-export function analyzeRugbyTrend(match) {
-  const homeAvg = Number(match.homeAvgPoints || 27);
-  const awayAvg = Number(match.awayAvgPoints || 24);
+/**
+ * SPORTLAB V3 — RUGBY TREND ENGINE
+ * Rôle unique :
+ * proposer une tendance OVER / UNDER avec indice de confiance.
+ */
 
-  const totalExpected = homeAvg + awayAvg;
+export function computeRugbyTrend(match) {
+  const homeAvgFor = Number(match.homeAvgFor || 24);
+  const homeAvgAgainst = Number(match.homeAvgAgainst || 22);
+  const awayAvgFor = Number(match.awayAvgFor || 23);
+  const awayAvgAgainst = Number(match.awayAvgAgainst || 23);
 
-  let trend = "OVER";
-  let confidence = 55;
+  const expectedHomePoints = (homeAvgFor + awayAvgAgainst) / 2;
+  const expectedAwayPoints = (awayAvgFor + homeAvgAgainst) / 2;
+  const expectedTotalPoints = expectedHomePoints + expectedAwayPoints;
 
-  if (totalExpected < 47) {
-    trend = "UNDER";
-    confidence = 62;
-  }
+  const trend = expectedTotalPoints >= 48 ? "OVER" : "UNDER";
 
-  if (totalExpected > 55) {
-    trend = "OVER";
-    confidence = 64;
-  }
+  const distanceFromNeutral = Math.abs(expectedTotalPoints - 48);
+  const confidence = Math.min(75, 52 + distanceFromNeutral * 2);
 
   return {
     ...match,
-    expectedPoints: totalExpected,
+    expectedHomePoints: round(expectedHomePoints),
+    expectedAwayPoints: round(expectedAwayPoints),
+    expectedTotalPoints: round(expectedTotalPoints),
     trend,
-    confidence
+    confidence: round(confidence)
   };
+}
+
+function round(value) {
+  return Math.round(value * 100) / 100;
 }
