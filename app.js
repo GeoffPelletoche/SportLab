@@ -1,119 +1,86 @@
-import { loadDrawHunterData } from "./modules/drawhunter.js";
-import { loadFrenchFlairData } from "./modules/frenchflair.js";
 import { computeValueEngine } from "./core/valueEngine.js";
 
-console.log("🚀 SPORTLAB JS RUNNING");
+console.log("🧠 SPORTLAB ANALYSIS MODE V1");
 
-async function init() {
+function init() {
   const app = document.getElementById("app");
 
   if (!app) {
-    console.error("❌ #app missing");
+    console.error("❌ missing #app");
     return;
   }
 
-  app.innerHTML = "<h2>🏟️ SportLab Loading...</h2>";
-
-  let football = [];
-  let rugby = [];
-
-  try {
-    const dh = await loadDrawHunterData();
-    football = dh?.matches || [];
-    console.log("⚽ DrawHunter OK:", football.length);
-  } catch (e) {
-    console.error("DrawHunter error", e);
-  }
-
-  try {
-    const ff = await loadFrenchFlairData();
-    rugby = ff?.matches || [];
-    console.log("🏉 FrenchFlair OK:", rugby.length);
-  } catch (e) {
-    console.error("FrenchFlair error", e);
-  }
-
-  football = enrichMatches(football);
-  rugby = enrichMatches(rugby);
-
-  render(app, football, rugby);
-}
-
-/**
- * 🧠 VALUE ENGINE SAFE WRAPPER
- */
-function enrichMatches(matches) {
-  if (!Array.isArray(matches)) return [];
-
-  return matches.map(match => {
-    try {
-
-      // 🔥 FIX CRITIQUE: inject probabilités manquantes
-      const enrichedMatch = {
-        ...match,
-
-        modelProb: 0.33,
-        impliedProb: 1 / (match.odds || 2)
-      };
-
-      return computeValueEngine(enrichedMatch);
-
-    } catch (e) {
-      console.error("Engine error:", e);
-      return fallback(match);
-    }
-  });
-}
-
-/**
- * 🧱 FALLBACK SAFE
- */
-function fallback(match) {
-  return {
-    ...match,
-    value: 0,
-    edge: 0,
-    decision: "NO DATA",
-    strategy: "SAFE_MODE"
-  };
-}
-
-/**
- * 🎨 UI RENDER
- */
-function render(app, football, rugby) {
   app.innerHTML = `
-    <h1>🏟️ SportLab V1.1</h1>
+    <h1>🧠 SportLab Analysis Mode</h1>
+
+    <div style="padding:10px; border:1px solid #ccc; margin-bottom:10px;">
+      <h3>⚽ Match Analyzer</h3>
+
+      <input id="home" placeholder="Home team" /><br/><br/>
+      <input id="away" placeholder="Away team" /><br/><br/>
+      <input id="odds" placeholder="Odds (ex: 3.2)" type="number" step="0.01"/><br/><br/>
+
+      <button id="analyzeBtn">Analyze Value</button>
+    </div>
+
+    <div id="result" style="padding:10px; border:1px solid #000;">
+      Awaiting analysis...
+    </div>
+  `;
+
+  document.getElementById("analyzeBtn").onclick = runAnalysis;
+}
+
+function runAnalysis() {
+  const home = document.getElementById("home").value;
+  const away = document.getElementById("away").value;
+  const odds = parseFloat(document.getElementById("odds").value);
+
+  if (!home || !away || !odds) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  const match = {
+    home,
+    away,
+    odds,
+
+    // 🧠 engine fallback inputs (IMPORTANT)
+    modelProb: 0.33,
+    impliedProb: 1 / odds,
+    sport: "football",
+    league: "manual"
+  };
+
+  const result = computeValueEngine(match);
+
+  renderResult(result);
+}
+
+function renderResult(result) {
+  const el = document.getElementById("result");
+
+  const color =
+    result.decision === "VALUE BET"
+      ? "green"
+      : "red";
+
+  el.innerHTML = `
+    <h2 style="color:${color}">
+      ${result.decision}
+    </h2>
+
+    <p><b>${result.home} vs ${result.away}</b></p>
+
+    <p>Odds: ${result.odds}</p>
+    <p>Value: ${result.value}</p>
+    <p>Edge: ${result.edge}</p>
 
     <hr/>
 
-    <h2>⚽ DrawHunter (${football.length})</h2>
-    <pre>${format(football)}</pre>
-
-    <hr/>
-
-    <h2>🏉 FrenchFlair (${rugby.length})</h2>
-    <pre>${format(rugby)}</pre>
-
-    <hr/>
-
-    <h3>🧠 STATUS</h3>
-    <p>Engine: ACTIVE</p>
-    <p>Football: ${football.length}</p>
-    <p>Rugby: ${rugby.length}</p>
+    <p><b>Strategy:</b> ${result.strategy}</p>
   `;
 }
 
-/**
- * 📦 SAFE JSON
- */
-function format(data) {
-  try {
-    return JSON.stringify(data, null, 2);
-  } catch (e) {
-    return "format error";
-  }
-}
-
-// 🚀 START
 init();
