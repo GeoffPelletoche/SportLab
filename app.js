@@ -1,53 +1,92 @@
 import { loadDrawHunterData } from "./modules/drawhunter.js";
 import { loadFrenchFlairData } from "./modules/frenchflair.js";
+import { computeValueEngine } from "./core/valueEngine.js";
 
 /**
- * SPORTLAB V1 - STABLE CORE
- * ZERO SILENT FAIL
+ * 🧠 SPORTLAB SAFE CORE V1
+ * - zero crash mode
+ * - fallback data safe
+ * - engine protected
  */
 
 async function init() {
   const app = document.getElementById("app");
 
   if (!app) {
-    console.error("❌ Missing #app container");
+    console.error("❌ #app container missing");
     return;
   }
 
-  app.innerHTML = "<h2>🏟️ SportLab Loading...</h2>";
+  app.innerHTML = "<h2>🏟️ SportLab Loading SAFE MODE...</h2>";
 
-  console.log("🚀 INIT SPORTLAB");
+  console.log("🚀 SPORTLAB INIT");
 
   let football = [];
   let rugby = [];
 
+  // ⚽ DRAW HUNTER SAFE LOAD
   try {
     console.log("⚽ Loading DrawHunter...");
-
-    football = await loadDrawHunterData();
-
-    console.log("⚽ DrawHunter OK:", football);
-
+    football = await loadDrawHunterData() || [];
+    console.log("⚽ DrawHunter OK");
   } catch (e) {
     console.error("❌ DrawHunter error:", e);
+    football = [];
   }
 
+  // 🏉 FRENCH FLAIR SAFE LOAD
   try {
     console.log("🏉 Loading FrenchFlair...");
-
-    rugby = await loadFrenchFlairData();
-
-    console.log("🏉 FrenchFlair OK:", rugby);
-
+    rugby = await loadFrenchFlairData() || [];
+    console.log("🏉 FrenchFlair OK");
   } catch (e) {
     console.error("❌ FrenchFlair error:", e);
+    rugby = [];
   }
+
+  // 🧠 SAFE ENRICHMENT (NO CRASH IF ENGINE FAILS)
+  football = safeValueEngine(football);
+  rugby = safeValueEngine(rugby);
 
   render(app, football, rugby);
 }
 
 /**
- * RENDER SAFE (NO CRASH EVER)
+ * 🧠 VALUE ENGINE WRAPPER SAFE
+ */
+function safeValueEngine(matches) {
+  if (!Array.isArray(matches)) return [];
+
+  return matches.map(match => {
+    try {
+      if (typeof computeValueEngine === "function") {
+        return computeValueEngine(match);
+      }
+
+      return fallbackMatch(match);
+
+    } catch (e) {
+      console.error("Engine error:", e);
+      return fallbackMatch(match);
+    }
+  });
+}
+
+/**
+ * 🧱 FALLBACK SAFE MATCH
+ */
+function fallbackMatch(match) {
+  return {
+    ...match,
+    value: 0,
+    edge: 0,
+    decision: "NO DATA",
+    strategy: "SAFE_MODE"
+  };
+}
+
+/**
+ * 🎨 SAFE RENDER
  */
 function render(app, football, rugby) {
 
@@ -55,7 +94,7 @@ function render(app, football, rugby) {
   const r = Array.isArray(rugby) ? rugby : [];
 
   app.innerHTML = `
-    <h1>🏟️ SportLab V1</h1>
+    <h1>🏟️ SportLab V1 SAFE CORE</h1>
 
     <hr/>
 
@@ -70,24 +109,22 @@ function render(app, football, rugby) {
     <hr/>
 
     <h3>🧠 SYSTEM STATUS</h3>
-    <p>Core: ACTIVE</p>
-    <p>Football Engine: ${f.length > 0 ? "OK" : "EMPTY"}</p>
-    <p>Rugby Engine: ${r.length > 0 ? "OK" : "EMPTY"}</p>
+    <p>Core: SAFE ACTIVE</p>
+    <p>Football: ${f.length} matches</p>
+    <p>Rugby: ${r.length} matches</p>
   `;
 }
 
 /**
- * SAFE JSON
+ * 🧾 SAFE JSON
  */
 function safeJSON(data) {
   try {
     return JSON.stringify(data, null, 2);
   } catch (e) {
-    return "Invalid data";
+    return "Invalid data format";
   }
 }
 
-/**
- * START APP
- */
+// 🚀 START APP
 init();
