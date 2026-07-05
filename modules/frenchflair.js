@@ -1,41 +1,48 @@
-import { analyzeRugbyTrend } from "../core/rugbyTrendEngine.js";
+import { computeRugbyTrend } from "../core/rugbyTrendEngine.js";
 
-export async function loadFrenchFlairData() {
+/**
+ * SPORTLAB V3 — FRENCHFLAIR MODULE
+ * Rôle unique :
+ * fournir les matchs rugby avec tendance OVER / UNDER.
+ */
+
+export async function loadFrenchFlairMatches() {
   const matches = [
     {
-      id: 1,
+      id: "ff-1",
       home: "France",
       away: "New Zealand",
-      league: "International XV",
-      homeAvgPoints: 29,
-      awayAvgPoints: 27
+      competition: "International XV",
+      homeAvgFor: 29,
+      homeAvgAgainst: 21,
+      awayAvgFor: 27,
+      awayAvgAgainst: 23
     },
     {
-      id: 2,
+      id: "ff-2",
       home: "Toulouse",
       away: "Leinster",
-      league: "Champions Cup",
-      homeAvgPoints: 31,
-      awayAvgPoints: 28
+      competition: "Champions Cup",
+      homeAvgFor: 31,
+      homeAvgAgainst: 22,
+      awayAvgFor: 28,
+      awayAvgAgainst: 24
     },
     {
-      id: 3,
+      id: "ff-3",
       home: "Racing 92",
       away: "La Rochelle",
-      league: "Top 14",
-      homeAvgPoints: 23,
-      awayAvgPoints: 21
+      competition: "Top 14",
+      homeAvgFor: 23,
+      homeAvgAgainst: 24,
+      awayAvgFor: 21,
+      awayAvgAgainst: 22
     }
   ];
 
-  const analysed = matches.map(match => ({
-    ...analyzeRugbyTrend(match),
+  return matches.map(match => ({
+    ...computeRugbyTrend(match),
     source: "FrenchFlair",
     sport: "rugby"
   }));
-
-  return {
-    status: "FRENCHFLAIR_READY",
-    matches: analysed
-  };
 }
