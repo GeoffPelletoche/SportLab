@@ -1,0 +1,89 @@
+:root {
+  --bg: #0f172a;
+  --panel: #111827;
+  --card: #1e293b;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #38bdf8;
+  --border: #334155;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge-value {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--green);
+}
+
+.badge-no {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--red);
+}
+
+button {
+  background: var(--blue);
+  border: none;
+  color: #020617;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #020617;
+  color: var(--text);
+  margin-top: 6px;
+}
+
+.small {
+  color: var(--muted);
+  font-size: 13px;
+}
