@@ -1,47 +1,54 @@
-import { computeValueEngine } from "../core/valueEngine.js";
+import { computeValue } from "../core/valueEngine.js";
 
-export async function loadDrawHunterData() {
+/**
+ * SPORTLAB V3 — DRAWHUNTER MODULE
+ * Rôle unique :
+ * fournir les matchs foot à analyser sur le marché DRAW.
+ */
+
+export async function loadDrawHunterMatches() {
   const matches = [
     {
-      id: 1,
+      id: "dh-1",
       home: "PSG",
       away: "Marseille",
-      league: "Ligue 1",
-      odds: 3.10,
-      modelProb: 0.34,
-      impliedProb: 1 / 3.10,
-      sport: "football"
+      competition: "Ligue 1",
+      drawOdds: 3.1,
+      drawProbability: 0.34
     },
     {
-      id: 2,
+      id: "dh-2",
       home: "Real Madrid",
       away: "Barcelona",
-      league: "La Liga",
-      odds: 3.40,
-      modelProb: 0.33,
-      impliedProb: 1 / 3.40,
-      sport: "football"
+      competition: "La Liga",
+      drawOdds: 3.4,
+      drawProbability: 0.33
     },
     {
-      id: 3,
+      id: "dh-3",
       home: "Bayern",
       away: "Dortmund",
-      league: "Bundesliga",
-      odds: 3.20,
-      modelProb: 0.30,
-      impliedProb: 1 / 3.20,
-      sport: "football"
+      competition: "Bundesliga",
+      drawOdds: 3.2,
+      drawProbability: 0.3
     }
   ];
 
-  const analysed = matches.map(match => ({
-    ...computeValueEngine(match),
-    source: "DrawHunter",
-    market: "DRAW"
-  }));
+  return matches.map(match => {
+    const value = computeValue({
+      probability: match.drawProbability,
+      odds: match.drawOdds,
+      minValue: 0.01
+    });
 
-  return {
-    status: "DRAWHUNTER_READY",
-    matches: analysed
-  };
+    return {
+      ...match,
+      source: "DrawHunter",
+      sport: "football",
+      market: "DRAW",
+      odds: match.drawOdds,
+      probability: match.drawProbability,
+      ...value
+    };
+  });
 }
