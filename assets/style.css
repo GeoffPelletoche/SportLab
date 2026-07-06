@@ -1,89 +1,195 @@
 :root {
-  --bg: #0f172a;
+  --bg: #07111f;
+  --bg-soft: #0f1b2d;
   --panel: #111827;
-  --card: #1e293b;
-  --text: #e5e7eb;
+  --card: #152238;
+  --card-soft: #1d2b44;
+
+  --text: #f8fafc;
   --muted: #94a3b8;
+
+  --border: rgba(148, 163, 184, 0.22);
+
   --green: #22c55e;
   --red: #ef4444;
+  --yellow: #facc15;
   --blue: #38bdf8;
-  --border: #334155;
+  --purple: #a78bfa;
+
+  --radius: 16px;
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  background: var(--bg);
+}
+
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.14), transparent 32%),
+    radial-gradient(circle at top right, rgba(167, 139, 250, 0.12), transparent 30%),
+    var(--bg);
   color: var(--text);
 }
 
 #app {
-  max-width: 1100px;
+  width: 100%;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 20px;
 }
 
-h1, h2, h3 {
-  margin-top: 0;
+h1 {
+  font-size: 30px;
+  margin: 0 0 8px;
+  letter-spacing: -0.04em;
+}
+
+h2 {
+  font-size: 22px;
+  margin: 0 0 14px;
+}
+
+h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+p {
+  margin: 8px 0;
+  line-height: 1.45;
 }
 
 .card {
-  background: var(--card);
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
+  border-radius: var(--radius);
+  padding: 18px;
   margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.card .card {
+  background: rgba(15, 23, 42, 0.75);
+  box-shadow: none;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: bold;
-}
-
-.badge-value {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--green);
-}
-
-.badge-no {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--red);
-}
-
-button {
-  background: var(--blue);
-  border: none;
-  color: #020617;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-input, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: #020617;
-  color: var(--text);
-  margin-top: 6px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
 }
 
 .small {
   color: var(--muted);
   font-size: 13px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-value {
+  background: rgba(34, 197, 94, 0.16);
+  color: var(--green);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.badge-no {
+  background: rgba(239, 68, 68, 0.14);
+  color: var(--red);
+  border: 1px solid rgba(239, 68, 68, 0.28);
+}
+
+button {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+  color: #020617;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+button:active {
+  transform: scale(0.99);
+}
+
+label {
+  display: block;
+  margin: 12px 0 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+input,
+select {
+  width: 100%;
+  margin-top: 6px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: #020617;
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--blue);
+}
+
+input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 16px 0;
+}
+
+section.card > h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 720px) {
+  #app {
+    padding: 14px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 15px;
+    border-radius: 14px;
+  }
 }
