@@ -1,13 +1,14 @@
 /**
  * SPORTLAB V3 — RUGBY PREDICTION ENGINE
- * Sprint 4A.3
+ * Sprint 4A.4
  *
  * Rôle :
- * transformer un historique de matchs rugby en statistiques simples :
- * - moyenne points marqués
- * - moyenne points encaissés
- * - moyenne domicile
- * - moyenne extérieur
+ * transformer les historiques rugby en prédiction simple :
+ * - stats équipe domicile
+ * - stats équipe extérieure
+ * - points prédits domicile
+ * - points prédits extérieur
+ * - total prédit
  *
  * Aucun accès API.
  * Aucun HTML.
@@ -37,6 +38,47 @@ export function computeTeamStats(history = []) {
     awayGames: awayGames.length,
     awayAverageFor: round(avg(awayGames.map(g => g.pointsFor))),
     awayAverageAgainst: round(avg(awayGames.map(g => g.pointsAgainst)))
+  };
+}
+
+export function predictRugbyMatch(match) {
+  const homeStats = computeTeamStats(match.homeHistory || []);
+  const awayStats = computeTeamStats(match.awayHistory || []);
+
+  const homeAttack = homeStats.homeGames > 0
+    ? homeStats.homeAverageFor
+    : homeStats.averageFor;
+
+  const homeDefense = homeStats.homeGames > 0
+    ? homeStats.homeAverageAgainst
+    : homeStats.averageAgainst;
+
+  const awayAttack = awayStats.awayGames > 0
+    ? awayStats.awayAverageFor
+    : awayStats.averageFor;
+
+  const awayDefense = awayStats.awayGames > 0
+    ? awayStats.awayAverageAgainst
+    : awayStats.averageAgainst;
+
+  const predictedHomePoints = round((homeAttack + awayDefense) / 2);
+  const predictedAwayPoints = round((awayAttack + homeDefense) / 2);
+  const predictedTotalPoints = round(predictedHomePoints + predictedAwayPoints);
+
+  return {
+    ...match,
+
+    homeStats,
+    awayStats,
+
+    predictedHomePoints,
+    predictedAwayPoints,
+    predictedTotalPoints,
+
+    predictionStatus:
+      homeStats.games > 0 && awayStats.games > 0
+        ? "OK"
+        : "INSUFFICIENT_HISTORY"
   };
 }
 
