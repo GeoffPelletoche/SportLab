@@ -1,11 +1,12 @@
 /**
  * SPORTLAB V3 — FRENCHFLAIR VIEW
+ * Sprint 3.9A
  * Rôle :
- * afficher les matchs rugby + tendance Over/Under + état d'analyse.
+ * afficher les matchs rugby sous forme de cartes professionnelles.
  */
 
 export function renderFrenchFlair(payload) {
-  const matches = payload?.matches || [];
+  const matches = sortByDate(payload?.matches || []);
   const meta = payload?.meta || null;
 
   return `
@@ -25,7 +26,7 @@ function renderMeta(meta) {
       <p class="small">Période analysée : ${meta.from} → ${meta.to}</p>
       <p class="small">Compétitions actives : ${meta.competitions}</p>
       <p class="small">Matchs trouvés : ${meta.total}</p>
-      <p class="small">Dernière synchro : ${formatDate(meta.syncedAt)}</p>
+      <p class="small">Dernière synchro : ${formatDateTime(meta.syncedAt)}</p>
     </div>
   `;
 }
@@ -56,56 +57,110 @@ function renderMatches(matches) {
   return `
     ${matches.map((match, index) => `
       <div class="card">
-        <h3>${match.home || "Équipe domicile"} vs ${match.away || "Équipe extérieure"}</h3>
-        <p class="small">${match.competition || "-"}</p>
-        <p class="small">${formatDate(match.date)}</p>
+        <p class="small">🏉 ${match.competition || "-"}</p>
 
-        ${match.analysisStatus === "OK" ? renderAnalysis(match, index) : renderMissingStats(match)}
+        <div style="text-align:center; margin:16px 0;">
+          <h3>${teamLabel(match.home)}</h3>
+          <p class="small" style="margin:8px 0;">VS</p>
+          <h3>${teamLabel(match.away)}</h3>
+        </div>
+
+        <p class="small">📅 ${formatDate(match.date)}</p>
+        <p class="small">🕢 ${formatTime(match.date)}</p>
+
+        <span class="badge badge-value">À analyser</span>
+
+        <br/><br/>
+
+        <button onclick="analyzeFrenchFlairValue(${index})">
+          Analyser
+        </button>
+
+        <div id="ff-result-${index}" style="margin-top:12px;"></div>
       </div>
     `).join("")}
   `;
 }
 
-function renderAnalysis(match, index) {
-  return `
-    <p>Tendance proposée : <strong>${match.trend}</strong></p>
-    <p>Indice de confiance : ${match.confidence}%</p>
-    <p>Total attendu : ${match.expectedTotalPoints} pts</p>
-    <p class="small">${match.explanation}</p>
+function teamLabel(name) {
+  if (!name) return "Équipe inconnue";
 
-    <hr/>
+  const flag = getFlag(name);
 
-    <label>
-      Ligne bookmaker
-      <input id="ff-line-${index}" type="number" step="0.5" placeholder="Ex : 48.5">
-    </label>
-
-    <label>
-      Cote ${match.trend}
-      <input id="ff-odds-${index}" type="number" step="0.01" placeholder="Ex : 1.90">
-    </label>
-
-    <button onclick="analyzeFrenchFlairValue(${index})">
-      Analyser la value
-    </button>
-
-    <div id="ff-result-${index}" style="margin-top:12px;"></div>
-  `;
+  return `${flag ? `${flag} ` : ""}${name}`;
 }
 
-function renderMissingStats(match) {
-  return `
-    <p><strong>Tendance indisponible</strong></p>
-    <p class="small">${match.explanation || "Statistiques insuffisantes."}</p>
+function getFlag(name) {
+  const normalized = name.toLowerCase();
 
-    <p class="small">
-      Le match est bien récupéré, mais SportLab ne dispose pas encore de l’historique nécessaire
-      pour proposer une tendance Over/Under fiable.
-    </p>
-  `;
+  const flags = {
+    "france": "🇫🇷",
+    "la france": "🇫🇷",
+    "nouvelle-zélande": "🇳🇿",
+    "new zealand": "🇳🇿",
+    "australie": "🇦🇺",
+    "australia": "🇦🇺",
+    "afrique du sud": "🇿🇦",
+    "south africa": "🇿🇦",
+    "angleterre": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "écosse": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "l'écosse": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "pays de galles": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "irlande": "🇮🇪",
+    "ireland": "🇮🇪",
+    "italie": "🇮🇹",
+    "italy": "🇮🇹",
+    "japon": "🇯🇵",
+    "le japon": "🇯🇵",
+    "japan": "🇯🇵",
+    "fidji": "🇫🇯",
+    "fiji": "🇫🇯",
+    "argentine": "🇦🇷",
+    "argentina": "🇦🇷"
+  };
+
+  return flags[normalized] || "";
+}
+
+function sortByDate(matches) {
+  return [...matches].sort((a, b) => {
+    return new Date(a.date || 0) - new Date(b.date || 0);
+  });
 }
 
 function formatDate(value) {
+  if (!value) return "-";
+
+  try {
+    return new Date(value).toLocaleDateString("fr-FR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
+  } catch {
+    return value;
+  }
+}
+
+function formatTime(value) {
+  if (!value) return "-";
+
+  try {
+    return new Date(value).toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZoneName: "short"
+    });
+  } catch {
+    return value;
+  }
+}
+
+function formatDateTime(value) {
   if (!value) return "-";
 
   try {
