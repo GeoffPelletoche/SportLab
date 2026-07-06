@@ -63,10 +63,11 @@ function normalizeRugbyFixtures(data, competition) {
     source: "FrenchFlair",
     sport: "rugby",
 
-    // Données temporaires en attendant l’historique API
-    homeAvgFor: 24,
-    homeAvgAgainst: 22,
-    awayAvgFor: 23,
-    awayAvgAgainst: 23
+    // Pas de fausses statistiques.
+    // Elles seront calculées plus tard via historique API.
+    homeAvgFor: null,
+    homeAvgAgainst: null,
+    awayAvgFor: null,
+    awayAvgAgainst: null
   }));
 }
