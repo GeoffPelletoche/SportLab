@@ -22,13 +22,16 @@ export const CONFIG = {
   frenchflair: {
     market: "OVER_UNDER",
     competitions: [
-      { id: "top14", name: "Top 14", active: true },
-      { id: "prod2", name: "Pro D2", active: true },
-      { id: "super_rugby_pacific", name: "Super Rugby Pacific", active: true },
-      { id: "npc", name: "Bunnings NPC", active: true },
-      { id: "champions_cup", name: "Champions Cup", active: true },
-      { id: "international_xv", name: "International XV", active: true },
-      { id: "nations_championship", name: "Nations Championship", active: true }
+      { id: 16, name: "Top 14", active: true },
+      { id: 17, name: "Pro D2", active: true },
+      { id: 54, name: "Champions Cup", active: true },
+      { id: 80, name: "Bunnings NPC", active: true },
+      { id: 71, name: "Super Rugby Pacific", active: true },
+
+      { id: 51, name: "6 Nations", active: true },
+      { id: 84, name: "Test Match", active: true },
+      { id: 69, name: "Rugby World Cup", active: true },
+      { id: 145, name: "Nations Championship", active: true }
     ]
   }
 };
