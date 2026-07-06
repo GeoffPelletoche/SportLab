@@ -119,7 +119,9 @@ function getFlag(name) {
     "fidji": "🇫🇯",
     "fiji": "🇫🇯",
     "argentine": "🇦🇷",
-    "argentina": "🇦🇷"
+    "argentina": "🇦🇷",
+    "namibia": "🇳🇦",
+    "namibie":"🇳🇦",
   };
 
   return flags[normalized] || "";
