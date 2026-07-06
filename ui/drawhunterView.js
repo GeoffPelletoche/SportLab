@@ -1,7 +1,7 @@
 /**
  * SPORTLAB V3 — DRAWHUNTER VIEW
  * Rôle :
- * afficher les analyses DrawHunter + les métadonnées de synchronisation.
+ * afficher les analyses DrawHunter + permettre la validation manuelle d’un pari VALUE.
  */
 
 export function renderDrawHunter(payload) {
@@ -54,7 +54,7 @@ function renderEmpty(meta) {
 
 function renderMatches(matches) {
   return `
-    ${matches.map(match => `
+    ${matches.map((match, index) => `
       <div class="card">
         <h3>${match.home} vs ${match.away}</h3>
         <p class="small">${match.competition}</p>
@@ -68,6 +68,31 @@ function renderMatches(matches) {
         <span class="badge ${match.decision === "VALUE BET" ? "badge-value" : "badge-no"}">
           ${match.decision}
         </span>
+
+        ${match.decision === "VALUE BET" ? `
+          <hr/>
+
+          <label>
+            <input type="checkbox" id="draw-placed-${index}">
+            Pari placé
+          </label>
+
+          <br/><br/>
+
+          <label>
+            Montant misé
+            <input id="draw-stake-${index}" type="number" min="0" step="0.01" placeholder="Ex : 10">
+          </label>
+
+          <br/><br/>
+
+          <button onclick="saveDrawHunterBet(${index})">
+            Valider le pari
+          </button>
+        ` : `
+          <hr/>
+          <p class="small">Statut : NON_PLACED</p>
+        `}
       </div>
     `).join("")}
   `;
