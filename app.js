@@ -3,6 +3,7 @@ import { loadFrenchFlairMatches } from "./modules/frenchflair.js";
 import { getROI } from "./core/roiEngine.js";
 import { saveBet } from "./core/betsStore.js";
 import { computeValue } from "./core/valueEngine.js";
+import { saveAnalysis, getAnalysisForMatch } from "./core/analysisStore.js";
 
 import { renderDashboard } from "./ui/dashboardView.js";
 import { renderDrawHunter } from "./ui/drawhunterView.js";
@@ -33,7 +34,7 @@ async function init() {
     console.error("SportLab init error:", error);
 
     app.innerHTML = `
-      <h1>🏟️ SportLab !</h1>
+      <h1>🏟️ SportLab</h1>
       <section class="card">
         <h2>Erreur de chargement</h2>
         <p>${error.message}</p>
@@ -42,6 +43,9 @@ async function init() {
   }
 }
 
+/**
+ * DRAWHUNTER
+ */
 window.saveDrawHunterBet = function(index) {
   const match = drawhunterPayload?.matches?.[index];
 
@@ -76,13 +80,16 @@ window.saveDrawHunterBet = function(index) {
 
   alert(
     saved.placed
-      ? "Pari DrawHunter sauvegardé en attente."
-      : "Analyse DrawHunter sauvegardée en non placé."
+      ? "Pari DrawHunter sauvegardé."
+      : "Analyse DrawHunter sauvegardée."
   );
 
   init();
 };
 
+/**
+ * FRENCHFLAIR — OUVERTURE FICHE MANUELLE
+ */
 window.analyzeFrenchFlairValue = function(index) {
   const match = frenchflairPayload?.matches?.[index];
 
@@ -91,20 +98,111 @@ window.analyzeFrenchFlairValue = function(index) {
     return;
   }
 
-  if (match.analysisStatus !== "OK") {
-    alert("Analyse indisponible : statistiques insuffisantes.");
+  const existing = getAnalysisForMatch(match.id);
+  const box = document.getElementById(`ff-result-${index}`);
+
+  if (!box) return;
+
+  box.innerHTML = `
+    <hr/>
+
+    <h3>Analyse FrenchFlair</h3>
+
+    <label>
+      Marché
+      <select id="ff-market-${index}">
+        <option value="OVER" ${existing?.market === "OVER" ? "selected" : ""}>Over</option>
+        <option value="UNDER" ${existing?.market === "UNDER" ? "selected" : ""}>Under</option>
+      </select>
+    </label>
+
+    <label>
+      Ligne bookmaker
+      <input
+        id="ff-line-${index}"
+        type="number"
+        step="0.5"
+        placeholder="Ex : 45.5"
+        value="${existing?.line ?? ""}"
+      >
+    </label>
+
+    <label>
+      Bookmaker
+      <input
+        id="ff-bookmaker-${index}"
+        type="text"
+        placeholder="Ex : Betclic"
+        value="${existing?.bookmaker ?? ""}"
+      >
+    </label>
+
+    <label>
+      Cote
+      <input
+        id="ff-odds-${index}"
+        type="number"
+        step="0.01"
+        placeholder="Ex : 1.90"
+        value="${existing?.odds || ""}"
+      >
+    </label>
+
+    <label>
+      Probabilité estimée (%)
+      <input
+        id="ff-probability-${index}"
+        type="number"
+        step="0.1"
+        min="0"
+        max="100"
+        placeholder="Ex : 58"
+        value="${existing?.probability ? existing.probability * 100 : ""}"
+      >
+    </label>
+
+    <label>
+      Notes
+      <input
+        id="ff-notes-${index}"
+        type="text"
+        placeholder="Observation personnelle"
+        value="${existing?.notes ?? ""}"
+      >
+    </label>
+
+    <button onclick="calculateFrenchFlairAnalysis(${index})">
+      Calculer la value
+    </button>
+
+    <div id="ff-calculation-${index}" style="margin-top:12px;"></div>
+  `;
+};
+
+/**
+ * FRENCHFLAIR — CALCUL VALUE
+ */
+window.calculateFrenchFlairAnalysis = function(index) {
+  const match = frenchflairPayload?.matches?.[index];
+
+  if (!match) {
+    alert("Match introuvable.");
     return;
   }
 
+  const market = document.getElementById(`ff-market-${index}`)?.value;
   const line = Number(document.getElementById(`ff-line-${index}`)?.value || 0);
+  const bookmaker = document.getElementById(`ff-bookmaker-${index}`)?.value || "";
   const odds = Number(document.getElementById(`ff-odds-${index}`)?.value || 0);
+  const probabilityPercent = Number(document.getElementById(`ff-probability-${index}`)?.value || 0);
+  const notes = document.getElementById(`ff-notes-${index}`)?.value || "";
 
-  if (line <= 0 || odds <= 1) {
-    alert("Saisis une ligne bookmaker et une cote valide.");
+  if (!market || line <= 0 || odds <= 1 || probabilityPercent <= 0) {
+    alert("Saisis un marché, une ligne, une cote et une probabilité valides.");
     return;
   }
 
-  const probability = Number(match.confidence || 0) / 100;
+  const probability = probabilityPercent / 100;
 
   const value = computeValue({
     probability,
@@ -112,16 +210,39 @@ window.analyzeFrenchFlairValue = function(index) {
     minValue: 0.01
   });
 
-  const resultBox = document.getElementById(`ff-result-${index}`);
+  const analysis = saveAnalysis({
+    source: "FrenchFlair",
+    sport: "rugby",
+    competition: match.competition,
+    matchId: match.id,
+    match: `${match.home} vs ${match.away}`,
+    home: match.home,
+    away: match.away,
+    date: match.date,
 
-  resultBox.innerHTML = `
+    market,
+    line,
+    bookmaker,
+    odds,
+    probability,
+    impliedProbability: value.impliedProbability,
+    value: value.value,
+    edge: value.edge,
+    decision: value.decision,
+
+    status: "draft",
+    notes
+  });
+
+  const box = document.getElementById(`ff-calculation-${index}`);
+
+  box.innerHTML = `
     <hr/>
 
-    <p>Marché analysé : <strong>${match.trend}</strong></p>
-    <p>Ligne bookmaker : ${line}</p>
+    <p>Marché analysé : <strong>${market} ${line}</strong></p>
+    <p>Bookmaker : ${bookmaker || "-"}</p>
     <p>Cote : ${odds}</p>
-
-    <p>Probabilité modèle : ${(value.probability * 100).toFixed(1)}%</p>
+    <p>Probabilité estimée : ${probabilityPercent.toFixed(1)}%</p>
     <p>Probabilité implicite : ${(value.impliedProbability * 100).toFixed(1)}%</p>
     <p>Value : ${(value.value * 100).toFixed(1)}%</p>
     <p>Edge : ${(value.edge * 100).toFixed(1)}%</p>
@@ -129,6 +250,8 @@ window.analyzeFrenchFlairValue = function(index) {
     <span class="badge ${value.decision === "VALUE BET" ? "badge-value" : "badge-no"}">
       ${value.decision}
     </span>
+
+    <p class="small">Analyse sauvegardée automatiquement.</p>
 
     ${value.decision === "VALUE BET" ? `
       <hr/>
@@ -138,30 +261,27 @@ window.analyzeFrenchFlairValue = function(index) {
         Pari placé
       </label>
 
-      <br/><br/>
-
       <label>
         Montant misé
         <input id="ff-stake-${index}" type="number" min="0" step="0.01" placeholder="Ex : 10">
       </label>
 
-      <br/><br/>
-
-      <button onclick="saveFrenchFlairBet(${index}, ${line}, ${odds})">
-        Valider le pari
+      <button onclick="saveFrenchFlairBet(${index}, '${analysis.id}')">
+        Sauvegarder le pari
       </button>
-    ` : `
-      <hr/>
-      <p class="small">Statut : NON_PLACED</p>
-    `}
+    ` : ""}
   `;
 };
 
-window.saveFrenchFlairBet = function(index, line, odds) {
+/**
+ * FRENCHFLAIR — SAUVEGARDE PARI
+ */
+window.saveFrenchFlairBet = function(index, analysisId) {
   const match = frenchflairPayload?.matches?.[index];
+  const analysis = getAnalysisForMatch(match?.id);
 
-  if (!match) {
-    alert("Match introuvable.");
+  if (!match || !analysis) {
+    alert("Analyse introuvable.");
     return;
   }
 
@@ -173,36 +293,30 @@ window.saveFrenchFlairBet = function(index, line, odds) {
     return;
   }
 
-  const probability = Number(match.confidence || 0) / 100;
-
-  const value = computeValue({
-    probability,
-    odds,
-    minValue: 0.01
+  saveAnalysis({
+    ...analysis,
+    placed,
+    stake,
+    status: placed ? "betPlaced" : "completed"
   });
 
-  const saved = saveBet({
+  saveBet({
     source: "FrenchFlair",
     sport: "rugby",
     competition: match.competition,
     match: `${match.home} vs ${match.away}`,
-    market: match.trend,
-    line,
-    odds,
-    probability: value.probability,
-    value: value.value,
-    edge: value.edge,
-    decision: value.decision,
+    market: `${analysis.market} ${analysis.line}`,
+    line: analysis.line,
+    odds: analysis.odds,
+    probability: analysis.probability,
+    value: analysis.value,
+    edge: analysis.edge,
+    decision: analysis.decision,
     placed,
     stake
   });
 
-  alert(
-    saved.placed
-      ? "Pari FrenchFlair sauvegardé en attente."
-      : "Analyse FrenchFlair sauvegardée en non placé."
-  );
-
+  alert("Analyse FrenchFlair sauvegardée.");
   init();
 };
 
