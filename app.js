@@ -33,7 +33,7 @@ async function init() {
     console.error("SportLab init error:", error);
 
     app.innerHTML = `
-      <h1>🏟️ SportLab</h1>
+      <h1>🏟️ SportLab !</h1>
       <section class="card">
         <h2>Erreur de chargement</h2>
         <p>${error.message}</p>
