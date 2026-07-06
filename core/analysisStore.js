@@ -11,16 +11,18 @@ export function getAnalyses() {
 export function saveAnalysis(analysis) {
   const analyses = getAnalyses();
   const now = Date.now();
-
   const id = analysis.id || buildAnalysisId(analysis);
 
   const cleanAnalysis = {
     id,
     source: analysis.source || "FrenchFlair",
     sport: analysis.sport || "rugby",
+
     competition: analysis.competition || null,
     matchId: analysis.matchId || null,
-    match: analysis.match,
+    match: analysis.match || null,
+    home: analysis.home || null,
+    away: analysis.away || null,
     date: analysis.date || null,
 
     market: analysis.market || null,
@@ -28,11 +30,17 @@ export function saveAnalysis(analysis) {
     bookmaker: analysis.bookmaker || null,
     odds: Number(analysis.odds || 0),
     probability: Number(analysis.probability || 0),
+
+    impliedProbability: Number(analysis.impliedProbability || 0),
     value: Number(analysis.value || 0),
     edge: Number(analysis.edge || 0),
     decision: analysis.decision || "PENDING",
 
+    placed: Boolean(analysis.placed || false),
+    stake: Number(analysis.stake || 0),
+
     status: analysis.status || "draft",
+    result: analysis.result || "PENDING",
     notes: analysis.notes || "",
 
     createdAt: analysis.createdAt || now,
@@ -62,7 +70,10 @@ export function getAnalysisById(id) {
 
 export function getAnalysisForMatch(matchId) {
   if (!matchId) return null;
-  return getAnalyses().find(item => String(item.matchId) === String(matchId)) || null;
+
+  return getAnalyses().find(item =>
+    String(item.matchId) === String(matchId)
+  ) || null;
 }
 
 export function updateAnalysisStatus(id, status) {
