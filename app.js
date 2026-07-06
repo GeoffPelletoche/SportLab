@@ -13,12 +13,12 @@ async function init() {
   try {
     app.innerHTML = `<h1>🏟️ SportLab</h1><p>Chargement...</p>`;
 
-    const drawhunterMatches = await loadDrawHunterMatches();
+    const drawhunterPayload = await loadDrawHunterMatches();
     const frenchflairMatches = await loadFrenchFlairMatches();
     const roi = getROI();
 
     app.innerHTML = renderDashboard({
-      drawhunterHtml: renderDrawHunter(drawhunterMatches),
+      drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairMatches),
       portfolioHtml: renderPortfolio(roi)
     });
