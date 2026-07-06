@@ -4,14 +4,16 @@ import { CONFIG } from "../core/config.js";
 
 /**
  * SPORTLAB V3 — DRAWHUNTER MODULE
- * Rôle unique :
- * récupérer les matchs foot à venir et analyser le marché DRAW.
+ * Rôle :
+ * récupérer les matchs foot à venir,
+ * analyser le marché DRAW,
+ * transmettre les métadonnées de synchronisation.
  */
 
 export async function loadDrawHunterMatches() {
-  const fixtures = await fetchUpcomingFootballFixtures();
+  const { fixtures, meta } = await fetchUpcomingFootballFixtures();
 
-  return fixtures.map(match => {
+  const matches = fixtures.map(match => {
     const probability = estimateDrawProbability(match);
     const odds = estimateDrawOdds(match);
 
@@ -29,20 +31,25 @@ export async function loadDrawHunterMatches() {
       ...value
     };
   });
+
+  return {
+    matches,
+    meta
+  };
 }
 
 /**
- * V1 simple : modèle de probabilité temporaire.
- * Sera amélioré plus tard avec forme récente, H2H, xG, etc.
+ * Modèle temporaire V1.
+ * Sera remplacé plus tard par les vraies features.
  */
-function estimateDrawProbability(match) {
+function estimateDrawProbability() {
   return 0.32;
 }
 
 /**
- * V1 simple : cote temporaire.
- * Plus tard : récupération odds bookmaker API.
+ * Cote temporaire V1.
+ * Sera remplacée plus tard par l’API odds/bookmakers.
  */
-function estimateDrawOdds(match) {
+function estimateDrawOdds() {
   return 3.1;
 }
