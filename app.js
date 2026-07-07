@@ -132,11 +132,6 @@ window.analyzeFrenchFlairValue = function(index) {
     </label>
 
     <label>
-      Probabilité estimée (%)
-      <input id="ff-probability-${index}" type="number" step="0.1" min="0" max="100" placeholder="Ex : 58" value="${existing?.probability ? existing.probability * 100 : ""}">
-    </label>
-
-    <label>
       Notes
       <input id="ff-notes-${index}" type="text" placeholder="Observation personnelle" value="${existing?.notes ?? ""}">
     </label>
@@ -164,15 +159,14 @@ window.calculateFrenchFlairAnalysis = function(index) {
   const line = Number(document.getElementById(`ff-line-${index}`)?.value || 0);
   const bookmaker = document.getElementById(`ff-bookmaker-${index}`)?.value || "";
   const odds = Number(document.getElementById(`ff-odds-${index}`)?.value || 0);
-  const probabilityPercent = Number(document.getElementById(`ff-probability-${index}`)?.value || 0);
+  const probability = computeFrenchFlairProbability(match, market, line);
+  const probabilityPercent = probability * 100;
   const notes = document.getElementById(`ff-notes-${index}`)?.value || "";
 
-  if (!market || line <= 0 || odds <= 1 || probabilityPercent <= 0) {
-    alert("Saisis un marché, une ligne, une cote et une probabilité valides.");
-    return;
+  if (!market || line <= 0 || odds <= 1 || probability <= 0) {
+  alert("Saisis un marché, une ligne bookmaker et une cote valides.");
+  return;
   }
-
-  const probability = probabilityPercent / 100;
 
   const value = computeValue({
     probability,
@@ -312,5 +306,52 @@ window.saveFrenchFlairBet = function(index, analysisId) {
   alert("Analyse FrenchFlair sauvegardée.");
   init();
 };
+
+function computeFrenchFlairProbability(match, market, line) {
+  const mean = Number(match.predictedTotalPoints || 0);
+  const sigma = Number(match.sigma || 0);
+
+  if (!mean || !sigma || sigma <= 0 || !line) {
+    return 0;
+  }
+
+  const z = (line - mean) / sigma;
+  const overProbability = 1 - normalCdf(z);
+
+  if (market === "OVER") {
+    return clamp(overProbability, 0.01, 0.99);
+  }
+
+  return clamp(1 - overProbability, 0.01, 0.99);
+}
+
+function normalCdf(x) {
+  return 0.5 * (1 + erf(x / Math.sqrt(2)));
+}
+
+function erf(x) {
+  const sign = x >= 0 ? 1 : -1;
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+
+  const absX = Math.abs(x);
+  const t = 1 / (1 + p * absX);
+
+  const y =
+    1 -
+    (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) *
+    t *
+    Math.exp(-absX * absX);
+
+  return sign * y;
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
 
 init();
