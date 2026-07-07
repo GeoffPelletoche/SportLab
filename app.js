@@ -274,10 +274,10 @@ if (!Number.isFinite(probability) || probability <= 0) {
 };
 
 /**
- * FRENCHFLAIR — SAUVEGARDE PARI
- */
-window.saveFrenchFlairBet = function(index, analysisId) {
-  const match = frenchflairPayload?.matches?.[index];
+ * FRENCHFLAIR */
+
+window.saveFrenchFlairBet = function(matchId, analysisId) {
+  const match = getFrenchFlairMatchById(matchId);
   const analysis = getAnalysisForMatch(match?.id);
 
   if (!match || !analysis) {
