@@ -1,10 +1,9 @@
 /**
  * SPORTLAB V3 — RUGBY PREDICTION ENGINE
- * Sprint 4A.5B
+ * Sprint 4A.6
  *
  * Ajout :
- * - modèle ajusté selon la force offensive/défensive de l’adversaire
- * - prédiction moins naïve qu’une moyenne brute
+ * - Indice de confiance SportLab
  */
 
 export function computeTeamStats(history = []) {
@@ -28,6 +27,9 @@ export function computeTeamStats(history = []) {
     awayGames: awayGames.length,
     awayAverageFor: round(avg(awayGames.map(g => g.pointsFor))),
     awayAverageAgainst: round(avg(awayGames.map(g => g.pointsAgainst))),
+
+    attackSigma: round(stdDev(games.map(g => g.pointsFor))),
+    defenseSigma: round(stdDev(games.map(g => g.pointsAgainst))),
 
     totalAverage: round(avg(games.map(g => g.pointsFor + g.pointsAgainst))),
     totalSigma: round(stdDev(games.map(g => g.pointsFor + g.pointsAgainst)))
@@ -75,6 +77,14 @@ export function predictRugbyMatch(match) {
     awayStats.totalSigma
   ].filter(v => v > 0)));
 
+  const confidence = computeConfidence({
+    homeStats,
+    awayStats,
+    sigma,
+    predictedTotalPoints,
+    predictionStatus
+  });
+
   return {
     ...match,
 
@@ -96,8 +106,53 @@ export function predictRugbyMatch(match) {
     predictedRangeLow: round(predictedTotalPoints - sigma),
     predictedRangeHigh: round(predictedTotalPoints + sigma),
 
+    confidence,
+
     predictionStatus
   };
+}
+
+function computeConfidence({ homeStats, awayStats, sigma, predictedTotalPoints, predictionStatus }) {
+  if (predictionStatus !== "OK") return 0;
+
+  const totalGames = homeStats.games + awayStats.games;
+
+  const sampleScore = clamp(totalGames / 20, 0, 1) * 25;
+
+  const sigmaRatio = predictedTotalPoints > 0
+    ? sigma / predictedTotalPoints
+    : 1;
+
+  const stabilityScore = clamp(1 - sigmaRatio, 0, 1) * 40;
+
+  const homeBalance = homeStats.homeGames > 0 ? 1 : 0.65;
+  const awayBalance = awayStats.awayGames > 0 ? 1 : 0.65;
+  const contextScore = ((homeBalance + awayBalance) / 2) * 20;
+
+  const attackStability = avg([
+    normalizeStability(homeStats.attackSigma),
+    normalizeStability(awayStats.attackSigma)
+  ]);
+
+  const defenseStability = avg([
+    normalizeStability(homeStats.defenseSigma),
+    normalizeStability(awayStats.defenseSigma)
+  ]);
+
+  const consistencyScore = avg([attackStability, defenseStability]) * 15;
+
+  return Math.round(
+    clamp(
+      sampleScore + stabilityScore + contextScore + consistencyScore,
+      35,
+      92
+    )
+  );
+}
+
+function normalizeStability(sigma) {
+  if (!sigma || sigma <= 0) return 0.5;
+  return clamp(1 - sigma / 20, 0, 1);
 }
 
 function computeBaselinePoints(homeStats, awayStats) {
@@ -166,6 +221,9 @@ function emptyStats() {
     awayGames: 0,
     awayAverageFor: 0,
     awayAverageAgainst: 0,
+
+    attackSigma: 0,
+    defenseSigma: 0,
 
     totalAverage: 0,
     totalSigma: 0
