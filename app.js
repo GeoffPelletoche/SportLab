@@ -90,8 +90,8 @@ window.saveDrawHunterBet = function(index) {
 /**
  * FRENCHFLAIR — OUVERTURE FICHE MANUELLE
  */
-window.analyzeFrenchFlairValue = function(matchId) {
-  const match = frenchflairPayload?.matches?.find(m => String(m.id) === String(matchId));
+window.analyzeFrenchFlairValue = function(index) {
+  const match = frenchflairPayload?.matches?.[index];
 
   if (!match) {
     alert("Match introuvable.");
