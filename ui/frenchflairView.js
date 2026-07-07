@@ -134,13 +134,13 @@ function getFlag(name) {
     "australia": "🇦🇺",
     "afrique du sud": "🇿🇦",
     "south africa": "🇿🇦",
-    "angleterre": "🏴",
-    "england": "🏴",
-    "écosse": "🏴",
-    "l'écosse": "🏴",
-    "scotland": "🏴",
-    "pays de galles": "🏴",
-    "wales": "🏴",
+    "angleterre": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "écosse": "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+    "l'écosse": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    "pays de galles": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
     "irlande": "🇮🇪",
     "ireland": "🇮🇪",
     "italie": "🇮🇹",
@@ -151,7 +151,9 @@ function getFlag(name) {
     "fidji": "🇫🇯",
     "fiji": "🇫🇯",
     "argentine": "🇦🇷",
-    "argentina": "🇦🇷"
+    "argentina": "🇦🇷",
+    "namibia": "🇳🇦",
+    "namibie" : "🇳🇦"
   };
 
   return flags[normalized] || "";
