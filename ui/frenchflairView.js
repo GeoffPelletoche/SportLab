@@ -57,7 +57,7 @@ function renderMatches(matches) {
         Analyser
       </button>
 
-      <div id="ff-result-${index}" style="margin-top:12px;"></div>
+      <div id="ff-result-${matchId}" style="margin-top:12px;"></div>
     </div>
   `).join("");
 }
