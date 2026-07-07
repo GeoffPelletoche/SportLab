@@ -1,21 +1,20 @@
 import { fetchUpcomingRugbyFixtures } from "../core/rugbyService.js";
-import { analyzeRugbyMatch } from "../core/rugbyAnalysisEngine.js";
+import { predictRugbyMatch } from "../core/rugbyPredictionEngine.js";
 
 /**
- * 🏉 SPORTLAB V3
- * FRENCHFLAIR MODULE
+ * SPORTLAB V3 — FRENCHFLAIR MODULE
  *
- * Responsabilité unique :
+ * Rôle :
  * - récupérer les matchs rugby
- * - lancer l'analyse
- * - transmettre les résultats à l'UI
+ * - enrichir avec l’historique
+ * - calculer la prédiction FrenchFlair
+ * - transmettre à l’UI
  */
 
 export async function loadFrenchFlairMatches() {
-
   const { fixtures, meta } = await fetchUpcomingRugbyFixtures();
 
-  const matches = fixtures.map(match => analyzeRugbyMatch(match));
+  const matches = fixtures.map(match => predictRugbyMatch(match));
 
   return {
     matches,
