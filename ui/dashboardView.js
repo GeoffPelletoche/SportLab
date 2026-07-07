@@ -6,7 +6,7 @@
 
 export function renderDashboard({ drawhunterHtml, frenchflairHtml, portfolioHtml }) {
   return `
-    <h1>🏟️ SportLab V3</h1>
+    <h1>🏟️ SportLab</h1>
 
     <section class="card">
       <h2>⚽ DrawHunter</h2>
