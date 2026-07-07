@@ -1,14 +1,10 @@
 /**
  * SPORTLAB V3 — RUGBY PREDICTION ENGINE
- * Sprint 4A.4
+ * Sprint 4A.5
  *
- * Rôle :
- * transformer les historiques rugby en prédiction simple :
- * - stats équipe domicile
- * - stats équipe extérieure
- * - points prédits domicile
- * - points prédits extérieur
- * - total prédit
+ * Ajout :
+ * - vrai sigma statistique
+ * - zone probable autour du total prédit
  *
  * Aucun accès API.
  * Aucun HTML.
@@ -37,7 +33,10 @@ export function computeTeamStats(history = []) {
 
     awayGames: awayGames.length,
     awayAverageFor: round(avg(awayGames.map(g => g.pointsFor))),
-    awayAverageAgainst: round(avg(awayGames.map(g => g.pointsAgainst)))
+    awayAverageAgainst: round(avg(awayGames.map(g => g.pointsAgainst))),
+
+    totalAverage: round(avg(games.map(g => g.pointsFor + g.pointsAgainst))),
+    totalSigma: round(stdDev(games.map(g => g.pointsFor + g.pointsAgainst)))
   };
 }
 
@@ -65,6 +64,14 @@ export function predictRugbyMatch(match) {
   const predictedAwayPoints = round((awayAttack + homeDefense) / 2);
   const predictedTotalPoints = round(predictedHomePoints + predictedAwayPoints);
 
+  const sigma = round(avg([
+    homeStats.totalSigma,
+    awayStats.totalSigma
+  ].filter(v => v > 0)));
+
+  const lowRange = round(predictedTotalPoints - sigma);
+  const highRange = round(predictedTotalPoints + sigma);
+
   return {
     ...match,
 
@@ -74,6 +81,10 @@ export function predictRugbyMatch(match) {
     predictedHomePoints,
     predictedAwayPoints,
     predictedTotalPoints,
+
+    sigma,
+    predictedRangeLow: lowRange,
+    predictedRangeHigh: highRange,
 
     predictionStatus:
       homeStats.games > 0 && awayStats.games > 0
@@ -109,7 +120,10 @@ function emptyStats() {
 
     awayGames: 0,
     awayAverageFor: 0,
-    awayAverageAgainst: 0
+    awayAverageAgainst: 0,
+
+    totalAverage: 0,
+    totalSigma: 0
   };
 }
 
@@ -119,6 +133,20 @@ function avg(values) {
   if (clean.length === 0) return 0;
 
   return clean.reduce((sum, value) => sum + Number(value), 0) / clean.length;
+}
+
+function stdDev(values) {
+  const clean = values
+    .map(Number)
+    .filter(v => Number.isFinite(v));
+
+  if (clean.length < 2) return 0;
+
+  const mean = avg(clean);
+  const variance =
+    clean.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / clean.length;
+
+  return Math.sqrt(variance);
 }
 
 function round(value) {
