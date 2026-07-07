@@ -85,8 +85,8 @@ function renderPrediction(match) {
       Zone probable : ${formatNumber(match.predictedRangeLow)} – ${formatNumber(match.predictedRangeHigh)} pts
     </p>
 
-    <span class="badge badge-value">
-      Confiance ${match.confidence}%
+    <span class="badge ${confidenceClass(match.confidence)}">
+  ${confidenceLabel(match.confidence)} — ${match.confidence}%
     </span>
   `;
 }
@@ -187,4 +187,17 @@ function formatDateTime(value) {
 
 function formatNumber(value) {
   return Number(value || 0).toFixed(1);
+}
+
+function confidenceLabel(confidence) {
+  if (confidence >= 80) return "Confiance forte";
+  if (confidence >= 65) return "Confiance correcte";
+  if (confidence >= 50) return "Confiance moyenne";
+  return "Confiance faible";
+}
+
+function confidenceClass(confidence) {
+  if (confidence >= 65) return "badge-value";
+  if (confidence >= 50) return "badge-neutral";
+  return "badge-no";
 }
