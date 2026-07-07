@@ -1,22 +1,16 @@
 /**
  * SPORTLAB V3 — RUGBY PREDICTION ENGINE
- * Sprint 4A.5
+ * Sprint 4A.5B
  *
  * Ajout :
- * - vrai sigma statistique
- * - zone probable autour du total prédit
- *
- * Aucun accès API.
- * Aucun HTML.
- * Aucun effet de bord.
+ * - modèle ajusté selon la force offensive/défensive de l’adversaire
+ * - prédiction moins naïve qu’une moyenne brute
  */
 
 export function computeTeamStats(history = []) {
   const games = sanitizeGames(history);
 
-  if (games.length === 0) {
-    return emptyStats();
-  }
+  if (games.length === 0) return emptyStats();
 
   const homeGames = games.filter(game => game.isHome);
   const awayGames = games.filter(game => !game.isHome);
@@ -44,24 +38,36 @@ export function predictRugbyMatch(match) {
   const homeStats = computeTeamStats(match.homeHistory || []);
   const awayStats = computeTeamStats(match.awayHistory || []);
 
-  const homeAttack = homeStats.homeGames > 0
-    ? homeStats.homeAverageFor
-    : homeStats.averageFor;
+  const predictionStatus =
+    homeStats.games > 0 && awayStats.games > 0
+      ? "OK"
+      : "INSUFFICIENT_HISTORY";
 
-  const homeDefense = homeStats.homeGames > 0
-    ? homeStats.homeAverageAgainst
-    : homeStats.averageAgainst;
+  const baselinePoints = computeBaselinePoints(homeStats, awayStats);
 
-  const awayAttack = awayStats.awayGames > 0
-    ? awayStats.awayAverageFor
-    : awayStats.averageFor;
+  const homeAttack = chooseHomeAttack(homeStats);
+  const homeDefense = chooseHomeDefense(homeStats);
 
-  const awayDefense = awayStats.awayGames > 0
-    ? awayStats.awayAverageAgainst
-    : awayStats.averageAgainst;
+  const awayAttack = chooseAwayAttack(awayStats);
+  const awayDefense = chooseAwayDefense(awayStats);
 
-  const predictedHomePoints = round((homeAttack + awayDefense) / 2);
-  const predictedAwayPoints = round((awayAttack + homeDefense) / 2);
+  const homeAttackIndex = safeRatio(homeAttack, baselinePoints);
+  const awayAttackIndex = safeRatio(awayAttack, baselinePoints);
+
+  const homeDefenseWeaknessIndex = safeRatio(homeDefense, baselinePoints);
+  const awayDefenseWeaknessIndex = safeRatio(awayDefense, baselinePoints);
+
+  const modelHomePoints =
+    baselinePoints * homeAttackIndex * awayDefenseWeaknessIndex;
+
+  const modelAwayPoints =
+    baselinePoints * awayAttackIndex * homeDefenseWeaknessIndex;
+
+  const simpleHomePoints = (homeAttack + awayDefense) / 2;
+  const simpleAwayPoints = (awayAttack + homeDefense) / 2;
+
+  const predictedHomePoints = round(blend(modelHomePoints, simpleHomePoints));
+  const predictedAwayPoints = round(blend(modelAwayPoints, simpleAwayPoints));
   const predictedTotalPoints = round(predictedHomePoints + predictedAwayPoints);
 
   const sigma = round(avg([
@@ -69,28 +75,67 @@ export function predictRugbyMatch(match) {
     awayStats.totalSigma
   ].filter(v => v > 0)));
 
-  const lowRange = round(predictedTotalPoints - sigma);
-  const highRange = round(predictedTotalPoints + sigma);
-
   return {
     ...match,
 
     homeStats,
     awayStats,
 
+    baselinePoints: round(baselinePoints),
+
+    homeAttackIndex: round(homeAttackIndex),
+    awayAttackIndex: round(awayAttackIndex),
+    homeDefenseWeaknessIndex: round(homeDefenseWeaknessIndex),
+    awayDefenseWeaknessIndex: round(awayDefenseWeaknessIndex),
+
     predictedHomePoints,
     predictedAwayPoints,
     predictedTotalPoints,
 
     sigma,
-    predictedRangeLow: lowRange,
-    predictedRangeHigh: highRange,
+    predictedRangeLow: round(predictedTotalPoints - sigma),
+    predictedRangeHigh: round(predictedTotalPoints + sigma),
 
-    predictionStatus:
-      homeStats.games > 0 && awayStats.games > 0
-        ? "OK"
-        : "INSUFFICIENT_HISTORY"
+    predictionStatus
   };
+}
+
+function computeBaselinePoints(homeStats, awayStats) {
+  const values = [
+    homeStats.averageFor,
+    homeStats.averageAgainst,
+    awayStats.averageFor,
+    awayStats.averageAgainst
+  ].filter(v => v > 0);
+
+  return values.length ? avg(values) : 25;
+}
+
+function chooseHomeAttack(stats) {
+  return stats.homeGames > 0 ? stats.homeAverageFor : stats.averageFor;
+}
+
+function chooseHomeDefense(stats) {
+  return stats.homeGames > 0 ? stats.homeAverageAgainst : stats.averageAgainst;
+}
+
+function chooseAwayAttack(stats) {
+  return stats.awayGames > 0 ? stats.awayAverageFor : stats.averageFor;
+}
+
+function chooseAwayDefense(stats) {
+  return stats.awayGames > 0 ? stats.awayAverageAgainst : stats.averageAgainst;
+}
+
+function blend(adjusted, simple) {
+  return adjusted * 0.65 + simple * 0.35;
+}
+
+function safeRatio(value, baseline) {
+  if (!baseline || baseline <= 0) return 1;
+  if (!value || value <= 0) return 1;
+
+  return clamp(value / baseline, 0.65, 1.45);
 }
 
 function sanitizeGames(history) {
@@ -129,17 +174,13 @@ function emptyStats() {
 
 function avg(values) {
   const clean = values.filter(v => Number.isFinite(Number(v)));
-
   if (clean.length === 0) return 0;
 
   return clean.reduce((sum, value) => sum + Number(value), 0) / clean.length;
 }
 
 function stdDev(values) {
-  const clean = values
-    .map(Number)
-    .filter(v => Number.isFinite(v));
-
+  const clean = values.map(Number).filter(v => Number.isFinite(v));
   if (clean.length < 2) return 0;
 
   const mean = avg(clean);
@@ -147,6 +188,10 @@ function stdDev(values) {
     clean.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / clean.length;
 
   return Math.sqrt(variance);
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function round(value) {
