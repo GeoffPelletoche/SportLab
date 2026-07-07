@@ -195,7 +195,15 @@ if (!Number.isFinite(probability) || probability <= 0) {
   const modelEdgePercent = line > 0
     ? (modelEdgePoints / line) * 100
     : 0;
+  const scoreValue = computeFrenchFlairScore({
+  modelEdgePercent,
+  confidence: match.confidence,
+  sigma: match.sigma,
+  predictedTotal,
+  mathValue: value.value
+});
 
+  const finalDecision = scoreValue >= 70 ? "VALUE" : "NO VALUE";
   const analysis = saveAnalysis({
     source: "FrenchFlair",
     sport: "rugby",
@@ -221,7 +229,11 @@ if (!Number.isFinite(probability) || probability <= 0) {
     modelEdgePercent,
 
     status: "draft",
-    notes
+    notes,
+    scoreValue,
+    finalDecision,
+    confidence: match.confidence
+    
   });
 
   const box = document.getElementById(`ff-calculation-${match.id}`);
@@ -247,8 +259,8 @@ if (!Number.isFinite(probability) || probability <= 0) {
     <p>Value : ${(value.value * 100).toFixed(1)}%</p>
     <p>Edge : ${(value.edge * 100).toFixed(1)}%</p>
 
-    <span class="badge ${value.decision === "VALUE BET" ? "badge-value" : "badge-no"}">
-      ${value.decision}
+    <span class="badge ${finalDecision === "VALUE" ? "badge-value" : "badge-no"}">
+      ${finalDecision} — ${scoreValue}% | Confiance ${match.confidence}%
     </span>
 
     <p class="small">Analyse sauvegardée automatiquement.</p>
@@ -371,6 +383,17 @@ function getFrenchFlairMatchById(matchId) {
   return frenchflairPayload?.matches?.find(
     match => String(match.id) === String(matchId)
   ) || null;
+}
+function computeFrenchFlairScore({ modelEdgePercent, confidence, sigma, predictedTotal, mathValue }) {
+  const edgeScore = clamp(Math.max(modelEdgePercent, 0) / 10, 0, 1) * 40;
+  const confidenceScore = clamp(confidence / 100, 0, 1) * 20;
+
+  const sigmaRatio = predictedTotal > 0 ? sigma / predictedTotal : 1;
+  const sigmaScore = clamp(1 - sigmaRatio, 0, 1) * 20;
+
+  const mathValueScore = clamp(Math.max(mathValue, 0) / 0.10, 0, 1) * 20;
+
+  return Math.round(edgeScore + confidenceScore + sigmaScore + mathValueScore);
 }
 
 init();
