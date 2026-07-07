@@ -53,7 +53,7 @@ function renderMatches(matches) {
 
       <br/>
 
-      <button onclick="analyzeFrenchFlairValue('${match.id}')">
+      <button onclick="analyzeFrenchFlairValue(${index})">
         Analyser
       </button>
 
