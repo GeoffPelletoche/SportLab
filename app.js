@@ -78,12 +78,7 @@ window.saveDrawHunterBet = function(index) {
     stake
   });
 
-  alert(
-    saved.placed
-      ? "Pari DrawHunter sauvegardé."
-      : "Analyse DrawHunter sauvegardée."
-  );
-
+  alert(saved.placed ? "Pari DrawHunter sauvegardé." : "Analyse DrawHunter sauvegardée.");
   init();
 };
 
@@ -118,57 +113,27 @@ window.analyzeFrenchFlairValue = function(index) {
 
     <label>
       Ligne bookmaker
-      <input
-        id="ff-line-${index}"
-        type="number"
-        step="0.5"
-        placeholder="Ex : 45.5"
-        value="${existing?.line ?? ""}"
-      >
+      <input id="ff-line-${index}" type="number" step="0.5" placeholder="Ex : 45.5" value="${existing?.line ?? ""}">
     </label>
 
     <label>
       Bookmaker
-      <input
-        id="ff-bookmaker-${index}"
-        type="text"
-        placeholder="Ex : Betclic"
-        value="${existing?.bookmaker ?? ""}"
-      >
+      <input id="ff-bookmaker-${index}" type="text" placeholder="Ex : Betclic" value="${existing?.bookmaker ?? ""}">
     </label>
 
     <label>
       Cote
-      <input
-        id="ff-odds-${index}"
-        type="number"
-        step="0.01"
-        placeholder="Ex : 1.90"
-        value="${existing?.odds || ""}"
-      >
+      <input id="ff-odds-${index}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds || ""}">
     </label>
 
     <label>
       Probabilité estimée (%)
-      <input
-        id="ff-probability-${index}"
-        type="number"
-        step="0.1"
-        min="0"
-        max="100"
-        placeholder="Ex : 58"
-        value="${existing?.probability ? existing.probability * 100 : ""}"
-      >
+      <input id="ff-probability-${index}" type="number" step="0.1" min="0" max="100" placeholder="Ex : 58" value="${existing?.probability ? existing.probability * 100 : ""}">
     </label>
 
     <label>
       Notes
-      <input
-        id="ff-notes-${index}"
-        type="text"
-        placeholder="Observation personnelle"
-        value="${existing?.notes ?? ""}"
-      >
+      <input id="ff-notes-${index}" type="text" placeholder="Observation personnelle" value="${existing?.notes ?? ""}">
     </label>
 
     <button onclick="calculateFrenchFlairAnalysis(${index})">
@@ -210,6 +175,15 @@ window.calculateFrenchFlairAnalysis = function(index) {
     minValue: 0.01
   });
 
+  const predictedTotal = Number(match.predictedTotalPoints || 0);
+  const modelEdgePoints = market === "OVER"
+    ? predictedTotal - line
+    : line - predictedTotal;
+
+  const modelEdgePercent = line > 0
+    ? (modelEdgePoints / line) * 100
+    : 0;
+
   const analysis = saveAnalysis({
     source: "FrenchFlair",
     sport: "rugby",
@@ -230,6 +204,10 @@ window.calculateFrenchFlairAnalysis = function(index) {
     edge: value.edge,
     decision: value.decision,
 
+    predictedTotalPoints: predictedTotal,
+    modelEdgePoints,
+    modelEdgePercent,
+
     status: "draft",
     notes
   });
@@ -242,6 +220,16 @@ window.calculateFrenchFlairAnalysis = function(index) {
     <p>Marché analysé : <strong>${market} ${line}</strong></p>
     <p>Bookmaker : ${bookmaker || "-"}</p>
     <p>Cote : ${odds}</p>
+
+    <hr/>
+
+    <p>Total prédit SportLab : <strong>${predictedTotal.toFixed(1)} pts</strong></p>
+    <p>Ligne bookmaker : ${line.toFixed(1)} pts</p>
+    <p>Écart modèle / bookmaker : <strong>${modelEdgePoints >= 0 ? "+" : ""}${modelEdgePoints.toFixed(1)} pts</strong></p>
+    <p>Écart relatif : <strong>${modelEdgePercent >= 0 ? "+" : ""}${modelEdgePercent.toFixed(1)}%</strong></p>
+
+    <hr/>
+
     <p>Probabilité estimée : ${probabilityPercent.toFixed(1)}%</p>
     <p>Probabilité implicite : ${(value.impliedProbability * 100).toFixed(1)}%</p>
     <p>Value : ${(value.value * 100).toFixed(1)}%</p>
