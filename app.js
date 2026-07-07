@@ -161,12 +161,25 @@ window.calculateFrenchFlairAnalysis = function(index) {
   const odds = Number(document.getElementById(`ff-odds-${index}`)?.value || 0);
   const probability = computeFrenchFlairProbability(match, market, line);
   const probabilityPercent = probability * 100;
+  console.log("FF probability debug", {
+    matchId: match.id,
+    predictedTotalPoints: match.predictedTotalPoints,
+    sigma: match.sigma,
+    market,
+    line,
+    probability
+  });
   const notes = document.getElementById(`ff-notes-${index}`)?.value || "";
 
-  if (!market || line <= 0 || odds <= 1 || probability <= 0) {
+  if (!market || line <= 0 || odds <= 1) {
   alert("Saisis un marché, une ligne bookmaker et une cote valides.");
   return;
-  }
+}
+
+if (!Number.isFinite(probability) || probability <= 0) {
+  alert("Probabilité automatique indisponible : sigma ou total prédit manquant.");
+  return;
+}
 
   const value = computeValue({
     probability,
