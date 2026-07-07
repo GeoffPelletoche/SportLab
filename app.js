@@ -59,8 +59,8 @@ window.saveDrawHunterBet = function(index) {
     return;
   }
 
-  const placed = document.getElementById(`draw-placed-${index}`)?.checked;
-  const stake = Number(document.getElementById(`draw-stake-${index}`)?.value || 0);
+  const placed = document.getElementById(`draw-placed-${match.id}`)?.checked;
+  const stake = Number(document.getElementById(`draw-stake-${match.id}`)?.value || 0);
 
   if (placed && stake <= 0) {
     alert("Saisis un montant misé valide.");
@@ -110,7 +110,7 @@ window.analyzeFrenchFlairValue = function(matchId) {
 
     <label>
       Marché
-      <select id="ff-market-${index}">
+      <select id="ff-market-${match.id}">
         <option value="OVER" ${existing?.market === "OVER" ? "selected" : ""}>Over</option>
         <option value="UNDER" ${existing?.market === "UNDER" ? "selected" : ""}>Under</option>
       </select>
@@ -118,29 +118,29 @@ window.analyzeFrenchFlairValue = function(matchId) {
 
     <label>
       Ligne bookmaker
-      <input id="ff-line-${index}" type="number" step="0.5" placeholder="Ex : 45.5" value="${existing?.line ?? ""}">
+      <input id="ff-line-${match.id}" type="number" step="0.5" placeholder="Ex : 45.5" value="${existing?.line ?? ""}">
     </label>
 
     <label>
       Bookmaker
-      <input id="ff-bookmaker-${index}" type="text" placeholder="Ex : Betclic" value="${existing?.bookmaker ?? ""}">
+      <input id="ff-bookmaker-${match.id}" type="text" placeholder="Ex : Betclic" value="${existing?.bookmaker ?? ""}">
     </label>
 
     <label>
       Cote
-      <input id="ff-odds-${index}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds || ""}">
+      <input id="ff-odds-${match.id}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds || ""}">
     </label>
 
     <label>
       Notes
-      <input id="ff-notes-${index}" type="text" placeholder="Observation personnelle" value="${existing?.notes ?? ""}">
+      <input id="ff-notes-${match.id}" type="text" placeholder="Observation personnelle" value="${existing?.notes ?? ""}">
     </label>
 
     <button onclick="calculateFrenchFlairAnalysis('${match.id}')">
       Calculer la value
     </button>
 
-    <div id="ff-calculation-${index}" style="margin-top:12px;"></div>
+    <div id="ff-calculation-${match.id}" style="margin-top:12px;"></div>
   `;
 };
 
@@ -155,10 +155,10 @@ window.calculateFrenchFlairAnalysis = function(matchId) {
     return;
   }
 
-  const market = document.getElementById(`ff-market-${index}`)?.value;
-  const line = Number(document.getElementById(`ff-line-${index}`)?.value || 0);
-  const bookmaker = document.getElementById(`ff-bookmaker-${index}`)?.value || "";
-  const odds = Number(document.getElementById(`ff-odds-${index}`)?.value || 0);
+  const market = document.getElementById(`ff-market-${match.id}`)?.value;
+  const line = Number(document.getElementById(`ff-line-${match.id}`)?.value || 0);
+  const bookmaker = document.getElementById(`ff-bookmaker-${match.id}`)?.value || "";
+  const odds = Number(document.getElementById(`ff-odds-${match.id}`)?.value || 0);
   const probability = computeFrenchFlairProbability(match, market, line);
   const probabilityPercent = probability * 100;
   console.log("FF probability debug", {
@@ -169,7 +169,7 @@ window.calculateFrenchFlairAnalysis = function(matchId) {
     line,
     probability
   });
-  const notes = document.getElementById(`ff-notes-${index}`)?.value || "";
+  const notes = document.getElementById(`ff-notes-${match.id}`)?.value || "";
 
   if (!market || line <= 0 || odds <= 1) {
   alert("Saisis un marché, une ligne bookmaker et une cote valides.");
@@ -224,7 +224,7 @@ if (!Number.isFinite(probability) || probability <= 0) {
     notes
   });
 
-  const box = document.getElementById(`ff-calculation-${index}`);
+  const box = document.getElementById(`ff-calculation-${match.id}`);
 
   box.innerHTML = `
     <hr/>
@@ -257,16 +257,16 @@ if (!Number.isFinite(probability) || probability <= 0) {
       <hr/>
 
       <label>
-        <input type="checkbox" id="ff-placed-${index}">
+        <input type="checkbox" id="ff-placed-${match.id}">
         Pari placé
       </label>
 
       <label>
         Montant misé
-        <input id="ff-stake-${index}" type="number" min="0" step="0.01" placeholder="Ex : 10">
+        <input id="ff-stake-${match.id}" type="number" min="0" step="0.01" placeholder="Ex : 10">
       </label>
 
-      <button onclick="saveFrenchFlairBet(${index}, '${analysis.id}')">
+      <button onclick="saveFrenchFlairBet(${match.id}, '${analysis.id}')">
         Sauvegarder le pari
       </button>
     ` : ""}
@@ -285,8 +285,8 @@ window.saveFrenchFlairBet = function(index, analysisId) {
     return;
   }
 
-  const placed = document.getElementById(`ff-placed-${index}`)?.checked;
-  const stake = Number(document.getElementById(`ff-stake-${index}`)?.value || 0);
+  const placed = document.getElementById(`ff-placed-${match.id}`)?.checked;
+  const stake = Number(document.getElementById(`ff-stake-${match.id}`)?.value || 0);
 
   if (placed && stake <= 0) {
     alert("Saisis un montant misé valide.");
