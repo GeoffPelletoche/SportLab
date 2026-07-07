@@ -90,9 +90,9 @@ window.saveDrawHunterBet = function(index) {
 /**
  * FRENCHFLAIR — OUVERTURE FICHE MANUELLE
  */
-window.analyzeFrenchFlairValue = function(index) {
-  const match = frenchflairPayload?.matches?.[index];
-
+window.analyzeFrenchFlairValue = function(matchId) {
+  const match = getFrenchFlairMatchById(matchId);
+  
   if (!match) {
     alert("Match introuvable.");
     return;
@@ -136,7 +136,7 @@ window.analyzeFrenchFlairValue = function(index) {
       <input id="ff-notes-${index}" type="text" placeholder="Observation personnelle" value="${existing?.notes ?? ""}">
     </label>
 
-    <button onclick="calculateFrenchFlairAnalysis(${index})">
+    <button onclick="calculateFrenchFlairAnalysis('${match.id}')">
       Calculer la value
     </button>
 
@@ -147,9 +147,9 @@ window.analyzeFrenchFlairValue = function(index) {
 /**
  * FRENCHFLAIR — CALCUL VALUE
  */
-window.calculateFrenchFlairAnalysis = function(index) {
-  const match = frenchflairPayload?.matches?.[index];
-
+window.calculateFrenchFlairAnalysis = function(matchId) {
+  const match = getFrenchFlairMatchById(matchId);
+  
   if (!match) {
     alert("Match introuvable.");
     return;
@@ -365,6 +365,12 @@ function erf(x) {
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
+}
+
+function getFrenchFlairMatchById(matchId) {
+  return frenchflairPayload?.matches?.find(
+    match => String(match.id) === String(matchId)
+  ) || null;
 }
 
 init();
