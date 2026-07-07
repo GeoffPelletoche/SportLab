@@ -1,8 +1,6 @@
 /**
  * SPORTLAB V3 — FRENCHFLAIR VIEW
- * Sprint 3.9A
- * Rôle :
- * afficher les matchs rugby sous forme de cartes professionnelles.
+ * Sprint 4A.7
  */
 
 export function renderFrenchFlair(payload) {
@@ -11,15 +9,12 @@ export function renderFrenchFlair(payload) {
 
   return `
     ${renderMeta(meta)}
-
     ${matches.length === 0 ? renderEmpty(meta) : renderMatches(matches)}
   `;
 }
 
 function renderMeta(meta) {
-  if (!meta) {
-    return `<p class="small">Synchronisation rugby non disponible.</p>`;
-  }
+  if (!meta) return `<p class="small">Synchronisation rugby non disponible.</p>`;
 
   return `
     <div class="card">
@@ -35,59 +30,96 @@ function renderEmpty(meta) {
   return `
     <div class="card">
       <h3>Aucun match rugby trouvé</h3>
-      <p class="small">
-        Causes possibles : aucune rencontre sur la période, abonnement API expiré,
-        quota atteint ou calendrier non encore disponible.
-      </p>
-
-      ${meta?.syncLog?.length ? `
-        <h4>Détail synchronisation</h4>
-        ${meta.syncLog.map(item => `
-          <p class="small">
-            ${item.competition} — ${item.status} — ${item.count} match(s)
-            ${item.message ? `— ${item.message}` : ""}
-          </p>
-        `).join("")}
-      ` : ""}
+      <p class="small">Aucune rencontre disponible sur la période analysée.</p>
     </div>
   `;
 }
 
 function renderMatches(matches) {
-  return `
-    ${matches.map((match, index) => `
-      <div class="card">
-        <p class="small">🏉 ${match.competition || "-"}</p>
+  return matches.map((match, index) => `
+    <div class="card">
+      <p class="small">🏉 ${match.competition || "-"}</p>
 
-        <div style="text-align:center; margin:16px 0;">
-          <h3>${teamLabel(match.home)}</h3>
-          <p class="small" style="margin:8px 0;">VS</p>
-          <h3>${teamLabel(match.away)}</h3>
-        </div>
-
-        <p class="small">📅 ${formatDate(match.date)}</p>
-        <p class="small">🕢 ${formatTime(match.date)}</p>
-
-        <span class="badge badge-value">À analyser</span>
-
-        <br/><br/>
-
-        <button onclick="analyzeFrenchFlairValue(${index})">
-          Analyser
-        </button>
-
-        <div id="ff-result-${index}" style="margin-top:12px;"></div>
+      <div style="text-align:center; margin:16px 0;">
+        <h3>${teamLabel(match.home)}</h3>
+        <p class="small">VS</p>
+        <h3>${teamLabel(match.away)}</h3>
       </div>
-    `).join("")}
+
+      <p class="small">📅 ${formatDate(match.date)}</p>
+      <p class="small">🕢 ${formatTime(match.date)}</p>
+
+      ${renderPrediction(match)}
+
+      <br/>
+
+      <button onclick="analyzeFrenchFlairValue(${index})">
+        Analyser
+      </button>
+
+      <div id="ff-result-${index}" style="margin-top:12px;"></div>
+    </div>
+  `).join("");
+}
+
+function renderPrediction(match) {
+  if (match.predictionStatus !== "OK") {
+    return `
+      <hr/>
+      <p class="small">Prédiction indisponible</p>
+    `;
+  }
+
+  return `
+    <hr/>
+
+    <p><strong>Points prédits</strong></p>
+    <p class="small">${teamLabel(match.home)} : ${formatNumber(match.predictedHomePoints)} pts</p>
+    <p class="small">${teamLabel(match.away)} : ${formatNumber(match.predictedAwayPoints)} pts</p>
+
+    <p><strong>Total prédit : ${formatNumber(match.predictedTotalPoints)} pts</strong></p>
+    <p class="small">
+      Moyenne ± Sigma : ${formatNumber(match.predictedTotalPoints)} ± ${formatNumber(match.sigma)} pts
+    </p>
+    <p class="small">
+      Zone probable : ${formatNumber(match.predictedRangeLow)} – ${formatNumber(match.predictedRangeHigh)} pts
+    </p>
+
+    <span class="badge badge-value">
+      Confiance ${match.confidence}%
+    </span>
   `;
 }
 
 function teamLabel(name) {
   if (!name) return "Équipe inconnue";
-
   const flag = getFlag(name);
+  const translated = translateTeamName(name);
+  return `${flag ? `${flag} ` : ""}${translated}`;
+}
 
-  return `${flag ? `${flag} ` : ""}${name}`;
+function translateTeamName(name) {
+  const normalized = name.toLowerCase();
+
+  const names = {
+    "new zealand": "Nouvelle-Zélande",
+    "italy": "Italie",
+    "australia": "Australie",
+    "france": "France",
+    "la france": "France",
+    "japan": "Japon",
+    "le japon": "Japon",
+    "ireland": "Irlande",
+    "fiji": "Fidji",
+    "england": "Angleterre",
+    "south africa": "Afrique du Sud",
+    "scotland": "Écosse",
+    "l'écosse": "Écosse",
+    "argentina": "Argentine",
+    "wales": "Pays de Galles"
+  };
+
+  return names[normalized] || name;
 }
 
 function getFlag(name) {
@@ -102,13 +134,13 @@ function getFlag(name) {
     "australia": "🇦🇺",
     "afrique du sud": "🇿🇦",
     "south africa": "🇿🇦",
-    "angleterre": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-    "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-    "écosse": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    "l'écosse": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    "scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
-    "pays de galles": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
-    "wales": "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+    "angleterre": "🏴",
+    "england": "🏴",
+    "écosse": "🏴",
+    "l'écosse": "🏴",
+    "scotland": "🏴",
+    "pays de galles": "🏴",
+    "wales": "🏴",
     "irlande": "🇮🇪",
     "ireland": "🇮🇪",
     "italie": "🇮🇹",
@@ -119,55 +151,40 @@ function getFlag(name) {
     "fidji": "🇫🇯",
     "fiji": "🇫🇯",
     "argentine": "🇦🇷",
-    "argentina": "🇦🇷",
-    "namibia": "🇳🇦",
-    "namibie":"🇳🇦",
+    "argentina": "🇦🇷"
   };
 
   return flags[normalized] || "";
 }
 
 function sortByDate(matches) {
-  return [...matches].sort((a, b) => {
-    return new Date(a.date || 0) - new Date(b.date || 0);
-  });
+  return [...matches].sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
 }
 
 function formatDate(value) {
   if (!value) return "-";
-
-  try {
-    return new Date(value).toLocaleDateString("fr-FR", {
-      weekday: "long",
-      day: "2-digit",
-      month: "long",
-      year: "numeric"
-    });
-  } catch {
-    return value;
-  }
+  return new Date(value).toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
 }
 
 function formatTime(value) {
   if (!value) return "-";
-
-  try {
-    return new Date(value).toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZoneName: "short"
-    });
-  } catch {
-    return value;
-  }
+  return new Date(value).toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short"
+  });
 }
 
 function formatDateTime(value) {
   if (!value) return "-";
+  return new Date(value).toLocaleString("fr-FR");
+}
 
-  try {
-    return new Date(value).toLocaleString("fr-FR");
-  } catch {
-    return value;
-  }
+function formatNumber(value) {
+  return Number(value || 0).toFixed(1);
 }
