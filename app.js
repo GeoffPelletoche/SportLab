@@ -99,7 +99,7 @@ window.analyzeFrenchFlairValue = function(matchId) {
   }
 
   const existing = getAnalysisForMatch(match.id);
-  const box = document.getElementById(`ff-result-${index}`);
+  const box = document.getElementById(`ff-result-${matchId}`);
 
   if (!box) return;
 
