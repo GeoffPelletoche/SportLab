@@ -16,7 +16,7 @@ export function renderDashboard({
     <h1>🏟️ SportLab</h1>
     ${navigationHtml || ""}
 
-        ${activePage === "home" ? `
+            ${activePage === "home" ? `
       <section class="card">
         <h2>⚽ DrawHunter</h2>
         ${drawhunterHtml}
