@@ -24,10 +24,12 @@ export function renderJournal(analyses = []) {
 
 function renderAnalysis(a) {
 
-  const badge =
-    a.finalDecision === "VALUE"
-      ? "badge-value"
-      : "badge-no";
+const decision = a.finalDecision || a.decision;
+
+const badge =
+  decision === "VALUE" || decision === "VALUE BET"
+    ? "badge-value"
+    : "badge-no";
 
   return `
     <div class="journal-item">
