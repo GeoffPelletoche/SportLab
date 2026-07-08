@@ -5,6 +5,7 @@
  */
 
 export function renderDashboard({
+  activePage,
   navigationHtml,
   drawhunterHtml,
   frenchflairHtml,
@@ -15,23 +16,34 @@ export function renderDashboard({
     <h1>🏟️ SportLab</h1>
     ${navigationHtml || ""}
 
-    <section class="card">
-      <h2>⚽ DrawHunter</h2>
-      ${drawhunterHtml}
-    </section>
+        ${activePage === "home" ? `
+      <section class="card">
+        <h2>⚽ DrawHunter</h2>
+        ${drawhunterHtml}
+      </section>
 
-    <section class="card">
-      <h2>🏉 FrenchFlair</h2>
-      ${frenchflairHtml}
-    </section>
+      <section class="card">
+        <h2>🏉 FrenchFlair</h2>
+        ${frenchflairHtml}
+      </section>
+    ` : ""}
 
-    <section class="card">
-      ${journalHtml}
-    </section>
+    ${activePage === "journal" ? `
+      <section class="card">
+        ${journalHtml}
+      </section>
+    ` : ""}
 
-    <section class="card">
-      <h2>💼 Portfolio</h2>
-      ${portfolioHtml}
-    </section>
-  `;
-}
+    ${activePage === "bets" ? `
+      <section class="card">
+        <h2>🎯 Paris placés</h2>
+        <p class="small">Cette page arrive à l’étape suivante.</p>
+      </section>
+    ` : ""}
+
+    ${activePage === "portfolio" ? `
+      <section class="card">
+        <h2>💼 Portfolio</h2>
+        ${portfolioHtml}
+      </section>
+    ` : ""}
