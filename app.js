@@ -4,7 +4,8 @@ import { getROI } from "./core/roiEngine.js";
 import { saveBet } from "./core/betsStore.js";
 import { computeValue } from "./core/valueEngine.js";
 import { saveAnalysis, getAnalysisForMatch } from "./core/analysisStore.js";
-
+import { getAnalyses } from "./core/analysisStore.js";
+import { renderJournal } from "./ui/journalView.js";
 import { renderDashboard } from "./ui/dashboardView.js";
 import { renderDrawHunter } from "./ui/drawhunterView.js";
 import { renderFrenchFlair } from "./ui/frenchflairView.js";
@@ -23,11 +24,12 @@ async function init() {
     frenchflairPayload = await loadFrenchFlairMatches();
 
     const roi = getROI();
-
+    const analyses = getAnalyses();
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(roi)
+      portfolioHtml: renderPortfolio(roi),
+      journalHtml: renderJournal(analyses)
     });
 
     } catch (error) {
