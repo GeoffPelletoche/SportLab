@@ -11,6 +11,8 @@ import { renderDrawHunter } from "./ui/drawhunterView.js";
 import { renderFrenchFlair } from "./ui/frenchflairView.js";
 import { renderPortfolio } from "./ui/portfolioView.js";
 import { renderNavigation } from "./ui/navigationView.js";
+import { getBets } from "./core/betsStore.js";
+import { renderBets } from "./ui/betsView.js";
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
