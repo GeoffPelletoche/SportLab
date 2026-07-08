@@ -10,7 +10,9 @@ export function renderDashboard({
   drawhunterHtml = "",
   frenchflairHtml = "",
   journalHtml = "",
-  portfolioHtml = ""
+  portfolioHtml = "",
+  betsHtml = ""
+  
 }) {
 
   let content = "";
@@ -27,14 +29,11 @@ export function renderDashboard({
 
     case "bets":
       content = `
-        <section class="card">
-          <h2>🎯 Paris placés</h2>
-          <p class="small">
-            Cette page sera connectée au betsStore dans la Beta 1.4.
-          </p>
-        </section>
-      `;
-      break;
+    <section class="card">
+      ${betsHtml}
+    </section>
+  `;
+  break;
 
     case "portfolio":
       content = `
