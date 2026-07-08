@@ -35,8 +35,18 @@ function renderAnalysis(a) {
       </p>
 
       <p class="small">
-        ${a.market}
-      </p>
+  ${a.market}${a.line ? ` ${a.line}` : ""}
+</p>
+
+${a.odds ? `
+  <p class="small">
+    Cote : ${a.odds}
+  </p>
+` : ""}
+
+<p class="small">
+  Décision : ${decision}${a.scoreValue ? ` • ${a.scoreValue}%` : ""}
+</p>
 
       <span class="badge ${badge}">
         ${decision}
