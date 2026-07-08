@@ -20,6 +20,7 @@ let currentPage = "home";
 
 async function init() {
   const app = document.getElementById("app");
+  
 
   try {
     app.innerHTML = `<h1>🏟️ SportLab</h1><p>Chargement...</p>`;
@@ -30,6 +31,7 @@ async function init() {
     const roi = getROI();
     const analyses = getAnalyses();
     const navigationHtml = renderNavigation(currentPage);
+    const bets = getBets();
     
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
@@ -37,7 +39,8 @@ async function init() {
       portfolioHtml: renderPortfolio(roi),
       journalHtml: renderJournal(analyses),
       activePage: currentPage,
-      navigationHtml
+      navigationHtml,
+      betsHtml: renderBets(bets)
     });
 
     } catch (error) {
