@@ -122,11 +122,6 @@ window.analyzeFrenchFlairValue = function(matchId) {
     </label>
 
     <label>
-      Bookmaker
-      <input id="ff-bookmaker-${match.id}" type="text" placeholder="Ex : Betclic" value="${existing?.bookmaker ?? ""}">
-    </label>
-
-    <label>
       Cote
       <input id="ff-odds-${match.id}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds || ""}">
     </label>
@@ -157,7 +152,7 @@ window.calculateFrenchFlairAnalysis = function(matchId) {
 
   const market = document.getElementById(`ff-market-${match.id}`)?.value;
   const line = Number(document.getElementById(`ff-line-${match.id}`)?.value || 0);
-  const bookmaker = document.getElementById(`ff-bookmaker-${match.id}`)?.value || "";
+  const bookmaker = "";
   const odds = Number(document.getElementById(`ff-odds-${match.id}`)?.value || 0);
   const probability = computeFrenchFlairProbability(match, market, line);
   const probabilityPercent = probability * 100;
@@ -242,7 +237,6 @@ if (!Number.isFinite(probability) || probability <= 0) {
     <hr/>
 
     <p>Marché analysé : <strong>${market} ${line}</strong></p>
-    <p>Bookmaker : ${bookmaker || "-"}</p>
     <p>Cote : ${odds}</p>
 
     <hr/>
