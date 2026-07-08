@@ -47,3 +47,4 @@ export function renderDashboard({
         ${portfolioHtml}
       </section>
     ` : ""}
+}
