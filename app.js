@@ -283,6 +283,11 @@ if (!Number.isFinite(probability) || probability <= 0) {
       </button>
     ` : ""}
   `;
+    if (finalDecision === "NO VALUE") {
+    setTimeout(() => {
+      init();
+    }, 1000);
+  }
 };
 
 /**
