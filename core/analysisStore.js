@@ -44,7 +44,14 @@ export function saveAnalysis(analysis) {
     notes: analysis.notes || "",
 
     createdAt: analysis.createdAt || now,
-    updatedAt: now
+    updatedAt: now,
+    scoreValue: Number(analysis.scoreValue || 0),
+finalDecision: analysis.finalDecision || null,
+confidence: Number(analysis.confidence || 0),
+sigma: Number(analysis.sigma || 0),
+predictedTotalPoints: Number(analysis.predictedTotalPoints || 0),
+modelEdgePoints: Number(analysis.modelEdgePoints || 0),
+modelEdgePercent: Number(analysis.modelEdgePercent || 0)
   };
 
   const existingIndex = analyses.findIndex(item => item.id === id);
