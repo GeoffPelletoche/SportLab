@@ -44,10 +44,6 @@ ${a.odds ? `
   </p>
 ` : ""}
 
-<p class="small">
-  Décision : ${decision}${a.scoreValue ? ` • ${a.scoreValue}%` : ""}
-</p>
-
       <span class="badge ${badge}">
         ${decision}
         ${a.scoreValue ? ` • ${a.scoreValue}%` : ""}
