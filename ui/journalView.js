@@ -23,13 +23,8 @@ export function renderJournal(analyses = []) {
 }
 
 function renderAnalysis(a) {
-
-const decision = a.finalDecision || a.decision;
-
-const badge =
-  decision === "VALUE" || decision === "VALUE BET"
-    ? "badge-value"
-    : "badge-no";
+  const decision = normalizeDecision(a);
+  const badge = decision === "VALUE" ? "badge-value" : "badge-no";
 
   return `
     <div class="journal-item">
@@ -44,14 +39,14 @@ const badge =
       </p>
 
       <span class="badge ${badge}">
-        ${a.finalDecision || a.decision}
+        ${decision}
         ${a.scoreValue ? ` • ${a.scoreValue}%` : ""}
       </span>
 
       ${a.confidence ? `
-        <p class="small">
-          Confiance : ${a.confidence}%
-        </p>
+          <p class="small">
+            Confiance : ${a.confidence}%
+          </p>
       ` : ""}
 
       <p class="small">
@@ -77,4 +72,14 @@ function formatDate(timestamp) {
   if (!timestamp) return "-";
 
   return new Date(timestamp).toLocaleString("fr-FR");
+}
+
+function normalizeDecision(a) {
+  const raw = a.finalDecision || a.decision || "NO VALUE";
+
+  if (raw === "VALUE" || raw === "VALUE BET") {
+    return "VALUE";
+  }
+
+  return "NO VALUE";
 }
