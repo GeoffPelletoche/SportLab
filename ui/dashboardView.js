@@ -1,49 +1,71 @@
 /**
  * SPORTLAB V3 — DASHBOARD VIEW
- * Rôle unique :
- * afficher l'enveloppe principale de l'application.
+ * Rôle :
+ * Afficher les différentes pages de SportLab.
  */
 
 export function renderDashboard({
-  activePage,
-  navigationHtml,
-  drawhunterHtml,
-  frenchflairHtml,
-  portfolioHtml,
-  journalHtml
+  activePage = "home",
+  navigationHtml = "",
+  drawhunterHtml = "",
+  frenchflairHtml = "",
+  journalHtml = "",
+  portfolioHtml = ""
 }) {
+
+  let content = "";
+
+  switch (activePage) {
+
+    case "journal":
+      content = `
+        <section class="card">
+          ${journalHtml}
+        </section>
+      `;
+      break;
+
+    case "bets":
+      content = `
+        <section class="card">
+          <h2>🎯 Paris placés</h2>
+          <p class="small">
+            Cette page sera connectée au betsStore dans la Beta 1.4.
+          </p>
+        </section>
+      `;
+      break;
+
+    case "portfolio":
+      content = `
+        <section class="card">
+          <h2>💼 Portfolio</h2>
+          ${portfolioHtml}
+        </section>
+      `;
+      break;
+
+    case "home":
+    default:
+      content = `
+        <section class="card">
+          <h2>⚽ DrawHunter</h2>
+          ${drawhunterHtml}
+        </section>
+
+        <section class="card">
+          <h2>🏉 FrenchFlair</h2>
+          ${frenchflairHtml}
+        </section>
+      `;
+      break;
+  }
+
   return `
     <h1>🏟️ SportLab</h1>
-    ${navigationHtml || ""}
 
-            ${activePage === "home" ? `
-      <section class="card">
-        <h2>⚽ DrawHunter</h2>
-        ${drawhunterHtml}
-      </section>
+    ${navigationHtml}
 
-      <section class="card">
-        <h2>🏉 FrenchFlair</h2>
-        ${frenchflairHtml}
-      </section>
-    ` : ""}
-
-    ${activePage === "journal" ? `
-      <section class="card">
-        ${journalHtml}
-      </section>
-    ` : ""}
-
-    ${activePage === "bets" ? `
-      <section class="card">
-        <h2>🎯 Paris placés</h2>
-        <p class="small">Cette page arrive à l’étape suivante.</p>
-      </section>
-    ` : ""}
-
-    ${activePage === "portfolio" ? `
-      <section class="card">
-        <h2>💼 Portfolio</h2>
-        ${portfolioHtml}
-      </section>
-    ` : ""}
+    ${content}
+  `;
+}
