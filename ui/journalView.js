@@ -6,10 +6,8 @@
 export function renderJournal(analyses = []) {
   if (!analyses.length) {
     return `
-      <section class="card">
         <h2>📒 Journal</h2>
         <p class="small">Aucune analyse sauvegardée.</p>
-      </section>
     `;
   }
 
@@ -18,13 +16,9 @@ export function renderJournal(analyses = []) {
   );
 
   return `
-    <section class="card">
-
       <h2>📒 Journal</h2>
 
       ${sorted.map(renderAnalysis).join("")}
-
-    </section>
   `;
 }
 
