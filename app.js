@@ -10,9 +10,11 @@ import { renderDashboard } from "./ui/dashboardView.js";
 import { renderDrawHunter } from "./ui/drawhunterView.js";
 import { renderFrenchFlair } from "./ui/frenchflairView.js";
 import { renderPortfolio } from "./ui/portfolioView.js";
+import { renderNavigation } from "./ui/navigationView.js";
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
+let currentPage = "home";
 
 async function init() {
   const app = document.getElementById("app");
@@ -25,11 +27,14 @@ async function init() {
 
     const roi = getROI();
     const analyses = getAnalyses();
+    const navigationHtml = renderNavigation(currentPage);
+    
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
       portfolioHtml: renderPortfolio(roi),
-      journalHtml: renderJournal(analyses)
+      journalHtml: renderJournal(analyses),
+      navigationHtml
     });
 
     } catch (error) {
@@ -396,5 +401,10 @@ function computeFrenchFlairScore({ modelEdgePercent, confidence, sigma, predicte
 
   return Math.round(edgeScore + confidenceScore + sigmaScore + mathValueScore);
 }
+
+window.navigateSportLab = function(page) {
+  currentPage = page;
+  init();
+};
 
 init();
