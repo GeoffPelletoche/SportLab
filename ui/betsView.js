@@ -33,7 +33,6 @@ function renderBet(bet) {
 
       <p class="small">
         ${bet.market}
-        ${bet.line ? ` ${bet.line}` : ""}
       </p>
 
       <p class="small">
