@@ -4,7 +4,12 @@
  * afficher l'enveloppe principale de l'application.
  */
 
-export function renderDashboard({ drawhunterHtml, frenchflairHtml, portfolioHtml }) {
+export function renderDashboard({
+  drawhunterHtml,
+  frenchflairHtml,
+  portfolioHtml,
+  journalHtml
+}) {
   return `
     <h1>🏟️ SportLab</h1>
 
@@ -16,6 +21,10 @@ export function renderDashboard({ drawhunterHtml, frenchflairHtml, portfolioHtml
     <section class="card">
       <h2>🏉 FrenchFlair</h2>
       ${frenchflairHtml}
+    </section>
+
+    <section class="card">
+      ${journalHtml}
     </section>
 
     <section class="card">
