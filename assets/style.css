@@ -115,6 +115,24 @@ p {
   border: 1px solid rgba(239, 68, 68, 0.28);
 }
 
+.sportlab-nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.sportlab-nav button {
+  padding: 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.sportlab-nav .nav-active {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-weight: 700;
+}
+
 button {
   width: 100%;
   border: none;
