@@ -46,6 +46,12 @@ function renderAnalysis(a) {
         ${a.scoreValue ? ` • ${a.scoreValue}%` : ""}
       </span>
 
+      ${a.confidence ? `
+        <p class="small">
+          Confiance : ${a.confidence}%
+        </p>
+      ` : ""}
+
       <p class="small">
         ${formatDate(a.createdAt)}
       </p>
