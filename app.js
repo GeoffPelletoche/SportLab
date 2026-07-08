@@ -34,6 +34,7 @@ async function init() {
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
       portfolioHtml: renderPortfolio(roi),
       journalHtml: renderJournal(analyses),
+      activePage: currentPage,
       navigationHtml
     });
 
