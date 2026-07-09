@@ -4,7 +4,8 @@ export const COMPETITIONS = {
     { id: 140, name: "La Liga", active: true },
     { id: 78, name: "Bundesliga", active: true },
     { id: 135, name: "Serie A", active: true },
-    { id: 61, name: "Ligue 1", active: true }
+    { id: 61, name: "Ligue 1", active: true },
+    { id: 62, name: "Ligue 2", active: true }
   ],
 
   frenchflair: [
