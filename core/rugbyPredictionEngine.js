@@ -71,6 +71,19 @@ export function predictRugbyMatch(match) {
   const predictedHomePoints = round(blend(modelHomePoints, simpleHomePoints));
   const predictedAwayPoints = round(blend(modelAwayPoints, simpleAwayPoints));
   const predictedTotalPoints = round(predictedHomePoints + predictedAwayPoints);
+const historicalReferenceTotal = round(
+  avg(
+    [
+      homeStats.totalAverage,
+      awayStats.totalAverage
+    ].filter(value => value > 0)
+  )
+);
+
+const recommendedTrend =
+  predictedTotalPoints >= historicalReferenceTotal
+    ? "OVER"
+    : "UNDER";
 
   const sigma = round(avg([
     homeStats.totalSigma,
@@ -101,7 +114,10 @@ export function predictRugbyMatch(match) {
     predictedHomePoints,
     predictedAwayPoints,
     predictedTotalPoints,
-
+    
+    historicalReferenceTotal,
+    recommendedTrend,
+    
     sigma,
     predictedRangeLow: round(predictedTotalPoints - sigma),
     predictedRangeHigh: round(predictedTotalPoints + sigma),
