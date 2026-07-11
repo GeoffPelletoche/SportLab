@@ -275,8 +275,14 @@ pendingFrenchFlairAnalyses.set(String(match.id), analysis);
       ${finalDecision} — ${scoreValue}% | Confiance ${match.confidence}%
     </span>
 
-    <p class="small">Analyse sauvegardée automatiquement.</p>
+    <p class="small">
+  Tu peux modifier la ligne ou la cote et recalculer avant de sauvegarder.
+</p>
 
+<button onclick="saveFrenchFlairAnalysis('${match.id}')">
+  Sauvegarder l’analyse
+</button>
+    
     ${value.decision === "VALUE BET" ? `
       <hr/>
 
