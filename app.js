@@ -154,152 +154,296 @@ window.analyzeFrenchFlairValue = function(matchId) {
 };
 
 /**
- * FRENCHFLAIR — CALCUL VALUE
+ * FRENCHFLAIR — CALCUL AUTOMATIQUE DE LA VALUE
+ *
+ * Le calcul ne sauvegarde rien immédiatement.
+ * L’utilisateur peut modifier la ligne ou la cote,
+ * puis sauvegarder volontairement l’analyse.
  */
 window.calculateFrenchFlairAnalysis = function(matchId) {
   const match = getFrenchFlairMatchById(matchId);
-  
+
   if (!match) {
     alert("Match introuvable.");
     return;
   }
 
-  const market = document.getElementById(`ff-market-${match.id}`)?.value;
-  const line = Number(document.getElementById(`ff-line-${match.id}`)?.value || 0);
-  const bookmaker = "";
-  const odds = Number(document.getElementById(`ff-odds-${match.id}`)?.value || 0);
-  const probability = computeFrenchFlairProbability(match, market, line);
-  const probabilityPercent = probability * 100;
-  console.log("FF probability debug", {
-    matchId: match.id,
-    predictedTotalPoints: match.predictedTotalPoints,
-    sigma: match.sigma,
-    market,
-    line,
-    probability
-  });
-  const notes = document.getElementById(`ff-notes-${match.id}`)?.value || "";
+  const market =
+    document.getElementById(`ff-market-${match.id}`)?.value ||
+    match.recommendedTrend ||
+    "OVER";
+
+  const line = Number(
+    document.getElementById(`ff-line-${match.id}`)?.value || 0
+  );
+
+  const odds = Number(
+    document.getElementById(`ff-odds-${match.id}`)?.value || 0
+  );
+
+  const notes =
+    document.getElementById(`ff-notes-${match.id}`)?.value || "";
 
   if (!market || line <= 0 || odds <= 1) {
-  alert("Saisis un marché, une ligne bookmaker et une cote valides.");
-  return;
-}
+    alert("Saisis une ligne bookmaker et une cote valides.");
+    return;
+  }
 
-if (!Number.isFinite(probability) || probability <= 0) {
-  alert("Probabilité automatique indisponible : sigma ou total prédit manquant.");
-  return;
-}
+  const predictedTotal = Number(match.predictedTotalPoints || 0);
+  const sigma = Number(match.sigma || 0);
+  const confidence = Number(match.confidence || 0);
 
+  if (
+    !Number.isFinite(predictedTotal) ||
+    predictedTotal <= 0 ||
+    !Number.isFinite(sigma) ||
+    sigma <= 0
+  ) {
+    alert(
+      "Calcul indisponible : le total prédit ou le sigma est manquant."
+    );
+    return;
+  }
+
+  /*
+   * Probabilité automatiquement calculée à partir :
+   * - du total prédit ;
+   * - du sigma ;
+   * - de la ligne bookmaker ;
+   * - du marché Over ou Under.
+   */
+  const probability = computeFrenchFlairProbability(
+    match,
+    market,
+    line
+  );
+
+  if (!Number.isFinite(probability) || probability <= 0) {
+    alert("La probabilité automatique n’a pas pu être calculée.");
+    return;
+  }
+
+  const probabilityPercent = probability * 100;
+
+  /*
+   * Value mathématique :
+   * probabilité SportLab comparée à la probabilité implicite de la cote.
+   */
   const value = computeValue({
     probability,
     odds,
     minValue: 0.01
   });
 
-  const predictedTotal = Number(match.predictedTotalPoints || 0);
-  const modelEdgePoints = market === "OVER"
-    ? predictedTotal - line
-    : line - predictedTotal;
+  /*
+   * Écart entre la prédiction SportLab et la ligne bookmaker.
+   * Un écart positif va dans le sens du marché sélectionné.
+   */
+  const modelEdgePoints =
+    market === "OVER"
+      ? predictedTotal - line
+      : line - predictedTotal;
 
-  const modelEdgePercent = line > 0
-    ? (modelEdgePoints / line) * 100
-    : 0;
+  const modelEdgePercent =
+    line > 0
+      ? (modelEdgePoints / line) * 100
+      : 0;
+
+  /*
+   * Score Value SportLab :
+   * - écart modèle/bookmaker : 40 %
+   * - confiance : 20 %
+   * - sigma : 20 %
+   * - value mathématique : 20 %
+   */
   const scoreValue = computeFrenchFlairScore({
-  modelEdgePercent,
-  confidence: match.confidence,
-  sigma: match.sigma,
-  predictedTotal,
-  mathValue: value.value
-});
+    modelEdgePercent,
+    confidence,
+    sigma,
+    predictedTotal,
+    mathValue: value.value
+  });
 
-  const finalDecision = scoreValue >= 70 ? "VALUE" : "NO VALUE";
+  const finalDecision =
+    scoreValue >= 70
+      ? "VALUE"
+      : "NO VALUE";
+
+  /*
+   * Brouillon temporaire.
+   * Rien n’est encore enregistré dans analysisStore.
+   */
   const analysis = {
-  source: "FrenchFlair",
-  sport: "rugby",
-  competition: match.competition,
-  matchId: match.id,
-  match: `${match.home} vs ${match.away}`,
-  home: match.home,
-  away: match.away,
-  date: match.date,
+    source: "FrenchFlair",
+    sport: "rugby",
 
-  market,
-  line,
-  bookmaker,
-  odds,
-  probability,
-  impliedProbability: value.impliedProbability,
-  value: value.value,
-  edge: value.edge,
-  decision: value.decision,
+    competition: match.competition,
+    matchId: match.id,
+    match: `${match.home} vs ${match.away}`,
+    home: match.home,
+    away: match.away,
+    date: match.date,
 
-  predictedTotalPoints: predictedTotal,
-  modelEdgePoints,
-  modelEdgePercent,
+    market,
+    line,
+    bookmaker: "",
+    odds,
 
-  scoreValue,
-  finalDecision,
-  confidence: match.confidence,
-  sigma: match.sigma,
-  recommendedTrend: match.recommendedTrend,
+    probability,
+    impliedProbability: value.impliedProbability,
+    value: value.value,
+    edge: value.edge,
+    decision: value.decision,
 
-  status: "draft",
-  notes
-};
+    predictedHomePoints: Number(match.predictedHomePoints || 0),
+    predictedAwayPoints: Number(match.predictedAwayPoints || 0),
+    predictedTotalPoints: predictedTotal,
 
-pendingFrenchFlairAnalyses.set(String(match.id), analysis);
+    modelEdgePoints,
+    modelEdgePercent,
 
-  const box = document.getElementById(`ff-calculation-${match.id}`);
+    sigma,
+    confidence,
+    recommendedTrend: match.recommendedTrend || null,
+
+    scoreValue,
+    finalDecision,
+
+    placed: false,
+    stake: 0,
+    status: "draft",
+    notes
+  };
+
+  /*
+   * Mémorisation temporaire jusqu’au clic sur :
+   * "Sauvegarder l’analyse" ou "Sauvegarder le pari".
+   */
+  pendingFrenchFlairAnalyses.set(
+    String(match.id),
+    analysis
+  );
+
+  const box = document.getElementById(
+    `ff-calculation-${match.id}`
+  );
+
+  if (!box) {
+    alert("Zone de résultat introuvable.");
+    return;
+  }
+
+  const decisionClass =
+    finalDecision === "VALUE"
+      ? "badge-value"
+      : "badge-no";
 
   box.innerHTML = `
     <hr/>
 
-    <p>Marché analysé : <strong>${market} ${line}</strong></p>
-    <p>Cote : ${odds}</p>
+    <p>
+      Marché analysé :
+      <strong>${market} ${line.toFixed(1)}</strong>
+    </p>
+
+    <p>
+      Cote :
+      <strong>${odds.toFixed(2)}</strong>
+    </p>
 
     <hr/>
 
-    <p>Total prédit SportLab : <strong>${predictedTotal.toFixed(1)} pts</strong></p>
-    <p>Ligne bookmaker : ${line.toFixed(1)} pts</p>
-    <p>Écart modèle / bookmaker : <strong>${modelEdgePoints >= 0 ? "+" : ""}${modelEdgePoints.toFixed(1)} pts</strong></p>
-    <p>Écart relatif : <strong>${modelEdgePercent >= 0 ? "+" : ""}${modelEdgePercent.toFixed(1)}%</strong></p>
+    <p>
+      Total prédit SportLab :
+      <strong>${predictedTotal.toFixed(1)} pts</strong>
+    </p>
+
+    <p>
+      Ligne bookmaker :
+      ${line.toFixed(1)} pts
+    </p>
+
+    <p>
+      Écart modèle / bookmaker :
+      <strong>
+        ${modelEdgePoints >= 0 ? "+" : ""}
+        ${modelEdgePoints.toFixed(1)} pts
+      </strong>
+    </p>
+
+    <p>
+      Écart relatif :
+      <strong>
+        ${modelEdgePercent >= 0 ? "+" : ""}
+        ${modelEdgePercent.toFixed(1)}%
+      </strong>
+    </p>
 
     <hr/>
 
-    <p>Probabilité estimée : ${probabilityPercent.toFixed(1)}%</p>
-    <p>Probabilité implicite : ${(value.impliedProbability * 100).toFixed(1)}%</p>
-    <p>Value : ${(value.value * 100).toFixed(1)}%</p>
-    <p>Edge : ${(value.edge * 100).toFixed(1)}%</p>
+    <p>
+      Probabilité SportLab :
+      ${probabilityPercent.toFixed(1)}%
+    </p>
 
-    <span class="badge ${finalDecision === "VALUE" ? "badge-value" : "badge-no"}">
-      ${finalDecision} — ${scoreValue}% | Confiance ${match.confidence}%
+    <p>
+      Probabilité implicite :
+      ${(value.impliedProbability * 100).toFixed(1)}%
+    </p>
+
+    <p>
+      Value mathématique :
+      ${(value.value * 100).toFixed(1)}%
+    </p>
+
+    <p>
+      Edge :
+      ${(value.edge * 100).toFixed(1)}%
+    </p>
+
+    <span class="badge ${decisionClass}">
+      ${finalDecision} — ${scoreValue}%
+      | Confiance ${confidence}%
     </span>
 
     <p class="small">
-  Tu peux modifier la ligne ou la cote et recalculer avant de sauvegarder.
-</p>
+      Tu peux modifier la ligne ou la cote et recalculer avant de sauvegarder.
+    </p>
 
-<button onclick="saveFrenchFlairAnalysis('${match.id}')">
-  Sauvegarder l’analyse
-</button>
-    
-    ${value.decision === "VALUE BET" ? `
-      <hr/>
+    <button onclick="saveFrenchFlairAnalysis('${match.id}')">
+      💾 Sauvegarder l’analyse
+    </button>
 
-      <label>
-        <input type="checkbox" id="ff-placed-${match.id}">
-        Pari placé
-      </label>
+    ${
+      finalDecision === "VALUE"
+        ? `
+          <hr/>
 
-      <label>
-        Montant misé
-        <input id="ff-stake-${match.id}" type="number" min="0" step="0.01" placeholder="Ex : 10">
-      </label>
+          <label>
+            <input
+              type="checkbox"
+              id="ff-placed-${match.id}"
+            >
+            Pari placé
+          </label>
 
-      <button onclick="saveFrenchFlairBet(${match.id}, '${analysis.id}')">
-        Sauvegarder le pari
-      </button>
-    ` : ""}
+          <label>
+            Montant misé
+            <input
+              id="ff-stake-${match.id}"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="Ex : 10"
+            >
+          </label>
+
+          <button onclick="saveFrenchFlairBet('${match.id}')">
+            Sauvegarder le pari
+          </button>
+        `
+        : ""
+    }
   `;
 };
 
