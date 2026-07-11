@@ -78,6 +78,12 @@ function renderPrediction(match) {
     <p class="small">${teamLabel(match.away)} : ${formatNumber(match.predictedAwayPoints)} pts</p>
 
     <p><strong>Total prédit : ${formatNumber(match.predictedTotalPoints)} pts</strong></p>
+    <p>
+     <strong>
+    Tendance SportLab :
+    ${match.recommendedTrend === "OVER" ? "📈 OVER" : "📉 UNDER"}
+     </strong>
+    </p>
     <p class="small">
       Moyenne ± Sigma : ${formatNumber(match.predictedTotalPoints)} ± ${formatNumber(match.sigma)} pts
     </p>
