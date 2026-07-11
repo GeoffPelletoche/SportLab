@@ -156,6 +156,13 @@ window.analyzeFrenchFlairValue = function(matchId) {
 /**
  * FRENCHFLAIR — CALCUL VALUE
  */
+window.calculateFrenchFlairAnalysis = function(matchId) {
+  const match = getFrenchFlairMatchById(matchId);
+  
+  if (!match) {
+    alert("Match introuvable.");
+    return;
+  }
 
   const market = document.getElementById(`ff-market-${match.id}`)?.value;
   const line = Number(document.getElementById(`ff-line-${match.id}`)?.value || 0);
@@ -268,13 +275,7 @@ pendingFrenchFlairAnalyses.set(String(match.id), analysis);
       ${finalDecision} — ${scoreValue}% | Confiance ${match.confidence}%
     </span>
 
-    <p class="small">
-  Tu peux modifier la ligne ou la cote et recalculer avant de sauvegarder.
-</p>
-
-<button onclick="saveFrenchFlairAnalysis('${match.id}')">
-  Sauvegarder l’analyse
-</button>
+    <p class="small">Analyse sauvegardée automatiquement.</p>
 
     ${value.decision === "VALUE BET" ? `
       <hr/>
@@ -304,28 +305,9 @@ pendingFrenchFlairAnalyses.set(String(match.id), analysis);
 /**
  * FRENCHFLAIR */
 
-window.saveFrenchFlairAnalysis = function(matchId) {
-  const pending = pendingFrenchFlairAnalyses.get(String(matchId));
-
-  if (!pending) {
-    alert("Calcule d’abord la value avant de sauvegarder.");
-    return;
-  }
-
-  saveAnalysis(pending);
-  pendingFrenchFlairAnalyses.delete(String(matchId));
-
-  alert("Analyse sauvegardée dans le Journal.");
-
-  // VALUE ou NO VALUE : le match disparaît seulement
-  // après ton action volontaire de sauvegarde.
-  init();
-};
 window.saveFrenchFlairBet = function(matchId, analysisId) {
   const match = getFrenchFlairMatchById(matchId);
-  const analysis =
-  pendingFrenchFlairAnalyses.get(String(matchId)) ||
-  getAnalysisForMatch(match?.id);
+  const analysis = getAnalysisForMatch(match?.id);
 
   if (!match || !analysis) {
     alert("Analyse introuvable.");
@@ -341,13 +323,11 @@ window.saveFrenchFlairBet = function(matchId, analysisId) {
   }
 
   saveAnalysis({
-  ...analysis,
-  placed: true,
-  stake,
-  status: "betPlaced"
-});
-
-pendingFrenchFlairAnalyses.delete(String(matchId));
+    ...analysis,
+    placed,
+    stake,
+    status: placed ? "betPlaced" : "completed"
+  });
 
   saveBet({
     source: "FrenchFlair",
