@@ -310,7 +310,23 @@ pendingFrenchFlairAnalyses.set(String(match.id), analysis);
 
 /**
  * FRENCHFLAIR */
+window.saveFrenchFlairAnalysis = function(matchId) {
+  const pending = pendingFrenchFlairAnalyses.get(String(matchId));
 
+  if (!pending) {
+    alert("Calcule d’abord la value avant de sauvegarder.");
+    return;
+  }
+
+  saveAnalysis(pending);
+  pendingFrenchFlairAnalyses.delete(String(matchId));
+
+  alert("Analyse sauvegardée dans le Journal.");
+
+  // VALUE ou NO VALUE : le match disparaît seulement
+  // après ton action volontaire de sauvegarde.
+  init();
+};
 window.saveFrenchFlairBet = function(matchId, analysisId) {
   const match = getFrenchFlairMatchById(matchId);
   const analysis = getAnalysisForMatch(match?.id);
