@@ -301,11 +301,6 @@ pendingFrenchFlairAnalyses.set(String(match.id), analysis);
       </button>
     ` : ""}
   `;
-    if (finalDecision === "NO VALUE") {
-    setTimeout(() => {
-      init();
-    }, 1000);
-  }
 };
 
 /**
