@@ -329,7 +329,9 @@ window.saveFrenchFlairAnalysis = function(matchId) {
 };
 window.saveFrenchFlairBet = function(matchId, analysisId) {
   const match = getFrenchFlairMatchById(matchId);
-  const analysis = getAnalysisForMatch(match?.id);
+  const analysis =
+  pendingFrenchFlairAnalyses.get(String(matchId)) ||
+  getAnalysisForMatch(match?.id);
 
   if (!match || !analysis) {
     alert("Analyse introuvable.");
@@ -350,6 +352,14 @@ window.saveFrenchFlairBet = function(matchId, analysisId) {
     stake,
     status: placed ? "betPlaced" : "completed"
   });
+  saveAnalysis({
+  ...analysis,
+  placed: true,
+  stake,
+  status: "betPlaced"
+});
+
+pendingFrenchFlairAnalyses.delete(String(matchId));
 
   saveBet({
     source: "FrenchFlair",
