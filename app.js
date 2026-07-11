@@ -16,6 +16,7 @@ import { renderBets } from "./ui/betsView.js";
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
+const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 
 async function init() {
@@ -212,37 +213,41 @@ if (!Number.isFinite(probability) || probability <= 0) {
 });
 
   const finalDecision = scoreValue >= 70 ? "VALUE" : "NO VALUE";
-  const analysis = saveAnalysis({
-    source: "FrenchFlair",
-    sport: "rugby",
-    competition: match.competition,
-    matchId: match.id,
-    match: `${match.home} vs ${match.away}`,
-    home: match.home,
-    away: match.away,
-    date: match.date,
+  const analysis = {
+  source: "FrenchFlair",
+  sport: "rugby",
+  competition: match.competition,
+  matchId: match.id,
+  match: `${match.home} vs ${match.away}`,
+  home: match.home,
+  away: match.away,
+  date: match.date,
 
-    market,
-    line,
-    bookmaker,
-    odds,
-    probability,
-    impliedProbability: value.impliedProbability,
-    value: value.value,
-    edge: value.edge,
-    decision: value.decision,
+  market,
+  line,
+  bookmaker,
+  odds,
+  probability,
+  impliedProbability: value.impliedProbability,
+  value: value.value,
+  edge: value.edge,
+  decision: value.decision,
 
-    predictedTotalPoints: predictedTotal,
-    modelEdgePoints,
-    modelEdgePercent,
+  predictedTotalPoints: predictedTotal,
+  modelEdgePoints,
+  modelEdgePercent,
 
-    status: "draft",
-    notes,
-    scoreValue,
-    finalDecision,
-    confidence: match.confidence
-    
-  });
+  scoreValue,
+  finalDecision,
+  confidence: match.confidence,
+  sigma: match.sigma,
+  recommendedTrend: match.recommendedTrend,
+
+  status: "draft",
+  notes
+};
+
+pendingFrenchFlairAnalyses.set(String(match.id), analysis);
 
   const box = document.getElementById(`ff-calculation-${match.id}`);
 
