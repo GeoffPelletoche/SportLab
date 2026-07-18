@@ -201,3 +201,40 @@ function toNullableNumber(value) {
         ? number
         : null;
 }
+function evaluateBetResult(bet, game) {
+    if (!game?.isFinished) {
+        return "PENDING";
+    }
+
+    const market = String(bet.market || "").toUpperCase();
+
+    if (!market.includes("OVER") && !market.includes("UNDER")) {
+        return "UNKNOWN_MARKET";
+    }
+
+    const line = Number(bet.line);
+
+    if (!Number.isFinite(line)) {
+        return "INVALID_LINE";
+    }
+
+    const total = Number(game.totalPoints);
+
+    if (!Number.isFinite(total)) {
+        return "INVALID_SCORE";
+    }
+
+    if (market.includes("OVER")) {
+        if (total > line) return "WON";
+        if (total < line) return "LOST";
+        return "PUSH";
+    }
+
+    if (market.includes("UNDER")) {
+        if (total < line) return "WON";
+        if (total > line) return "LOST";
+        return "PUSH";
+    }
+
+    return "UNKNOWN_MARKET";
+}
