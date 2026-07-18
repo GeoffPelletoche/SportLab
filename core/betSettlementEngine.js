@@ -101,11 +101,14 @@ async function checkPendingBet(bet) {
             game
         );
 
-        return {
-            ...baseReport,
-            status: game.isFinished ? "READY" : "WAITING",
-            game
-        };
+        const settlement = evaluateBetResult(bet, game);
+
+return {
+    ...baseReport,
+    status: game.isFinished ? "READY" : "WAITING",
+    settlement,
+    game
+};
     } catch (error) {
         console.error(
             `[Settlement] Erreur pour ${bet.match || bet.matchId}:`,
