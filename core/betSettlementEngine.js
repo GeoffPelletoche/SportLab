@@ -104,13 +104,52 @@ async function checkPendingBet(bet) {
             game
         );
 
-        const settlement = evaluateBetResult(bet, game);
+const settlement = evaluateBetResult(bet, game);
+
+const finalResults = [
+    "WON",
+    "LOST",
+    "PUSH"
+];
+
+if (!finalResults.includes(settlement)) {
+    return {
+        ...baseReport,
+        status: game.isFinished
+            ? "NOT_SETTLED"
+            : "WAITING",
+        settlement,
+        game
+    };
+}
+
+const updatedBet = updateBetSettlement(
+    bet.id,
+    settlement,
+    game
+);
+
+if (!updatedBet) {
+    return {
+        ...baseReport,
+        status: "UPDATE_ERROR",
+        settlement,
+        game,
+        error: "BET_UPDATE_FAILED"
+    };
+}
+
+console.log(
+    `[Settlement] Pari réglé : ${bet.match}`,
+    settlement
+);
 
 return {
     ...baseReport,
-    status: game.isFinished ? "READY" : "WAITING",
+    status: "SETTLED",
     settlement,
-    game
+    game,
+    updatedBet
 };
     } catch (error) {
         console.error(
