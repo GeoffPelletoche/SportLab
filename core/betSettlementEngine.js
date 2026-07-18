@@ -1,4 +1,7 @@
-import { getBets } from "./betsStore.js";
+import {
+    getBets,
+    updateBetSettlement
+} from "./betsStore.js";
 
 /*
  * Remplace cette URL uniquement si l'adresse de ton Worker est différente.
