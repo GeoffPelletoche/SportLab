@@ -169,18 +169,34 @@ async function init() {
     });
 
     try {
-      const settlementReports = await settlePendingBets();
+  const settlementReports = await settlePendingBets();
 
-      console.log(
-        "[Settlement] Règlement automatique terminé :",
-        settlementReports
-      );
-    } catch (error) {
-      console.error(
-        "[Settlement] Échec du règlement automatique :",
-        error
-      );
-    }
+  console.log(
+    "[Settlement] Règlement automatique terminé :",
+    settlementReports
+  );
+
+  const hasSettledBet = settlementReports.some(
+    report => report.status === "SETTLED"
+  );
+
+  if (hasSettledBet) {
+    app.innerHTML = renderDashboard({
+      drawhunterHtml: renderDrawHunter(drawhunterPayload),
+      frenchflairHtml: renderFrenchFlair(frenchflairPayload),
+      portfolioHtml: renderPortfolio(getROI()),
+      journalHtml: renderJournal(getAnalyses()),
+      activePage: currentPage,
+      navigationHtml: renderNavigation(currentPage),
+      betsHtml: renderBets(getBets())
+    });
+  }
+} catch (error) {
+  console.error(
+    "[Settlement] Échec du règlement automatique :",
+    error
+  );
+}
 
   } catch (error) {
     console.error("SportLab init error:", error);
