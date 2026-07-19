@@ -65,8 +65,10 @@ function getEligiblePendingBets(bets) {
 }
 
 /**
- * Vérifie un pari sans le modifier.
- */
+ * Récupère le résultat officiel d’un pari éligible
+ * et met à jour le pari lorsqu’un règlement définitif est possible.
+ */ 
+
 async function checkPendingBet(bet) {
     const baseReport = {
         betId: bet.id || null,
