@@ -613,16 +613,10 @@ window.saveFrenchFlairBet = function(matchId, analysisId) {
   }
 
   saveAnalysis({
-    ...analysis,
-    placed,
-    stake,
-    status: placed ? "betPlaced" : "completed"
-  });
-  saveAnalysis({
   ...analysis,
-  placed: true,
+  placed,
   stake,
-  status: "betPlaced"
+  status: placed ? "betPlaced" : "completed"
 });
 
 pendingFrenchFlairAnalyses.delete(String(matchId));
