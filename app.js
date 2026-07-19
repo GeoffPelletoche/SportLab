@@ -64,6 +64,22 @@ async function runSettlementDiagnostics() {
     return [];
   }
 }
+window.runSettlementDiagnostics = async function () {
+  const reports = await runSettlementDiagnostics();
+
+  const debugElement =
+    document.getElementById("settlement-debug");
+
+  if (debugElement) {
+    debugElement.textContent = JSON.stringify(
+      reports,
+      null,
+      2
+    );
+  }
+
+  return reports;
+};
 
 async function init() {
   const app = document.getElementById("app");
