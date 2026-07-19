@@ -157,14 +157,23 @@ async function init() {
     const bets = getBets();
     
     app.innerHTML = renderDashboard({
-      drawhunterHtml: renderDrawHunter(drawhunterPayload),
-      frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(roi),
-      journalHtml: renderJournal(analyses),
-      activePage: currentPage,
-      navigationHtml,
-      betsHtml: renderBets(bets)
-    });
+  drawhunterHtml: renderDrawHunter(drawhunterPayload),
+  frenchflairHtml: renderFrenchFlair(frenchflairPayload),
+  portfolioHtml: renderPortfolio(roi),
+  journalHtml: renderJournal(analyses),
+  activePage: currentPage,
+  navigationHtml,
+  betsHtml: renderBets(bets)
+});
+
+try {
+  await settlePendingBets();
+} catch (error) {
+  console.error(
+    "[Settlement] Impossible d'exécuter le règlement automatique :",
+    error
+  );
+}
 
     } catch (error) {
     console.error("SportLab init error:", error);
