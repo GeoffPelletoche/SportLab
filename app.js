@@ -65,6 +65,39 @@ async function runSettlementDiagnostics() {
   }
 }
 
+window.testBetStorage = function () {
+  const saved = saveBet({
+    source: "TEST",
+    sport: "rugby",
+    competition: "TEST",
+    matchId: "test-123",
+    matchDate: new Date().toISOString(),
+    match: "Equipe A vs Equipe B",
+    market: "TOTAL_POINTS OVER 40.5",
+    line: 40.5,
+    odds: 1.9,
+    probability: 0.6,
+    value: 0.14,
+    edge: 0.1,
+    decision: "BET",
+    placed: true,
+    stake: 10
+  });
+
+  console.log("[TestBetStorage] Pari retourné :", saved);
+  console.log(
+    "[TestBetStorage] localStorage :",
+    Object.fromEntries(
+      Object.keys(localStorage).map(key => [
+        key,
+        localStorage.getItem(key)
+      ])
+    )
+  );
+
+  return saved;
+};
+
 window.runSettlementDiagnostics = async function () {
   const betsBefore = getBets();
 
