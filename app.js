@@ -13,6 +13,7 @@ import { renderPortfolio } from "./ui/portfolioView.js";
 import { renderNavigation } from "./ui/navigationView.js";
 import { getBets } from "./core/betsStore.js";
 import { renderBets } from "./ui/betsView.js";
+import { settlePendingBets } from "./core/betSettlementEngine.js";
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
