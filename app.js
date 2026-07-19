@@ -204,20 +204,24 @@ window.saveDrawHunterBet = function(index) {
   }
 
   const saved = saveBet({
-    source: "DrawHunter",
-    sport: "football",
-    competition: match.competition,
-    match: `${match.home} vs ${match.away}`,
-    market: "DRAW",
-    line: null,
-    odds: match.odds,
-    probability: match.probability,
-    value: match.value,
-    edge: match.edge,
-    decision: match.decision,
-    placed,
-    stake
-  });
+  source: "DrawHunter",
+  sport: "football",
+  competition: match.competition || null,
+
+  matchId: match.id ?? null,
+  matchDate: match.date || null,
+
+  match: `${match.home} vs ${match.away}`,
+  market: "DRAW",
+  line: null,
+  odds: match.odds,
+  probability: match.probability,
+  value: match.value,
+  edge: match.edge,
+  decision: match.decision,
+  placed,
+  stake
+});
 
   alert(saved.placed ? "Pari DrawHunter sauvegardé." : "Analyse DrawHunter sauvegardée.");
   init();
