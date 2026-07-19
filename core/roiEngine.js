@@ -9,40 +9,50 @@ import { getBets } from "./betsStore.js";
 export function getROI() {
   const bets = getBets();
 
-  const placedBets = bets.filter(bet => bet.placed === true);
+  const placedBets = bets.filter(
+    bet => bet.placed === true
+  );
 
   let invested = 0;
   let profit = 0;
   let wins = 0;
   let losses = 0;
+  let pushes = 0;
   let pending = 0;
 
   placedBets.forEach(bet => {
-    invested += Number(bet.stake || 0);
+    const stake = Number(bet.stake || 0);
+    const odds = Number(bet.odds || 0);
 
-    if (bet.result === "WIN") {
-      profit += Number(bet.stake) * (Number(bet.odds) - 1);
+    invested += stake;
+
+    if (bet.result === "WON") {
+      profit += stake * (odds - 1);
       wins++;
-    }
-
-    if (bet.result === "LOSS") {
-      profit -= Number(bet.stake);
+    } else if (bet.result === "LOST") {
+      profit -= stake;
       losses++;
-    }
-
-    if (bet.result === "PENDING") {
+    } else if (bet.result === "PUSH") {
+      pushes++;
+    } else if (bet.result === "PENDING") {
       pending++;
     }
   });
 
-  const roi = invested > 0 ? (profit / invested) * 100 : 0;
+  const roi =
+    invested > 0
+      ? (profit / invested) * 100
+      : 0;
 
   return {
     totalBets: bets.length,
     placedBets: placedBets.length,
-    nonPlacedBets: bets.filter(bet => bet.placed === false).length,
+    nonPlacedBets: bets.filter(
+      bet => bet.placed === false
+    ).length,
     wins,
     losses,
+    pushes,
     pending,
     invested: round(invested),
     profit: round(profit),
