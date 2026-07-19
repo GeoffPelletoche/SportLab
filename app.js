@@ -64,21 +64,81 @@ async function runSettlementDiagnostics() {
     return [];
   }
 }
+
 window.runSettlementDiagnostics = async function () {
-  const reports = await runSettlementDiagnostics();
+  const betsBefore = getBets();
+
+  let reports = [];
+  let globalError = null;
+
+  try {
+    reports = await settlePendingBets();
+  } catch (error) {
+    globalError =
+      error instanceof Error
+        ? error.message
+        : String(error);
+  }
+
+  const betsAfter = getBets();
+
+  const diagnostic = {
+    checkedAt: new Date().toISOString(),
+
+    location: {
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+      displayMode: window.matchMedia(
+        "(display-mode: standalone)"
+      ).matches
+        ? "standalone"
+        : "browser"
+    },
+
+    betsBefore: betsBefore.map(bet => ({
+      id: bet.id,
+      match: bet.match,
+      matchId: bet.matchId,
+      matchDate: bet.matchDate,
+      sport: bet.sport,
+      market: bet.market,
+      line: bet.line,
+      result: bet.result,
+      placed: bet.placed
+    })),
+
+    reports,
+
+    betsAfter: betsAfter.map(bet => ({
+      id: bet.id,
+      match: bet.match,
+      result: bet.result,
+      finalStatus: bet.finalStatus,
+      finalHomePoints: bet.finalHomePoints,
+      finalAwayPoints: bet.finalAwayPoints,
+      finalTotalPoints: bet.finalTotalPoints
+    })),
+
+    globalError
+  };
+
+  localStorage.setItem(
+    "sportlab_settlement_debug",
+    JSON.stringify(diagnostic)
+  );
 
   const debugElement =
     document.getElementById("settlement-debug");
 
   if (debugElement) {
     debugElement.textContent = JSON.stringify(
-      reports,
+      diagnostic,
       null,
       2
     );
   }
 
-  return reports;
+  return diagnostic;
 };
 
 async function init() {
