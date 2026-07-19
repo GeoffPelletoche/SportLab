@@ -626,6 +626,19 @@ window.saveFrenchFlairBet = function(matchId, analysisId) {
 
 pendingFrenchFlairAnalyses.delete(String(matchId));
 
+if (!match?.id || !match?.date) {
+  console.error(
+    "[FrenchFlair] Match incomplet au moment de sauvegarder le pari :",
+    match
+  );
+
+  alert(
+    "Impossible d’enregistrer ce pari : identifiant ou date du match manquant."
+  );
+
+  return;
+}
+
   saveBet({
   source: "FrenchFlair",
   sport: "rugby",
