@@ -217,33 +217,6 @@ async function init() {
   }
 }
 
-try {
-  await settlePendingBets();
-} catch (error) {
-  console.error(
-    "[Settlement] Impossible d'exécuter le règlement automatique :",
-    error
-  );
-}
-
-    } catch (error) {
-    console.error("SportLab init error:", error);
-
-    const message =
-      error?.message ||
-      String(error) ||
-      "Erreur inconnue au chargement de SportLab.";
-
-    app.innerHTML = `
-      <h1>🏟️ SportLab</h1>
-      <section class="card">
-        <h2>Erreur de chargement</h2>
-        <p>${message}</p>
-      </section>
-    `;
-  }
-}
-
 /**
  * DRAWHUNTER
  */
