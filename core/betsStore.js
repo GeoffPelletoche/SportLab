@@ -220,11 +220,24 @@ export function updateBetSettlement(
  * compatibilité avec le code existant.
  */
 export function updateBetResult(id, result) {
-  const normalizedResult = String(
-    result || ""
-  )
+  const allowedResults = [
+    "PENDING",
+    "WON",
+    "LOST",
+    "PUSH"
+  ];
+
+  const normalizedResult = String(result || "")
     .trim()
     .toUpperCase();
+
+  if (!allowedResults.includes(normalizedResult)) {
+    console.warn(
+      `[BetsStore] Résultat invalide : ${normalizedResult}`
+    );
+
+    return null;
+  }
 
   const bets = getBets();
 
@@ -233,27 +246,37 @@ export function updateBetResult(id, result) {
   );
 
   if (betIndex === -1) {
+    console.warn(
+      `[BetsStore] Pari introuvable : ${id}`
+    );
+
     return null;
   }
 
   const updatedBet = {
     ...bets[betIndex],
-    result: normalizedResult
+    result: normalizedResult,
+    settledAt:
+      normalizedResult === "PENDING"
+        ? null
+        : Date.now()
   };
 
   bets[betIndex] = updatedBet;
 
-  const saved = saveBets(bets);
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(bets)
+  );
 
-  if (!saved) {
-    return null;
-  }
-
-  dispatchBetsUpdated({
-    type: "BET_UPDATED",
-    betId: id,
-    result: normalizedResult
-  });
+  window.dispatchEvent(
+    new CustomEvent("sportlab:bets-updated", {
+      detail: {
+        betId: id,
+        result: normalizedResult
+      }
+    })
+  );
 
   return updatedBet;
 }
