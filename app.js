@@ -623,20 +623,24 @@ window.saveFrenchFlairBet = function(matchId, analysisId) {
 pendingFrenchFlairAnalyses.delete(String(matchId));
 
   saveBet({
-    source: "FrenchFlair",
-    sport: "rugby",
-    competition: match.competition,
-    match: `${match.home} vs ${match.away}`,
-    market: `${analysis.market} ${analysis.line}`,
-    line: analysis.line,
-    odds: analysis.odds,
-    probability: analysis.probability,
-    value: analysis.value,
-    edge: analysis.edge,
-    decision: analysis.decision,
-    placed,
-    stake
-  });
+  source: "FrenchFlair",
+  sport: "rugby",
+  competition: match.competition || null,
+
+  matchId: match.id ?? null,
+  matchDate: match.date || null,
+
+  match: `${match.home} vs ${match.away}`,
+  market: `${analysis.market} ${analysis.line}`,
+  line: analysis.line,
+  odds: analysis.odds,
+  probability: analysis.probability,
+  value: analysis.value,
+  edge: analysis.edge,
+  decision: analysis.decision,
+  placed,
+  stake
+});
 
   alert("Analyse FrenchFlair sauvegardée.");
   init();
