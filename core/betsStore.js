@@ -40,21 +40,7 @@ function saveBets(bets) {
       STORAGE_KEY,
       JSON.stringify(bets)
     );
-console.log(
-
-      "[saveBets] Clé écrite :",
-
-      STORAGE_KEY
-
-    );
-
-    console.log(
-
-      "[saveBets] Valeur :",
-
-      localStorage.getItem(STORAGE_KEY)
-
-    );
+    
     return true;
   } catch (error) {
     console.error(
@@ -70,7 +56,6 @@ console.log(
  * Ajoute un nouveau pari.
  */
 export function saveBet(bet) {
-  console.log("[saveBet] Entrée", bet);
   const bets = getBets();
 
   const cleanBet = {
@@ -110,10 +95,8 @@ export function saveBet(bet) {
   };
 
   bets.push(cleanBet);
-  console.log("[saveBet] Avant saveBets", bets);
 
   const saved = saveBets(bets);
-  console.log("[saveBet] saveBets =", saved);
 
   if (!saved) {
     return null;
