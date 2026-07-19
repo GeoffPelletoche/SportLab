@@ -143,10 +143,12 @@ window.runSettlementDiagnostics = async function () {
 
 async function init() {
   const app = document.getElementById("app");
-  
 
   try {
-    app.innerHTML = `<h1>🏟️ SportLab</h1><p>Chargement...</p>`;
+    app.innerHTML = `
+      <h1>🏟️ SportLab</h1>
+      <p>Chargement...</p>
+    `;
 
     drawhunterPayload = await loadDrawHunterMatches();
     frenchflairPayload = await loadFrenchFlairMatches();
@@ -155,16 +157,48 @@ async function init() {
     const analyses = getAnalyses();
     const navigationHtml = renderNavigation(currentPage);
     const bets = getBets();
-    
+
     app.innerHTML = renderDashboard({
-  drawhunterHtml: renderDrawHunter(drawhunterPayload),
-  frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-  portfolioHtml: renderPortfolio(roi),
-  journalHtml: renderJournal(analyses),
-  activePage: currentPage,
-  navigationHtml,
-  betsHtml: renderBets(bets)
-});
+      drawhunterHtml: renderDrawHunter(drawhunterPayload),
+      frenchflairHtml: renderFrenchFlair(frenchflairPayload),
+      portfolioHtml: renderPortfolio(roi),
+      journalHtml: renderJournal(analyses),
+      activePage: currentPage,
+      navigationHtml,
+      betsHtml: renderBets(bets)
+    });
+
+    try {
+      const settlementReports = await settlePendingBets();
+
+      console.log(
+        "[Settlement] Règlement automatique terminé :",
+        settlementReports
+      );
+    } catch (error) {
+      console.error(
+        "[Settlement] Échec du règlement automatique :",
+        error
+      );
+    }
+
+  } catch (error) {
+    console.error("SportLab init error:", error);
+
+    const message =
+      error?.message ||
+      String(error) ||
+      "Erreur inconnue au chargement de SportLab.";
+
+    app.innerHTML = `
+      <h1>🏟️ SportLab</h1>
+      <section class="card">
+        <h2>Erreur de chargement</h2>
+        <p>${message}</p>
+      </section>
+    `;
+  }
+}
 
 try {
   await settlePendingBets();
