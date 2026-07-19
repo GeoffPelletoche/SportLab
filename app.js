@@ -141,7 +141,38 @@ window.runSettlementDiagnostics = async function () {
 
   return diagnostic;
 };
+window.testBetStorage = function () {
+  const saved = saveBet({
+    source: "TEST",
+    sport: "rugby",
+    competition: "TEST",
 
+    matchId: "53213",
+    matchDate: new Date().toISOString(),
+
+    match: "Test A vs Test B",
+    market: "OVER 40.5",
+    line: 40.5,
+
+    odds: 1.9,
+    probability: 0.6,
+    value: 0.14,
+    edge: 0.1,
+
+    decision: "VALUE",
+    placed: true,
+    stake: 10
+  });
+
+  console.log("[TestBetStorage] Pari sauvegardé :", saved);
+
+  console.log(
+    "[TestBetStorage] Contenu localStorage :",
+    localStorage.getItem("sportlab_bets_v3")
+  );
+
+  return saved;
+};
 async function init() {
   const app = document.getElementById("app");
 
