@@ -18,6 +18,14 @@ export function renderBets(bets = []) {
 
   return `
     <h2>🎯 Paris placés</h2>
+    <button
+  type="button"
+  onclick="window.runSettlementDiagnostics()"
+>
+  🔄 Vérifier les résultats
+</button>
+
+<pre id="settlement-debug"></pre>
 
     ${sorted.map(renderBet).join("")}
   `;
