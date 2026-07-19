@@ -20,6 +20,51 @@ let frenchflairPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 
+async function runSettlementDiagnostics() {
+  try {
+    const reports = await settlePendingBets();
+
+    localStorage.setItem(
+      "sportlab_settlement_debug",
+      JSON.stringify(
+        {
+          checkedAt: new Date().toISOString(),
+          reports
+        },
+        null,
+        2
+      )
+    );
+
+    console.log(
+      "[Settlement] Rapport complet :",
+      reports
+    );
+
+    return reports;
+  } catch (error) {
+    const debugError = {
+      checkedAt: new Date().toISOString(),
+      error:
+        error instanceof Error
+          ? error.message
+          : String(error)
+    };
+
+    localStorage.setItem(
+      "sportlab_settlement_debug",
+      JSON.stringify(debugError, null, 2)
+    );
+
+    console.error(
+      "[Settlement] Erreur globale :",
+      error
+    );
+
+    return [];
+  }
+}
+
 async function init() {
   const app = document.getElementById("app");
   
