@@ -594,6 +594,7 @@ window.saveFrenchFlairAnalysis = function(matchId) {
 };
 window.saveFrenchFlairBet = function(matchId, analysisId) {
   const match = getFrenchFlairMatchById(matchId);
+  console.log("[FrenchFlair] Objet match :", match);
   const analysis =
   pendingFrenchFlairAnalyses.get(String(matchId)) ||
   getAnalysisForMatch(match?.id);
