@@ -13,17 +13,29 @@ import {
 
 export function getDashboardData() {
     const bets = getAllBets();
-    const placedBets = getPlacedBets();
-    const pendingBets = getPendingBets();
-    const settledBets = getSettledBets();
-    const portfolio = getPortfolioSummary();
+
+    const placedBets = bets.filter(
+        bet => bet.placed === true
+    );
+
+    const pendingBets = placedBets.filter(
+        bet => bet.result === "PENDING"
+    );
+
+    const settledBets = placedBets.filter(
+        bet =>
+            bet.result === "WON" ||
+            bet.result === "LOST" ||
+            bet.result === "PUSH"
+    );
 
     return {
         bets,
         placedBets,
         pendingBets,
         settledBets,
-        portfolio,
+
+        portfolio: getPortfolioSummary(),
 
         counters: {
             total: bets.length,
