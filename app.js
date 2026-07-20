@@ -181,37 +181,45 @@ async function init() {
     });
 
     try {
-  const settlement = await runAutomaticSettlement();
+      const settlement = await runAutomaticSettlement();
 
-  console.log(
-  "[Settlement] Règlement automatique terminé :",
-  settlement.reports
-);
+      console.log(
+        "[Settlement] Règlement automatique terminé :",
+        settlement.reports
+      );
 
-  const hasSettledBet = settlementReports.some(
-    report => report.status === "SETTLED"
-  );
+      const hasSettledBet = settlement.settledCount > 0;
 
-  if (hasSettledBet) {
-    app.innerHTML = renderDashboard({
-      drawhunterHtml: renderDrawHunter(drawhunterPayload),
-      frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(getPortfolioSummary()),
-      journalHtml: renderJournal(getAnalyses()),
-      activePage: currentPage,
-      navigationHtml: renderNavigation(currentPage),
-      betsHtml: renderBets(getAllBets())
-    });
-  }
-} catch (error) {
-  console.error(
-    "[Settlement] Échec du règlement automatique :",
-    error
-  );
-}
-
+      if (hasSettledBet) {
+        app.innerHTML = renderDashboard({
+          drawhunterHtml: renderDrawHunter(drawhunterPayload),
+          frenchflairHtml: renderFrenchFlair(frenchflairPayload),
+          portfolioHtml: renderPortfolio(
+            getPortfolioSummary()
+          ),
+          journalHtml: renderJournal(
+            getAnalyses()
+          ),
+          activePage: currentPage,
+          navigationHtml: renderNavigation(
+            currentPage
+          ),
+          betsHtml: renderBets(
+            getAllBets()
+          )
+        });
+      }
+    } catch (error) {
+      console.error(
+        "[Settlement] Échec du règlement automatique :",
+        error
+      );
+    }
   } catch (error) {
-    console.error("SportLab init error:", error);
+    console.error(
+      "SportLab init error:",
+      error
+    );
 
     const message =
       error?.message ||
@@ -220,6 +228,7 @@ async function init() {
 
     app.innerHTML = `
       <h1>🏟️ SportLab</h1>
+
       <section class="card">
         <h2>Erreur de chargement</h2>
         <p>${message}</p>
