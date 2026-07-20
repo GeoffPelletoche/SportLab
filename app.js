@@ -161,13 +161,12 @@ async function init() {
       <p>Chargement...</p>
     `;
 
-    drawhunterPayload = await loadDrawHunterMatches();
-    frenchflairPayload = await loadFrenchFlairMatches();
+    const appData = await loadApplicationData();
 
-    const roi = getPortfolioSummary();
-    const analyses = getAnalyses();
-    const navigationHtml = renderNavigation(currentPage);
-    const bets = getAllBets();
+drawhunterPayload = appData.drawhunterPayload;
+frenchflairPayload = appData.frenchflairPayload;
+
+const navigationHtml = renderNavigation(currentPage);
 
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
