@@ -1,4 +1,4 @@
-import { CONFIG } from "./config/config.js";
+import { CONFIG } from "../config/config.js";
 
 export async function fetchFromWorker(path, params = {}) {
   const url = new URL(CONFIG.api.workerBaseUrl + path);
