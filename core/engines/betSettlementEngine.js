@@ -10,10 +10,9 @@ const WORKER_BASE_URL =
     "https://sportlab-api-bridge.geoffrey-pelletier.workers.dev";
 
 /**
- * Recherche les paris terminés susceptibles d'être réglés,
- * puis récupère leur résultat officiel.
- *
- * Cette version ne modifie pas encore betsStore.
+ * Recherche les paris susceptibles d'être réglés,
+ * récupère leur résultat officiel auprès du Worker,
+ * puis met à jour les paris lorsqu'un résultat définitif est disponible.
  */
 export async function settlePendingBets() {
     const bets = getBets();
