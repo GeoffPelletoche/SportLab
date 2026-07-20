@@ -1,6 +1,6 @@
-import { fetchUpcomingRugbyFixtures } from "../core/rugbyService.js";
-import { predictRugbyMatch } from "../core/rugbyPredictionEngine.js";
-import { getAnalysisForMatch } from "../core/analysisStore.js";
+import { fetchUpcomingRugbyFixtures } from "../core/api/rugbyService.js";
+import { predictRugbyMatch } from "../core/engines/rugbyPredictionEngine.js";
+import { getAnalysisForMatch } from "../core/stores/analysisStore.js";
 
 /**
  * SPORTLAB V3 — FRENCHFLAIR MODULE
