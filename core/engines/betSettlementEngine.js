@@ -1,7 +1,7 @@
 import {
     getBets,
     updateBetSettlement
-} from "Sportlab/core/stores/betsStore.js";
+} from "../stores/betsStore.js";
 
 /*
  * Remplace cette URL uniquement si l'adresse de ton Worker est différente.
