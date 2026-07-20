@@ -171,7 +171,7 @@ const navigationHtml = renderNavigation(currentPage);
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(roi),
+      portfolioHtml: renderPortfolio(appData.portfolio),
       journalHtml: renderJournal(analyses),
       activePage: currentPage,
       navigationHtml,
