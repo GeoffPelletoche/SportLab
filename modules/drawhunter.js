@@ -1,7 +1,7 @@
-import { fetchUpcomingFootballFixtures } from "../api/footballService.js";
-import { computeValue } from "../engines/valueEngine.js";
-import { CONFIG } from "../config/config.js";
-import { getBets } from "../stores/betsStore.js";
+import { fetchUpcomingFootballFixtures } from "../core/api/footballService.js";
+import { computeValue } from "../core/engines/valueEngine.js";
+import { CONFIG } from "../core/config/config.js";
+import { getBets } from "../core/stores/betsStore.js";
 
 /**
  * SPORTLAB V3 — DRAWHUNTER MODULE
