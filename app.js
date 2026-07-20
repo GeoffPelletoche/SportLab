@@ -184,9 +184,9 @@ async function init() {
   const settlement = await runAutomaticSettlement();
 
   console.log(
-    "[Settlement] Règlement automatique terminé :",
-    settlementReports
-  );
+  "[Settlement] Règlement automatique terminé :",
+  settlement.reports
+);
 
   const hasSettledBet = settlementReports.some(
     report => report.status === "SETTLED"
