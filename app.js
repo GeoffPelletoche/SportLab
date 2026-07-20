@@ -1,5 +1,4 @@
-import { loadDrawHunterMatches } from "./modules/drawhunter.js";
-import { loadFrenchFlairMatches } from "./modules/frenchflair.js";
+import { loadApplicationData } from "./services/appService.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
