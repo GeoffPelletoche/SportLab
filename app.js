@@ -78,7 +78,7 @@ async function runSettlementDiagnostics() {
 
 
 window.runSettlementDiagnostics = async function () {
-  const betsBefore = getBets();
+  const betsBefore = getAllBets();
 
   let reports = [];
   let globalError = null;
@@ -92,7 +92,7 @@ window.runSettlementDiagnostics = async function () {
         : String(error);
   }
 
-  const betsAfter = getBets();
+  const betsAfter = getAllBets();
 
   const diagnostic = {
     checkedAt: new Date().toISOString(),
@@ -165,10 +165,10 @@ async function init() {
     drawhunterPayload = await loadDrawHunterMatches();
     frenchflairPayload = await loadFrenchFlairMatches();
 
-    const roi = getROI();
+    const roi = getPortfolioSummary();
     const analyses = getAnalyses();
     const navigationHtml = renderNavigation(currentPage);
-    const bets = getBets();
+    const bets = getAllBets();
 
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
@@ -181,7 +181,7 @@ async function init() {
     });
 
     try {
-  const settlementReports = await settlePendingBets();
+  const settlement = await runAutomaticSettlement();
 
   console.log(
     "[Settlement] Règlement automatique terminé :",
@@ -196,11 +196,11 @@ async function init() {
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(getROI()),
+      portfolioHtml: renderPortfolio(getPortfolioSummary()),
       journalHtml: renderJournal(getAnalyses()),
       activePage: currentPage,
       navigationHtml: renderNavigation(currentPage),
-      betsHtml: renderBets(getBets())
+      betsHtml: renderBets(getAllBets())
     });
   }
 } catch (error) {
@@ -247,7 +247,7 @@ window.saveDrawHunterBet = function(index) {
     return;
   }
 
-  const saved = saveBet({
+  const saved = createBet({
   source: "DrawHunter",
   sport: "football",
   competition: match.competition || null,
@@ -678,7 +678,7 @@ if (!match?.id || !match?.date) {
   return;
 }
 
-  saveBet({
+  createBet({
   source: "FrenchFlair",
   sport: "rugby",
   competition: match.competition || null,
