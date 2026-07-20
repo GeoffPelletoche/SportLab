@@ -1,4 +1,4 @@
-import { CONFIG } from "./config/config.js";
+import { CONFIG } from "./core/config/config.js";
 import { fetchFromWorker, getDateRange } from "./api/apiClient.js";
 
 export async function fetchUpcomingFootballFixtures() {
