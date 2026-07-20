@@ -1,4 +1,4 @@
-import { getBets } from "./core/stores/betsStore.js";
+import { getBets } from "../stores/betsStore.js";
 
 /**
  * SPORTLAB V3 — ROI ENGINE
