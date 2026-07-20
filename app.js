@@ -175,7 +175,7 @@ const navigationHtml = renderNavigation(currentPage);
       journalHtml: renderJournal(appData.analyses),
       activePage: currentPage,
       navigationHtml,
-      betsHtml: renderBets(bets)
+      betsHtml: renderBets(appData.bets)
     });
 
     try {
