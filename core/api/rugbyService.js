@@ -1,4 +1,4 @@
-import { CONFIG } from "./config.js";
+import { CONFIG } from "./config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
 
 const HISTORY_LIMIT = 10;
