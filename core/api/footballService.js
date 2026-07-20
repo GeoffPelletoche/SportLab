@@ -1,5 +1,5 @@
-import { CONFIG } from "./core/config/config.js";
-import { fetchFromWorker, getDateRange } from "./api/apiClient.js";
+import { CONFIG } from "../config/config.js";
+import { fetchFromWorker, getDateRange } from "./apiClient.js";
 
 export async function fetchUpcomingFootballFixtures() {
   const range = getDateRange(CONFIG.analysisWindowDays);
