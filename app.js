@@ -172,7 +172,7 @@ const navigationHtml = renderNavigation(currentPage);
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
       portfolioHtml: renderPortfolio(appData.portfolio),
-      journalHtml: renderJournal(analyses),
+      journalHtml: renderJournal(appData.analyses),
       activePage: currentPage,
       navigationHtml,
       betsHtml: renderBets(bets)
