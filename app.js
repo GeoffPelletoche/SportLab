@@ -1,8 +1,21 @@
 import { loadDrawHunterMatches } from "./modules/drawhunter.js";
 import { loadFrenchFlairMatches } from "./modules/frenchflair.js";
-import { getROI } from "./core/engines/roiEngine.js";
-import { saveBet } from "./core/stores/betsStore.js";
+
 import { computeValue } from "./core/engines/valueEngine.js";
+
+import {
+  createBet,
+  getAllBets
+} from "./services/betService.js";
+
+import {
+  getPortfolioSummary
+} from "./services/portfolioService.js";
+
+import {
+  runAutomaticSettlement
+} from "./services/settlementService.js";
+
 import { saveAnalysis, getAnalysisForMatch } from "./core/stores/analysisStore.js";
 import { getAnalyses } from "./core/stores/analysisStore.js";
 import { renderJournal } from "./ui/views/journalView.js";
@@ -11,9 +24,7 @@ import { renderDrawHunter } from "./ui/views/drawhunterView.js";
 import { renderFrenchFlair } from "./ui/views/frenchflairView.js";
 import { renderPortfolio } from "./ui/views/portfolioView.js";
 import { renderNavigation } from "./ui/views/navigationView.js";
-import { getBets } from "./core/stores/betsStore.js";
 import { renderBets } from "./ui/views/betsView.js";
-import { settlePendingBets } from "./core/engines/betSettlementEngine.js";
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
