@@ -1,10 +1,11 @@
 // ui/views/journalView.js
 
 /**
- * SPORTLAB V6.3.1 — JOURNAL VIEW
+ * SPORTLAB V6.3.1
+ *
+ * JOURNAL VIEW
  *
  * Affichage uniquement.
- * Aucune logique métier.
  */
 
 function escapeHtml(value = "") {
@@ -16,126 +17,220 @@ function escapeHtml(value = "") {
         .replaceAll("'", "&#039;");
 }
 
-function badge(text, css) {
-    return `<span class="badge ${css}">${escapeHtml(text)}</span>`;
+function renderOptions(values, selected = "") {
+
+    return values.map(value => `
+
+        <option
+            value="${escapeHtml(value)}"
+            ${value === selected ? "selected" : ""}
+        >
+
+            ${escapeHtml(value)}
+
+        </option>
+
+    `).join("");
+
+}
+
+function renderBadge(text, css) {
+
+    return `
+        <span class="badge ${css}">
+            ${escapeHtml(text)}
+        </span>
+    `;
+
 }
 
 function renderCard(entry) {
 
     const decisionBadge =
         entry.decision === "VALUE"
-            ? badge("VALUE", "badge-success")
-            : badge("NO VALUE", "badge-neutral");
+            ? renderBadge("VALUE", "badge-success")
+            : renderBadge(
+                entry.decision || "Analyse",
+                "badge-neutral"
+            );
 
-    const resultBadge = badge(
-        entry.result || "PENDING",
-        `badge-${String(entry.result || "pending").toLowerCase()}`
-    );
+    const resultBadge =
+        renderBadge(
+            entry.result || "PENDING",
+            `badge-${String(
+                entry.result || "pending"
+            ).toLowerCase()}`
+        );
 
     return `
-    <article class="journal-card">
 
-        <div class="journal-header">
+<article class="journal-card">
 
-            <div>
+    <header class="journal-card-header">
 
-                <h3>
-                    ${escapeHtml(entry.match)}
-                </h3>
+        <div>
 
-                <p class="small">
-                    ${escapeHtml(entry.competition)}
-                </p>
+            <h3>
 
-            </div>
+                ${escapeHtml(entry.match)}
 
-            ${decisionBadge}
+            </h3>
 
-        </div>
+            <p class="small">
 
-        <div class="journal-grid">
+                ${escapeHtml(entry.competition)}
 
-            <div>
-
-                <span class="label">Sport</span>
-
-                <strong>${escapeHtml(entry.sport)}</strong>
-
-            </div>
-
-            <div>
-
-                <span class="label">Module</span>
-
-                <strong>${escapeHtml(entry.source)}</strong>
-
-            </div>
-
-            <div>
-
-                <span class="label">Probabilité</span>
-
-                <strong>${entry.probability}%</strong>
-
-            </div>
-
-            <div>
-
-                <span class="label">Value</span>
-
-                <strong>${entry.value}%</strong>
-
-            </div>
-
-            <div>
-
-                <span class="label">Confiance</span>
-
-                <strong>${entry.confidence}%</strong>
-
-            </div>
-
-            <div>
-
-                <span class="label">Parié</span>
-
-                <strong>${entry.placed ? "Oui" : "Non"}</strong>
-
-            </div>
-
-            <div>
-
-                <span class="label">Résultat</span>
-
-                ${resultBadge}
-
-            </div>
-
-            <div>
-
-                <span class="label">Profit</span>
-
-                <strong>${entry.profit} €</strong>
-
-            </div>
+            </p>
 
         </div>
 
-        <div class="journal-footer">
+        ${decisionBadge}
 
-            <span class="small">
+    </header>
 
-                ${escapeHtml(entry.date)}
+    <div class="journal-grid">
 
+        <div>
+
+            <span class="label">
+                Sport
             </span>
 
+            <strong>
+
+                ${escapeHtml(entry.sport)}
+
+            </strong>
+
         </div>
 
-    </article>
-    `;
+        <div>
+
+            <span class="label">
+                Module
+            </span>
+
+            <strong>
+
+                ${escapeHtml(entry.source)}
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span class="label">
+                Probabilité
+            </span>
+
+            <strong>
+
+                ${entry.probability} %
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span class="label">
+                Value
+            </span>
+
+            <strong>
+
+                ${entry.value} %
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span class="label">
+                Confiance
+            </span>
+
+            <strong>
+
+                ${entry.confidence} %
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span class="label">
+                Pari
+            </span>
+
+            <strong>
+
+                ${entry.placed ? "Oui" : "Non"}
+
+            </strong>
+
+        </div>
+
+        <div>
+
+            <span class="label">
+                Résultat
+            </span>
+
+            ${resultBadge}
+
+        </div>
+
+        <div>
+
+            <span class="label">
+                Profit
+            </span>
+
+            <strong>
+
+                ${entry.profit.toFixed(2)} €
+
+            </strong>
+
+        </div>
+
+    </div>
+
+    <footer class="journal-footer">
+
+        <span class="small">
+
+            ${escapeHtml(entry.date)}
+
+        </span>
+
+    </footer>
+
+</article>
+
+`;
+
 }
 
-export function renderJournal(entries = []) {
+export function renderJournal(journal) {
+
+    const {
+
+        entries = [],
+
+        options = {},
+
+        filters = {},
+
+        totalEntries = 0,
+
+        filteredEntries = 0
+
+    } = journal;
 
     return `
 
@@ -144,10 +239,17 @@ export function renderJournal(entries = []) {
     <header class="journal-toolbar">
 
         <input
+
             id="journal-search"
+
             class="journal-search"
+
             type="search"
-            placeholder="🔍 Rechercher une équipe, une compétition..."
+
+            value="${escapeHtml(filters.search)}"
+
+            placeholder="🔍 Rechercher..."
+
         >
 
         <div class="journal-filters">
@@ -158,13 +260,10 @@ export function renderJournal(entries = []) {
                     Tous les sports
                 </option>
 
-                <option>
-                    Football
-                </option>
-
-                <option>
-                    Rugby
-                </option>
+                ${renderOptions(
+                    options.sports || [],
+                    filters.sport
+                )}
 
             </select>
 
@@ -174,13 +273,36 @@ export function renderJournal(entries = []) {
                     Tous les modules
                 </option>
 
-                <option>
-                    DrawHunter
+                ${renderOptions(
+                    options.sources || [],
+                    filters.source
+                )}
+
+            </select>
+
+            <select id="filter-competition">
+
+                <option value="">
+                    Toutes les compétitions
                 </option>
 
-                <option>
-                    FrenchFlair
+                ${renderOptions(
+                    options.competitions || [],
+                    filters.competition
+                )}
+
+            </select>
+
+            <select id="filter-market">
+
+                <option value="">
+                    Tous les marchés
                 </option>
+
+                ${renderOptions(
+                    options.markets || [],
+                    filters.market
+                )}
 
             </select>
 
@@ -190,13 +312,10 @@ export function renderJournal(entries = []) {
                     Toutes les décisions
                 </option>
 
-                <option>
-                    VALUE
-                </option>
-
-                <option>
-                    NO VALUE
-                </option>
+                ${renderOptions(
+                    options.decisions || [],
+                    filters.decision
+                )}
 
             </select>
 
@@ -206,65 +325,69 @@ export function renderJournal(entries = []) {
                     Tous les résultats
                 </option>
 
-                <option>
-                    WON
-                </option>
-
-                <option>
-                    LOST
-                </option>
-
-                <option>
-                    PUSH
-                </option>
-
-                <option>
-                    PENDING
-                </option>
+                ${renderOptions(
+                    options.results || [],
+                    filters.result
+                )}
 
             </select>
 
             <select id="filter-sort">
 
-                <option value="date-desc">
-
+                <option
+                    value="date-desc"
+                    ${filters.sort === "date-desc" ? "selected" : ""}
+                >
                     Date ↓
-
                 </option>
 
-                <option value="date-asc">
-
+                <option
+                    value="date-asc"
+                    ${filters.sort === "date-asc" ? "selected" : ""}
+                >
                     Date ↑
-
                 </option>
 
-                <option value="confidence">
-
+                <option
+                    value="confidence"
+                    ${filters.sort === "confidence" ? "selected" : ""}
+                >
                     Confiance
-
                 </option>
 
-                <option value="probability">
-
+                <option
+                    value="probability"
+                    ${filters.sort === "probability" ? "selected" : ""}
+                >
                     Probabilité
-
                 </option>
 
-                <option value="value">
-
+                <option
+                    value="value"
+                    ${filters.sort === "value" ? "selected" : ""}
+                >
                     Value
-
                 </option>
 
-                <option value="profit">
-
+                <option
+                    value="profit"
+                    ${filters.sort === "profit" ? "selected" : ""}
+                >
                     Profit
-
                 </option>
 
             </select>
 
         </div>
+
+        <p class="small">
+
+            ${filteredEntries}
+            résultat(s)
+            sur
+            ${totalEntries}
+
+        </p>
 
     </header>
 
@@ -273,30 +396,31 @@ export function renderJournal(entries = []) {
         class="journal-list"
     >
 
-        ${
-            entries.length === 0
+        ${entries.length === 0
 
-                ? `
+            ? `
 
                 <div class="empty-state">
 
                     <h3>
-                        Aucune analyse disponible
+
+                        Aucune analyse trouvée
+
                     </h3>
 
                     <p>
 
-                        Le journal est vide.
+                        Essayez de modifier vos filtres.
 
                     </p>
 
                 </div>
 
-                `
+            `
 
-                : entries
-                    .map(renderCard)
-                    .join("")
+            : entries
+                .map(renderCard)
+                .join("")
         }
 
     </section>
@@ -304,4 +428,5 @@ export function renderJournal(entries = []) {
 </section>
 
 `;
+
 }
