@@ -521,3 +521,468 @@ body {
     border-radius: 22px;
   }
 }
+/* =========================================================
+   SPORTLAB V6.3.2 — DESIGN SYSTEM
+   ========================================================= */
+
+:root {
+  /* Couleurs principales */
+  --sl-bg: #06111f;
+  --sl-surface-1: rgba(16, 34, 56, 0.92);
+  --sl-surface-2: rgba(22, 45, 72, 0.94);
+  --sl-surface-3: rgba(31, 58, 89, 0.96);
+
+  --sl-border: rgba(128, 180, 230, 0.22);
+  --sl-border-strong: rgba(128, 190, 255, 0.42);
+
+  --sl-text: #f5f8ff;
+  --sl-text-muted: #9fb1c8;
+  --sl-text-soft: #c9d5e5;
+
+  --sl-primary: #58b8ff;
+  --sl-secondary: #9c8cff;
+
+  --sl-success: #45d695;
+  --sl-success-soft: rgba(69, 214, 149, 0.13);
+
+  --sl-danger: #ff6978;
+  --sl-danger-soft: rgba(255, 105, 120, 0.13);
+
+  --sl-warning: #ffca62;
+  --sl-warning-soft: rgba(255, 202, 98, 0.14);
+
+  --sl-info: #69bfff;
+  --sl-info-soft: rgba(105, 191, 255, 0.14);
+
+  --sl-neutral: #9aaec6;
+  --sl-neutral-soft: rgba(154, 174, 198, 0.13);
+
+  /* Espacements */
+  --sl-space-1: 4px;
+  --sl-space-2: 8px;
+  --sl-space-3: 12px;
+  --sl-space-4: 16px;
+  --sl-space-5: 20px;
+  --sl-space-6: 24px;
+  --sl-space-7: 32px;
+
+  /* Rayons */
+  --sl-radius-sm: 12px;
+  --sl-radius-md: 18px;
+  --sl-radius-lg: 24px;
+  --sl-radius-pill: 999px;
+
+  /* Ombres */
+  --sl-shadow-sm:
+    0 8px 22px rgba(0, 0, 0, 0.18);
+
+  --sl-shadow-md:
+    0 16px 36px rgba(0, 0, 0, 0.24);
+
+  --sl-shadow-accent:
+    0 12px 30px rgba(74, 159, 255, 0.22);
+
+  /* Transitions */
+  --sl-transition:
+    160ms ease;
+}
+
+/* =========================================================
+   TYPOGRAPHIE
+   ========================================================= */
+
+.sl-page-title {
+  margin: 0;
+  color: var(--sl-text);
+  font-size: clamp(1.75rem, 7vw, 2.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.sl-section-title {
+  margin: 0;
+  color: var(--sl-text);
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.sl-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--sl-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.sl-value {
+  color: var(--sl-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.sl-muted {
+  color: var(--sl-text-muted);
+}
+
+.sl-positive {
+  color: var(--sl-success);
+}
+
+.sl-negative {
+  color: var(--sl-danger);
+}
+
+.sl-warning-text {
+  color: var(--sl-warning);
+}
+
+/* =========================================================
+   EN-TÊTES DE PAGE ET DE SECTION
+   ========================================================= */
+
+.sl-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sl-space-4);
+  margin-bottom: var(--sl-space-5);
+}
+
+.sl-page-header-content {
+  min-width: 0;
+}
+
+.sl-page-header p {
+  margin: 8px 0 0;
+  color: var(--sl-text-muted);
+}
+
+.sl-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sl-space-3);
+  margin: var(--sl-space-6) 0 var(--sl-space-4);
+}
+
+/* =========================================================
+   PANELS ET CARTES
+   ========================================================= */
+
+.sl-panel {
+  padding: var(--sl-space-5);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-lg);
+
+  background:
+    linear-gradient(
+      145deg,
+      var(--sl-surface-2),
+      var(--sl-surface-1)
+    );
+
+  box-shadow: var(--sl-shadow-sm);
+}
+
+.sl-card {
+  padding: var(--sl-space-4);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-md);
+  color: var(--sl-text);
+  background: var(--sl-surface-1);
+  box-shadow: var(--sl-shadow-sm);
+
+  transition:
+    transform var(--sl-transition),
+    border-color var(--sl-transition),
+    background var(--sl-transition);
+}
+
+.sl-card:active {
+  transform: scale(0.992);
+}
+
+.sl-card-success {
+  border-color: rgba(69, 214, 149, 0.32);
+  background:
+    linear-gradient(
+      145deg,
+      var(--sl-success-soft),
+      var(--sl-surface-1)
+    );
+}
+
+.sl-card-danger {
+  border-color: rgba(255, 105, 120, 0.30);
+  background:
+    linear-gradient(
+      145deg,
+      var(--sl-danger-soft),
+      var(--sl-surface-1)
+    );
+}
+
+.sl-card-warning {
+  border-color: rgba(255, 202, 98, 0.30);
+  background:
+    linear-gradient(
+      145deg,
+      var(--sl-warning-soft),
+      var(--sl-surface-1)
+    );
+}
+
+/* =========================================================
+   KPI
+   ========================================================= */
+
+.sl-kpi-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: var(--sl-space-3);
+}
+
+.sl-kpi-card {
+  min-width: 0;
+  padding: var(--sl-space-4);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-md);
+  background:
+    linear-gradient(
+      145deg,
+      var(--sl-surface-2),
+      var(--sl-surface-1)
+    );
+  box-shadow: var(--sl-shadow-sm);
+}
+
+.sl-kpi-value {
+  display: block;
+  overflow: hidden;
+  color: var(--sl-text);
+  font-size: clamp(1.35rem, 6vw, 2rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sl-kpi-label {
+  display: block;
+  margin-top: 7px;
+  color: var(--sl-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+/* =========================================================
+   BADGES
+   ========================================================= */
+
+.sl-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  min-height: 28px;
+  padding: 5px 10px;
+
+  border: 1px solid transparent;
+  border-radius: var(--sl-radius-pill);
+
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.sl-badge-success {
+  color: var(--sl-success);
+  border-color: rgba(69, 214, 149, 0.34);
+  background: var(--sl-success-soft);
+}
+
+.sl-badge-danger {
+  color: var(--sl-danger);
+  border-color: rgba(255, 105, 120, 0.34);
+  background: var(--sl-danger-soft);
+}
+
+.sl-badge-warning {
+  color: var(--sl-warning);
+  border-color: rgba(255, 202, 98, 0.34);
+  background: var(--sl-warning-soft);
+}
+
+.sl-badge-info {
+  color: var(--sl-info);
+  border-color: rgba(105, 191, 255, 0.34);
+  background: var(--sl-info-soft);
+}
+
+.sl-badge-neutral {
+  color: var(--sl-neutral);
+  border-color: rgba(154, 174, 198, 0.28);
+  background: var(--sl-neutral-soft);
+}
+
+/* =========================================================
+   FORMULAIRES ET FILTRES
+   ========================================================= */
+
+.sl-input,
+.sl-select {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+
+  padding: 10px 13px;
+
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-sm);
+
+  color: var(--sl-text);
+  background: rgba(7, 20, 35, 0.82);
+
+  font: inherit;
+  font-size: 0.92rem;
+
+  outline: none;
+
+  transition:
+    border-color var(--sl-transition),
+    box-shadow var(--sl-transition);
+}
+
+.sl-input::placeholder {
+  color: #768ca7;
+}
+
+.sl-input:focus,
+.sl-select:focus {
+  border-color: var(--sl-primary);
+  box-shadow:
+    0 0 0 3px rgba(88, 184, 255, 0.14);
+}
+
+.sl-filter-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: var(--sl-space-3);
+}
+
+/* =========================================================
+   BOUTONS
+   ========================================================= */
+
+.sl-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  min-height: 44px;
+  padding: 10px 16px;
+
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-pill);
+
+  color: var(--sl-text);
+  background: var(--sl-surface-2);
+
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform var(--sl-transition),
+    border-color var(--sl-transition),
+    background var(--sl-transition);
+}
+
+.sl-button:active {
+  transform: scale(0.97);
+}
+
+.sl-button-primary {
+  color: #06111f;
+  border-color: transparent;
+  background:
+    linear-gradient(
+      135deg,
+      var(--sl-primary),
+      var(--sl-secondary)
+    );
+  box-shadow: var(--sl-shadow-accent);
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.sl-empty-state {
+  padding: 42px 20px;
+  border: 1px dashed var(--sl-border-strong);
+  border-radius: var(--sl-radius-lg);
+  text-align: center;
+  background: rgba(15, 33, 55, 0.5);
+}
+
+.sl-empty-state-icon {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 2.25rem;
+}
+
+.sl-empty-state h3 {
+  margin: 0 0 8px;
+  color: var(--sl-text);
+}
+
+.sl-empty-state p {
+  margin: 0;
+  color: var(--sl-text-muted);
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 760px) {
+  .sl-kpi-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .sl-filter-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .sl-page-header {
+    display: block;
+  }
+
+  .sl-kpi-card {
+    padding: 14px;
+  }
+
+  .sl-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sl-panel {
+    padding: 16px;
+    border-radius: 20px;
+  }
+}
