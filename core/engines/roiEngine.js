@@ -1,111 +1,198 @@
 import { getBets } from "../stores/betsStore.js";
 
 /**
- * SPORTLAB V3 — ROI ENGINE
- * Rôle unique :
- * calculer les statistiques du portefeuille.
+ * SPORTLAB V6.2 — ROI ENGINE
+ *
+ * Source unique de calcul des performances financières.
+ *
+ * Résultats reconnus :
+ * - WON
+ * - LOST
+ * - PUSH
+ * - PENDING
  */
 
-export function getROI() {
-  const bets = getBets();
+function toNumber(value) {
+  const number = Number(value);
 
-  const placedBets = bets.filter(
-    bet => bet.placed === true
+  return Number.isFinite(number)
+    ? number
+    : 0;
+}
+
+function normalizeResult(value) {
+  const result = String(value ?? "")
+    .trim()
+    .toUpperCase();
+
+  /*
+   * Compatibilité avec d’anciennes données éventuelles.
+   */
+  if (result === "WIN") {
+    return "WON";
+  }
+
+  if (result === "LOSS") {
+    return "LOST";
+  }
+
+  return result || "PENDING";
+}
+
+function round(value) {
+  return Math.round(
+    (toNumber(value) + Number.EPSILON) * 100
+  ) / 100;
+}
+
+/**
+ * Calcule le ROI pour une liste de paris.
+ *
+ * Les paris en attente ne sont pas inclus dans :
+ * - la mise réglée ;
+ * - le profit ;
+ * - le ROI.
+ */
+export function calculateROI(bets = []) {
+  const safeBets =
+    Array.isArray(bets)
+      ? bets
+      : [];
+
+  const placedBets = safeBets.filter(
+    bet => bet?.placed === true
   );
 
-  let invested = 0;
+  let settledStake = 0;
+  let pendingStake = 0;
   let profit = 0;
+
   let wins = 0;
   let losses = 0;
   let pushes = 0;
   let pending = 0;
 
   placedBets.forEach(bet => {
-    const stake = Number(bet.stake || 0);
-    const odds = Number(bet.odds || 0);
+    const stake = Math.max(
+      toNumber(bet?.stake),
+      0
+    );
 
-    invested += stake;
+    const odds = Math.max(
+      toNumber(bet?.odds),
+      0
+    );
 
-    if (bet.result === "WON") {
+    const result =
+      normalizeResult(
+        bet?.result || bet?.finalStatus
+      );
+
+    if (result === "WON") {
+      settledStake += stake;
       profit += stake * (odds - 1);
       wins++;
-    } else if (bet.result === "LOST") {
+      return;
+    }
+
+    if (result === "LOST") {
+      settledStake += stake;
       profit -= stake;
       losses++;
-    } else if (bet.result === "PUSH") {
-      pushes++;
-    } else if (bet.result === "PENDING") {
-      pending++;
+      return;
     }
+
+    if (result === "PUSH") {
+      settledStake += stake;
+      pushes++;
+      return;
+    }
+
+    pendingStake += stake;
+    pending++;
   });
 
+  const settledBets =
+    wins + losses + pushes;
+
+  const decisiveBets =
+    wins + losses;
+
   const roi =
-    invested > 0
-      ? (profit / invested) * 100
+    settledStake > 0
+      ? (profit / settledStake) * 100
+      : 0;
+
+  const winRate =
+    decisiveBets > 0
+      ? (wins / decisiveBets) * 100
       : 0;
 
   return {
-    totalBets: bets.length,
-    placedBets: placedBets.length,
-    nonPlacedBets: bets.filter(
-      bet => bet.placed === false
-    ).length,
+    totalBets:
+      safeBets.length,
+
+    placedBets:
+      placedBets.length,
+
+    nonPlacedBets:
+      safeBets.filter(
+        bet => bet?.placed !== true
+      ).length,
+
+    settledBets,
+
     wins,
     losses,
     pushes,
     pending,
-    invested: round(invested),
-    profit: round(profit),
-    roi: round(roi)
+
+    settledStake:
+      round(settledStake),
+
+    /*
+     * Conservé pour compatibilité avec portfolioService.
+     */
+    invested:
+      round(settledStake),
+
+    pendingStake:
+      round(pendingStake),
+
+    totalCommitted:
+      round(
+        settledStake + pendingStake
+      ),
+
+    profit:
+      round(profit),
+
+    roi:
+      round(roi),
+
+    winRate:
+      round(winRate)
   };
+}
+
+export function getROI() {
+  return calculateROI(
+    getBets()
+  );
 }
 
 export function getROIBySource(source) {
-  const bets = getBets().filter(bet => bet.source === source);
+  const normalizedSource =
+    String(source ?? "")
+      .trim()
+      .toUpperCase();
+
+  const bets = getBets().filter(
+    bet =>
+      String(bet?.source ?? "")
+        .trim()
+        .toUpperCase() === normalizedSource
+  );
+
   return calculateROI(bets);
-}
-
-function calculateROI(bets) {
-  const placedBets = bets.filter(bet => bet.placed === true);
-
-  let invested = 0;
-  let profit = 0;
-  let wins = 0;
-  let losses = 0;
-  let pending = 0;
-
-  placedBets.forEach(bet => {
-    invested += Number(bet.stake || 0);
-
-    if (bet.result === "WIN") {
-      profit += Number(bet.stake) * (Number(bet.odds) - 1);
-      wins++;
-    }
-
-    if (bet.result === "LOSS") {
-      profit -= Number(bet.stake);
-      losses++;
-    }
-
-    if (bet.result === "PENDING") {
-      pending++;
-    }
-  });
-
-  const roi = invested > 0 ? (profit / invested) * 100 : 0;
-
-  return {
-    totalBets: bets.length,
-    placedBets: placedBets.length,
-    wins,
-    losses,
-    pending,
-    invested: round(invested),
-    profit: round(profit),
-    roi: round(roi)
-  };
-}
-
-function round(value) {
-  return Math.round(value * 100) / 100;
 }
