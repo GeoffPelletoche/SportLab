@@ -15,135 +15,14 @@ import { saveAnalysis, getAnalysisForMatch } from "./core/stores/analysisStore.j
 
 import { renderApplication } from "./services/renderService.js";
 
+import {
+  runSettlementDiagnostics
+} from "./debug/settlementDiagnostics.js";
+
 let drawhunterPayload = null;
 let frenchflairPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
-
-async function runSettlementDiagnostics() {
-  try {
-    const settlement = await runAutomaticSettlement();
-    const reports = settlement.reports;
-
-    localStorage.setItem(
-      "sportlab_settlement_debug",
-      JSON.stringify(
-        {
-          checkedAt: new Date().toISOString(),
-          reports
-        },
-        null,
-        2
-      )
-    );
-
-    console.log(
-      "[Settlement] Rapport complet :",
-      reports
-    );
-
-    return reports;
-  } catch (error) {
-    const debugError = {
-      checkedAt: new Date().toISOString(),
-      error:
-        error instanceof Error
-          ? error.message
-          : String(error)
-    };
-
-    localStorage.setItem(
-      "sportlab_settlement_debug",
-      JSON.stringify(debugError, null, 2)
-    );
-
-    console.error(
-      "[Settlement] Erreur globale :",
-      error
-    );
-
-    return [];
-  }
-}
-
-
-window.runSettlementDiagnostics = async function () {
-  const betsBefore = getAllBets();
-
-  let reports = [];
-  let globalError = null;
-
-  try {
-    const settlement = await runAutomaticSettlement();
-    reports = settlement.reports;
-    
-  } catch (error) {
-    globalError =
-      error instanceof Error
-        ? error.message
-        : String(error);
-  }
-
-  const betsAfter = getAllBets();
-
-  const diagnostic = {
-    checkedAt: new Date().toISOString(),
-
-    location: {
-      origin: window.location.origin,
-      pathname: window.location.pathname,
-      displayMode: window.matchMedia(
-        "(display-mode: standalone)"
-      ).matches
-        ? "standalone"
-        : "browser"
-    },
-
-    betsBefore: betsBefore.map(bet => ({
-      id: bet.id,
-      match: bet.match,
-      matchId: bet.matchId,
-      matchDate: bet.matchDate,
-      sport: bet.sport,
-      market: bet.market,
-      line: bet.line,
-      result: bet.result,
-      placed: bet.placed
-    })),
-
-    reports,
-
-    betsAfter: betsAfter.map(bet => ({
-      id: bet.id,
-      match: bet.match,
-      result: bet.result,
-      finalStatus: bet.finalStatus,
-      finalHomePoints: bet.finalHomePoints,
-      finalAwayPoints: bet.finalAwayPoints,
-      finalTotalPoints: bet.finalTotalPoints
-    })),
-
-    globalError
-  };
-
-  localStorage.setItem(
-    "sportlab_settlement_debug",
-    JSON.stringify(diagnostic)
-  );
-
-  const debugElement =
-    document.getElementById("settlement-debug");
-
-  if (debugElement) {
-    debugElement.textContent = JSON.stringify(
-      diagnostic,
-      null,
-      2
-    );
-  }
-
-  return diagnostic;
-};
 
 async function init() {
   const app = document.getElementById("app");
