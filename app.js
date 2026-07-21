@@ -189,8 +189,7 @@ frenchflairPayload = appData.frenchflairPayload;
         currentPage
     });
 }
-      }
-    } catch (error) {
+   } catch (error) {
       console.error(
         "[Settlement] Échec du règlement automatique :",
         error
