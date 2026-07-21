@@ -8,12 +8,12 @@ import {
 } from "./services/betService.js";
 
 import {
-  getPortfolioSummary
-} from "./services/portfolioService.js";
-
-import {
   runAutomaticSettlement
 } from "./services/settlementService.js";
+
+import {
+    getDashboardData
+} from "./services/dashboardService.js";
 
 import { saveAnalysis, getAnalysisForMatch } from "./core/stores/analysisStore.js";
 import { getAnalyses } from "./core/stores/analysisStore.js";
@@ -26,7 +26,7 @@ let currentPage = "home";
 
 async function runSettlementDiagnostics() {
   try {
-    const reports = await settlePendingBets();
+    const settlement = await runAutomaticSettlement();
 
     localStorage.setItem(
       "sportlab_settlement_debug",
@@ -77,7 +77,7 @@ window.runSettlementDiagnostics = async function () {
   let globalError = null;
 
   try {
-    reports = await settlePendingBets();
+    const reports = settlement.reports;
   } catch (error) {
     globalError =
       error instanceof Error
@@ -160,8 +160,6 @@ async function init() {
 drawhunterPayload = appData.drawhunterPayload;
 frenchflairPayload = appData.frenchflairPayload;
 
-const navigationHtml = renderNavigation(currentPage);
-
     renderApplication(app, {
   ...appData,
   currentPage
@@ -178,16 +176,20 @@ const navigationHtml = renderNavigation(currentPage);
       const hasSettledBet = settlement.settledCount > 0;
 
       if (hasSettledBet) {
-        renderApplication(app, {
-  drawhunterPayload,
-  frenchflairPayload,
+    const refreshedData =
+        await loadApplicationData();
 
-  dashboard: getDashboardData(),
+    drawhunterPayload =
+        refreshedData.drawhunterPayload;
 
-  analyses: getAnalyses(),
+    frenchflairPayload =
+        refreshedData.frenchflairPayload;
 
-  currentPage
-});
+    renderApplication(app, {
+        ...refreshedData,
+        currentPage
+    });
+}
       }
     } catch (error) {
       console.error(
