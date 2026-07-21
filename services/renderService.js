@@ -17,9 +17,14 @@ export function renderApplication(app, data) {
       data.frenchflairPayload
     ),
 
-    portfolioHtml: renderPortfolio(
-      data.dashboard.portfolio
-    ),
+    portfolioHtml:
+  renderPortfolio({
+    summary:
+      data.dashboard.portfolio,
+
+    statistics:
+      data.statistics
+  }),
 
     journalHtml: renderJournal(
       data.analyses
