@@ -24,7 +24,7 @@ export async function loadApplicationData() {
 
     dashboard: getDashboardData(),
 
-    analyses: getAnalyses()
-    diagnostic: getSettlementDiagnostic(),
+    analyses: getAnalyses(),
+    diagnostic: getSettlementDiagnostic()
   };
 }
