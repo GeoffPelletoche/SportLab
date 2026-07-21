@@ -7,6 +7,8 @@ import { getDashboardData } from "./dashboardService.js";
 
 import { getAnalyses } from "../core/stores/analysisStore.js";
 
+import { getSettlementDiagnostic} from "./diagnosticService.js";
+
 export async function loadApplicationData() {
   const [
     drawhunterPayload,
@@ -23,5 +25,6 @@ export async function loadApplicationData() {
     dashboard: getDashboardData(),
 
     analyses: getAnalyses()
+    diagnostic: getSettlementDiagnostic(),
   };
 }
