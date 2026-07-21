@@ -1,47 +1,45 @@
 // services/dashboardService.js
 
-import {
-    getAllBets,
-    getPlacedBets,
-    getPendingBets,
-    getSettledBets
-} from "./betService.js";
+import { getAllBets } from "./betService.js";
+import { getPortfolioSummary } from "./portfolioService.js";
 
-import {
-    getPortfolioSummary
-} from "./portfolioService.js";
+function normalizeResult(result) {
+  return String(result || "")
+    .trim()
+    .toUpperCase();
+}
 
 export function getDashboardData() {
-    const bets = getAllBets();
+  const bets = getAllBets();
 
-    const placedBets = bets.filter(
-        bet => bet.placed === true
-    );
+  const placedBets = bets.filter(
+    bet => bet?.placed === true
+  );
 
-    const pendingBets = placedBets.filter(
-        bet => bet.result === "PENDING"
-    );
+  const pendingBets = placedBets.filter(
+    bet => normalizeResult(bet.result) === "PENDING"
+  );
 
-    const settledBets = placedBets.filter(
-        bet =>
-            bet.result === "WON" ||
-            bet.result === "LOST" ||
-            bet.result === "PUSH"
-    );
+  const settledBets = placedBets.filter(bet => {
+    const result = normalizeResult(bet.result);
 
-    return {
-        bets,
-        placedBets,
-        pendingBets,
-        settledBets,
+    return [
+      "WON",
+      "LOST",
+      "PUSH"
+    ].includes(result);
+  });
 
-        portfolio: getPortfolioSummary(),
+  return {
+    bets,
 
-        counters: {
-            total: bets.length,
-            placed: placedBets.length,
-            pending: pendingBets.length,
-            settled: settledBets.length
-        }
-    };
+    portfolio: getPortfolioSummary(),
+
+    counters: {
+      total: bets.length,
+      placed: placedBets.length,
+      pending: pendingBets.length,
+      settled: settledBets.length
+    }
+  };
 }
