@@ -9,6 +9,7 @@ export function renderNavigation(active = "home") {
       ${navButton("journal", "📒 Journal", active)}
       ${navButton("bets", "🎯 Paris", active)}
       ${navButton("portfolio", "💼 Portfolio", active)}
+      ${navButton("diagnostics", "🩺 Diagnostics", active)}
     </nav>
   `;
 }
