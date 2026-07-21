@@ -1,51 +1,64 @@
-import {
-  loadDrawHunterMatches
-} from "../modules/drawhunter.js";
+// services/appService.js
 
-import {
-  loadFrenchFlairMatches
-} from "../modules/frenchflair.js";
+import { getDashboardData } from "./dashboardService.js";
+import { getAnalyses } from "./analysisService.js";
+import { getJournalData } from "./journalService.js";
+import { getAdvancedStatistics } from "./statisticsService.js";
+import { getSettlementDiagnostic } from "./diagnosticService.js";
 
-import {
-  getDashboardData
-} from "./dashboardService.js";
+import { getDrawHunterPayload } from "./drawHunterService.js";
+import { getFrenchFlairPayload } from "./frenchFlairService.js";
 
-import {
-  getSettlementDiagnostic
-} from "./diagnosticService.js";
+/**
+ * SPORTLAB V6.3.1
+ *
+ * Point d'entrée unique des données de l'application.
+ */
 
-import {
-  getAnalyses
-} from "../core/stores/analysisStore.js";
+export function loadApplicationData() {
 
-import {
-  getAdvancedStatistics
-} from "./statisticsService.js";
+    return {
 
-export async function loadApplicationData() {
-  const [
-    drawhunterPayload,
-    frenchflairPayload
-  ] = await Promise.all([
-    loadDrawHunterMatches(),
-    loadFrenchFlairMatches()
-  ]);
+        /*
+         * Tableau de bord
+         */
+        dashboard:
+            getDashboardData(),
 
-  return {
-    drawhunterPayload,
-    frenchflairPayload,
+        /*
+         * Analyses brutes
+         */
+        analyses:
+            getAnalyses(),
 
-    dashboard:
-      getDashboardData(),
+        /*
+         * Journal intelligent
+         */
+        journal:
+            getJournalData(),
 
-    analyses:
-      getAnalyses(),
+        /*
+         * Statistiques avancées
+         */
+        statistics:
+            getAdvancedStatistics(),
 
-    diagnostic:
-      getSettlementDiagnostic(),
-      
-    statistics:
-     getAdvancedStatistics()
-       
-  };
+        /*
+         * Diagnostics
+         */
+        diagnostic:
+            getSettlementDiagnostic(),
+
+        /*
+         * Payload DrawHunter
+         */
+        drawhunterPayload:
+            getDrawHunterPayload(),
+
+        /*
+         * Payload FrenchFlair
+         */
+        frenchflairPayload:
+            getFrenchFlairPayload()
+    };
 }
