@@ -1,74 +1,97 @@
 // services/renderService.js
 
-import { renderDashboard } from "../ui/views/dashboardView.js";
-import { renderJournal } from "../ui/views/journalView.js";
-import { renderPortfolio } from "../ui/views/portfolioView.js";
-import { renderDiagnostics } from "../ui/views/diagnosticsView.js";
+import {
+  renderDashboard
+} from "../ui/views/dashboardView.js";
+
+import {
+  renderNavigation
+} from "../ui/views/navigationView.js";
+
+import {
+  renderDrawHunter
+} from "../ui/views/drawhunterView.js";
+
+import {
+  renderFrenchFlair
+} from "../ui/views/frenchflairView.js";
+
+import {
+  renderJournal
+} from "../ui/views/journalView.js";
+
+import {
+  renderBets
+} from "../ui/views/betsView.js";
+
+import {
+  renderPortfolio
+} from "../ui/views/portfolioView.js";
+
+import {
+  renderDiagnostics
+} from "../ui/views/diagnosticsView.js";
 
 /**
  * SPORTLAB V6.3.1
  *
  * Render central de l'application.
  *
- * Aucune logique métier.
- * Aucune récupération de données.
- *
- * Il distribue simplement les données
- * vers les vues.
+ * Responsabilité :
+ * - construire les différentes vues ;
+ * - transmettre leur HTML à dashboardView ;
+ * - ne contenir aucune logique métier.
  */
+export function renderApplication(app, data = {}) {
+  const activePage =
+    data.currentPage || "home";
 
-export function renderApplication(app, data) {
+  const navigationHtml =
+    renderNavigation(activePage);
 
-    const page =
-        data.currentPage ?? "dashboard";
+  const drawhunterHtml =
+    renderDrawHunter(
+      data.drawhunterPayload
+    );
 
-    switch (page) {
+  const frenchflairHtml =
+    renderFrenchFlair(
+      data.frenchflairPayload
+    );
 
-        case "dashboard":
+  const journalHtml =
+    renderJournal(
+      data.journal
+    );
 
-            app.innerHTML =
-                renderDashboard(
-                    data.dashboard
-                );
+  const betsHtml =
+    renderBets(
+      data.dashboard?.bets || []
+    );
 
-            break;
+  const portfolioHtml =
+    renderPortfolio({
+      summary:
+        data.dashboard?.portfolio || {},
 
-        case "journal":
+      statistics:
+        data.statistics || {}
+    });
 
-            app.innerHTML =
-                renderJournal(
-                    data.journal
-                );
+  const diagnosticsHtml =
+    renderDiagnostics(
+      data.diagnostic
+    );
 
-            break;
-
-        case "portfolio":
-
-            app.innerHTML =
-                renderPortfolio({
-                    summary:
-                        data.dashboard.portfolio,
-
-                    statistics:
-                        data.statistics
-                });
-
-            break;
-
-        case "diagnostics":
-
-            app.innerHTML =
-                renderDiagnostics(
-                    data.diagnostic
-                );
-
-            break;
-
-        default:
-
-            app.innerHTML =
-                renderDashboard(
-                    data.dashboard
-                );
-    }
+  app.innerHTML =
+    renderDashboard({
+      activePage,
+      navigationHtml,
+      drawhunterHtml,
+      frenchflairHtml,
+      journalHtml,
+      betsHtml,
+      portfolioHtml,
+      diagnosticsHtml
+    });
 }
