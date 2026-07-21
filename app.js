@@ -162,19 +162,10 @@ frenchflairPayload = appData.frenchflairPayload;
 
 const navigationHtml = renderNavigation(currentPage);
 
-    app.innerHTML = renderDashboard({
-      drawhunterHtml: renderDrawHunter(drawhunterPayload),
-      frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(
-  appData.dashboard.portfolio
-),
-      journalHtml: renderJournal(appData.analyses),
-      activePage: currentPage,
-      navigationHtml,
-      betsHtml: renderBets(
-  appData.dashboard.bets
-)
-    });
+    renderApplication(app, {
+  ...appData,
+  currentPage
+});
 
     try {
       const settlement = await runAutomaticSettlement();
@@ -187,23 +178,16 @@ const navigationHtml = renderNavigation(currentPage);
       const hasSettledBet = settlement.settledCount > 0;
 
       if (hasSettledBet) {
-        app.innerHTML = renderDashboard({
-          drawhunterHtml: renderDrawHunter(drawhunterPayload),
-          frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-          portfolioHtml: renderPortfolio(
-            getPortfolioSummary()
-          ),
-          journalHtml: renderJournal(
-            getAnalyses()
-          ),
-          activePage: currentPage,
-          navigationHtml: renderNavigation(
-            currentPage
-          ),
-          betsHtml: renderBets(
-            getAllBets()
-          )
-        });
+        renderApplication(app, {
+  drawhunterPayload,
+  frenchflairPayload,
+
+  dashboard: getDashboardData(),
+
+  analyses: getAnalyses(),
+
+  currentPage
+});
       }
     } catch (error) {
       console.error(
