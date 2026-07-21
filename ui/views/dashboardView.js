@@ -44,7 +44,16 @@ export function renderDashboard({
         </section>
       `;
       break;
-
+      
+    case "diagnostics":
+  content = `
+    <section class="card">
+      <h2>🩺 Diagnostics</h2>
+      ${diagnosticsHtml}
+    </section>
+  `;
+  break;
+      
     case "home":
     default:
       content = `
