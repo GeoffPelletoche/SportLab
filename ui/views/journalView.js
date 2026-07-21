@@ -1,91 +1,307 @@
+// ui/views/journalView.js
+
 /**
- * SPORTLAB V3
- * Journal des analyses
+ * SPORTLAB V6.3.1 — JOURNAL VIEW
+ *
+ * Affichage uniquement.
+ * Aucune logique métier.
  */
 
-export function renderJournal(analyses = []) {
-  if (!analyses.length) {
+function escapeHtml(value = "") {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+function badge(text, css) {
+    return `<span class="badge ${css}">${escapeHtml(text)}</span>`;
+}
+
+function renderCard(entry) {
+
+    const decisionBadge =
+        entry.decision === "VALUE"
+            ? badge("VALUE", "badge-success")
+            : badge("NO VALUE", "badge-neutral");
+
+    const resultBadge = badge(
+        entry.result || "PENDING",
+        `badge-${String(entry.result || "pending").toLowerCase()}`
+    );
+
     return `
-        <h2>📒 Journal</h2>
-        <p class="small">Aucune analyse sauvegardée.</p>
+    <article class="journal-card">
+
+        <div class="journal-header">
+
+            <div>
+
+                <h3>
+                    ${escapeHtml(entry.match)}
+                </h3>
+
+                <p class="small">
+                    ${escapeHtml(entry.competition)}
+                </p>
+
+            </div>
+
+            ${decisionBadge}
+
+        </div>
+
+        <div class="journal-grid">
+
+            <div>
+
+                <span class="label">Sport</span>
+
+                <strong>${escapeHtml(entry.sport)}</strong>
+
+            </div>
+
+            <div>
+
+                <span class="label">Module</span>
+
+                <strong>${escapeHtml(entry.source)}</strong>
+
+            </div>
+
+            <div>
+
+                <span class="label">Probabilité</span>
+
+                <strong>${entry.probability}%</strong>
+
+            </div>
+
+            <div>
+
+                <span class="label">Value</span>
+
+                <strong>${entry.value}%</strong>
+
+            </div>
+
+            <div>
+
+                <span class="label">Confiance</span>
+
+                <strong>${entry.confidence}%</strong>
+
+            </div>
+
+            <div>
+
+                <span class="label">Parié</span>
+
+                <strong>${entry.placed ? "Oui" : "Non"}</strong>
+
+            </div>
+
+            <div>
+
+                <span class="label">Résultat</span>
+
+                ${resultBadge}
+
+            </div>
+
+            <div>
+
+                <span class="label">Profit</span>
+
+                <strong>${entry.profit} €</strong>
+
+            </div>
+
+        </div>
+
+        <div class="journal-footer">
+
+            <span class="small">
+
+                ${escapeHtml(entry.date)}
+
+            </span>
+
+        </div>
+
+    </article>
     `;
-  }
-
-  const sorted = [...analyses].sort(
-    (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
-  );
-
-  return `
-      <h2>📒 Journal</h2>
-
-      ${sorted.map(renderAnalysis).join("")}
-  `;
 }
 
-function renderAnalysis(a) {
-  const decision = normalizeDecision(a);
-  const badge = decision === "VALUE" ? "badge-value" : "badge-no";
+export function renderJournal(entries = []) {
 
-  return `
-    <div class="journal-item">
+    return `
 
-      <p>
-        ${sportIcon(a.sport)}
-        <strong>${a.match}</strong>
-      </p>
+<section class="journal-page">
 
-      <p class="small">
-  ${a.market}${a.line ? ` ${a.line}` : ""}
-</p>
+    <header class="journal-toolbar">
 
-${a.odds ? `
-  <p class="small">
-    Cote : ${a.odds}
-  </p>
-` : ""}
+        <input
+            id="journal-search"
+            class="journal-search"
+            type="search"
+            placeholder="🔍 Rechercher une équipe, une compétition..."
+        >
 
-      <span class="badge ${badge}">
-        ${decision}
-        ${a.scoreValue ? ` • ${a.scoreValue}%` : ""}
-      </span>
+        <div class="journal-filters">
 
-      ${a.confidence ? `
-          <p class="small">
-            Confiance : ${a.confidence}%
-          </p>
-      ` : ""}
+            <select id="filter-sport">
 
-      <p class="small">
-        ${formatDate(a.createdAt)}
-      </p>
+                <option value="">
+                    Tous les sports
+                </option>
 
-      <hr/>
+                <option>
+                    Football
+                </option>
 
-    </div>
-  `;
-}
+                <option>
+                    Rugby
+                </option>
 
-function sportIcon(sport) {
+            </select>
 
-  if (sport === "rugby") return "🏉";
-  if (sport === "football") return "⚽";
+            <select id="filter-source">
 
-  return "🏟️";
-}
+                <option value="">
+                    Tous les modules
+                </option>
 
-function formatDate(timestamp) {
+                <option>
+                    DrawHunter
+                </option>
 
-  if (!timestamp) return "-";
+                <option>
+                    FrenchFlair
+                </option>
 
-  return new Date(timestamp).toLocaleString("fr-FR");
-}
+            </select>
 
-function normalizeDecision(a) {
-  const raw = a.finalDecision || a.decision || "NO VALUE";
+            <select id="filter-decision">
 
-  if (raw === "VALUE" || raw === "VALUE BET") {
-    return "VALUE";
-  }
+                <option value="">
+                    Toutes les décisions
+                </option>
 
-  return "NO VALUE";
+                <option>
+                    VALUE
+                </option>
+
+                <option>
+                    NO VALUE
+                </option>
+
+            </select>
+
+            <select id="filter-result">
+
+                <option value="">
+                    Tous les résultats
+                </option>
+
+                <option>
+                    WON
+                </option>
+
+                <option>
+                    LOST
+                </option>
+
+                <option>
+                    PUSH
+                </option>
+
+                <option>
+                    PENDING
+                </option>
+
+            </select>
+
+            <select id="filter-sort">
+
+                <option value="date-desc">
+
+                    Date ↓
+
+                </option>
+
+                <option value="date-asc">
+
+                    Date ↑
+
+                </option>
+
+                <option value="confidence">
+
+                    Confiance
+
+                </option>
+
+                <option value="probability">
+
+                    Probabilité
+
+                </option>
+
+                <option value="value">
+
+                    Value
+
+                </option>
+
+                <option value="profit">
+
+                    Profit
+
+                </option>
+
+            </select>
+
+        </div>
+
+    </header>
+
+    <section
+        id="journal-list"
+        class="journal-list"
+    >
+
+        ${
+            entries.length === 0
+
+                ? `
+
+                <div class="empty-state">
+
+                    <h3>
+                        Aucune analyse disponible
+                    </h3>
+
+                    <p>
+
+                        Le journal est vide.
+
+                    </p>
+
+                </div>
+
+                `
+
+                : entries
+                    .map(renderCard)
+                    .join("")
+        }
+
+    </section>
+
+</section>
+
+`;
 }
