@@ -7,6 +7,7 @@ import { renderPortfolio } from "../ui/views/portfolioView.js";
 import { renderJournal } from "../ui/views/journalView.js";
 import { renderNavigation } from "../ui/views/navigationView.js";
 import { renderBets } from "../ui/views/betsView.js";
+import { renderDiagnostics } from "../ui/views/diagnosticsView.js";
 
 export function renderApplication(app, data) {
   app.innerHTML = renderDashboard({
@@ -32,6 +33,11 @@ export function renderApplication(app, data) {
 
     betsHtml: renderBets(
       data.dashboard.bets
+    ),
+    
+    diagnosticsHtml:
+    renderDiagnostics(
+        data.diagnostic
     )
   });
 }
