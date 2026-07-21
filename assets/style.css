@@ -216,3 +216,66 @@ section.card > h2 {
     border-radius: 14px;
   }
 }
+.portfolio-summary {
+  margin-bottom: 24px;
+}
+
+.portfolio-stat {
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.portfolio-stat h3 {
+  margin: 6px 0 0;
+}
+
+.portfolio-breakdown {
+  margin-top: 24px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.portfolio-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 780px;
+}
+
+.portfolio-table th,
+.portfolio-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  white-space: nowrap;
+}
+
+.portfolio-table th {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.stat-positive {
+  color: #4ade80;
+}
+
+.stat-negative {
+  color: #fb7185;
+}
+
+.stat-neutral {
+  color: inherit;
+}
+
+.portfolio-details {
+  margin-top: 20px;
+}
+
+.portfolio-details summary {
+  cursor: pointer;
+  font-weight: 700;
+}
