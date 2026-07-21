@@ -42,6 +42,10 @@ export async function loadApplicationData() {
       getAnalyses(),
 
     diagnostic:
-      getSettlementDiagnostic()
+      getSettlementDiagnostic(),
+      
+    statistics:
+     getAdvancedStatistics()
+       
   };
 }
