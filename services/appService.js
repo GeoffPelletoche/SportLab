@@ -1,13 +1,22 @@
-// services/appService.js
+import {
+  loadDrawHunterMatches
+} from "../modules/drawhunter.js";
 
-import { loadDrawHunterMatches } from "../modules/drawhunter.js";
-import { loadFrenchFlairMatches } from "../modules/frenchflair.js";
+import {
+  loadFrenchFlairMatches
+} from "../modules/frenchflair.js";
 
-import { getDashboardData } from "./dashboardService.js";
+import {
+  getDashboardData
+} from "./dashboardService.js";
 
-import { getAnalyses } from "../core/stores/analysisStore.js";
+import {
+  getSettlementDiagnostic
+} from "./diagnosticService.js";
 
-import { getSettlementDiagnostic} from "./diagnosticService.js";
+import {
+  getAnalyses
+} from "../core/stores/analysisStore.js";
 
 export async function loadApplicationData() {
   const [
@@ -22,9 +31,13 @@ export async function loadApplicationData() {
     drawhunterPayload,
     frenchflairPayload,
 
-    dashboard: getDashboardData(),
+    dashboard:
+      getDashboardData(),
 
-    analyses: getAnalyses(),
-    diagnostic: getSettlementDiagnostic()
+    analyses:
+      getAnalyses(),
+
+    diagnostic:
+      getSettlementDiagnostic()
   };
 }
