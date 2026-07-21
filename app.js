@@ -171,11 +171,15 @@ const navigationHtml = renderNavigation(currentPage);
     app.innerHTML = renderDashboard({
       drawhunterHtml: renderDrawHunter(drawhunterPayload),
       frenchflairHtml: renderFrenchFlair(frenchflairPayload),
-      portfolioHtml: renderPortfolio(appData.portfolio),
+      portfolioHtml: renderPortfolio(
+  appData.dashboard.portfolio
+),
       journalHtml: renderJournal(appData.analyses),
       activePage: currentPage,
       navigationHtml,
-      betsHtml: renderBets(appData.bets)
+      betsHtml: renderBets(
+  appData.dashboard.bets
+)
     });
 
     try {
