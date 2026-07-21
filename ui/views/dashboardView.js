@@ -11,7 +11,8 @@ export function renderDashboard({
   frenchflairHtml = "",
   journalHtml = "",
   portfolioHtml = "",
-  betsHtml = ""
+  betsHtml = "",
+  diagnosticsHtml = ""
   
 }) {
 
