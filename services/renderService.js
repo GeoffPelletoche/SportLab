@@ -1,48 +1,74 @@
 // services/renderService.js
 
 import { renderDashboard } from "../ui/views/dashboardView.js";
-import { renderDrawHunter } from "../ui/views/drawhunterView.js";
-import { renderFrenchFlair } from "../ui/views/frenchflairView.js";
-import { renderPortfolio } from "../ui/views/portfolioView.js";
 import { renderJournal } from "../ui/views/journalView.js";
-import { renderNavigation } from "../ui/views/navigationView.js";
-import { renderBets } from "../ui/views/betsView.js";
+import { renderPortfolio } from "../ui/views/portfolioView.js";
 import { renderDiagnostics } from "../ui/views/diagnosticsView.js";
 
+/**
+ * SPORTLAB V6.3.1
+ *
+ * Render central de l'application.
+ *
+ * Aucune logique métier.
+ * Aucune récupération de données.
+ *
+ * Il distribue simplement les données
+ * vers les vues.
+ */
+
 export function renderApplication(app, data) {
-  app.innerHTML = renderDashboard({
-    drawhunterHtml: renderDrawHunter(data.drawhunterPayload),
 
-    frenchflairHtml: renderFrenchFlair(
-      data.frenchflairPayload
-    ),
+    const page =
+        data.currentPage ?? "dashboard";
 
-    portfolioHtml:
-  renderPortfolio({
-    summary:
-      data.dashboard.portfolio,
+    switch (page) {
 
-    statistics:
-      data.statistics
-  }),
+        case "dashboard":
 
-    journalHtml: renderJournal(
-      data.analyses
-    ),
+            app.innerHTML =
+                renderDashboard(
+                    data.dashboard
+                );
 
-    navigationHtml: renderNavigation(
-      data.currentPage
-    ),
+            break;
 
-    activePage: data.currentPage,
+        case "journal":
 
-    betsHtml: renderBets(
-      data.dashboard.bets
-    ),
-    
-    diagnosticsHtml:
-    renderDiagnostics(
-        data.diagnostic
-    )
-  });
+            app.innerHTML =
+                renderJournal(
+                    data.journal
+                );
+
+            break;
+
+        case "portfolio":
+
+            app.innerHTML =
+                renderPortfolio({
+                    summary:
+                        data.dashboard.portfolio,
+
+                    statistics:
+                        data.statistics
+                });
+
+            break;
+
+        case "diagnostics":
+
+            app.innerHTML =
+                renderDiagnostics(
+                    data.diagnostic
+                );
+
+            break;
+
+        default:
+
+            app.innerHTML =
+                renderDashboard(
+                    data.dashboard
+                );
+    }
 }
