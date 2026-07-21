@@ -1,64 +1,76 @@
 // services/appService.js
 
-import { getDashboardData } from "./dashboardService.js";
-import { getAnalyses } from "./analysisService.js";
-import { getJournalData } from "./journalService.js";
-import { getAdvancedStatistics } from "./statisticsService.js";
-import { getSettlementDiagnostic } from "./diagnosticService.js";
+import {
+  getDashboardData
+} from "./dashboardService.js";
 
-import { getDrawHunterPayload } from "./drawHunterService.js";
-import { getFrenchFlairPayload } from "./frenchFlairService.js";
+import {
+  getAnalyses
+} from "./analysisService.js";
+
+import {
+  getJournalData
+} from "./journalService.js";
+
+import {
+  getAdvancedStatistics
+} from "./statisticsService.js";
+
+import {
+  getSettlementDiagnostic
+} from "./diagnosticService.js";
+
+import {
+  getDrawHunterPayload
+} from "./drawHunterService.js";
+
+import {
+  getFrenchFlairPayload
+} from "./frenchFlairService.js";
 
 /**
  * SPORTLAB V6.3.1
  *
  * Point d'entrée unique des données de l'application.
  */
+export async function loadApplicationData() {
+  /*
+   * Les données locales sont synchrones.
+   */
+  const dashboard =
+    getDashboardData();
 
-export function loadApplicationData() {
+  const analyses =
+    getAnalyses();
 
-    return {
+  const journal =
+    getJournalData();
 
-        /*
-         * Tableau de bord
-         */
-        dashboard:
-            getDashboardData(),
+  const statistics =
+    getAdvancedStatistics();
 
-        /*
-         * Analyses brutes
-         */
-        analyses:
-            getAnalyses(),
+  const diagnostic =
+    getSettlementDiagnostic();
 
-        /*
-         * Journal intelligent
-         */
-        journal:
-            getJournalData(),
+  /*
+   * Les modules sportifs chargent des données
+   * distantes : ils sont donc asynchrones.
+   */
+  const [
+    drawhunterPayload,
+    frenchflairPayload
+  ] = await Promise.all([
+    getDrawHunterPayload(),
+    getFrenchFlairPayload()
+  ]);
 
-        /*
-         * Statistiques avancées
-         */
-        statistics:
-            getAdvancedStatistics(),
-
-        /*
-         * Diagnostics
-         */
-        diagnostic:
-            getSettlementDiagnostic(),
-
-        /*
-         * Payload DrawHunter
-         */
-        drawhunterPayload:
-            getDrawHunterPayload(),
-
-        /*
-         * Payload FrenchFlair
-         */
-        frenchflairPayload:
-            getFrenchFlairPayload()
-    };
+  return {
+    dashboard,
+    analyses,
+    journal,
+    statistics,
+    diagnostic,
+    drawhunterPayload,
+    frenchflairPayload
+  };
 }
