@@ -11,12 +11,8 @@ import {
   runAutomaticSettlement
 } from "./services/settlementService.js";
 
-import {
-    getDashboardData
-} from "./services/dashboardService.js";
-
 import { saveAnalysis, getAnalysisForMatch } from "./core/stores/analysisStore.js";
-import { getAnalyses } from "./core/stores/analysisStore.js";
+
 import { renderApplication } from "./services/renderService.js";
 
 let drawhunterPayload = null;
@@ -27,6 +23,7 @@ let currentPage = "home";
 async function runSettlementDiagnostics() {
   try {
     const settlement = await runAutomaticSettlement();
+    const reports = settlement.reports;
 
     localStorage.setItem(
       "sportlab_settlement_debug",
@@ -77,7 +74,9 @@ window.runSettlementDiagnostics = async function () {
   let globalError = null;
 
   try {
-    const reports = settlement.reports;
+    const settlement = await runAutomaticSettlement();
+    reports = settlement.reports;
+    
   } catch (error) {
     globalError =
       error instanceof Error
