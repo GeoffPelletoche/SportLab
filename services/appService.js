@@ -18,6 +18,10 @@ import {
   getAnalyses
 } from "../core/stores/analysisStore.js";
 
+import {
+  getAdvancedStatistics
+} from "./statisticsService.js";
+
 export async function loadApplicationData() {
   const [
     drawhunterPayload,
