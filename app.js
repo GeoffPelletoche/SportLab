@@ -638,5 +638,51 @@ window.navigateSportLab = function(page) {
   currentPage = page;
   init();
 };
+document.addEventListener(
+  "click",
+  async event => {
+    const button = event.target.closest(
+      "#run-settlement-diagnostic"
+    );
+
+    if (!button) {
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent =
+      "⏳ Diagnostic en cours...";
+
+    try {
+      await runSettlementDiagnostics();
+
+      const appData =
+        await loadApplicationData();
+
+      drawhunterPayload =
+        appData.drawhunterPayload;
+
+      frenchflairPayload =
+        appData.frenchflairPayload;
+
+      renderApplication(
+        document.getElementById("app"),
+        {
+          ...appData,
+          currentPage
+        }
+      );
+    } catch (error) {
+      console.error(
+        "[Diagnostics] Échec du diagnostic :",
+        error
+      );
+
+      button.disabled = false;
+      button.textContent =
+        "🔄 Relancer le diagnostic";
+    }
+  }
+);
 
 init();
