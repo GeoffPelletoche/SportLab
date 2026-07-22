@@ -1,0 +1,63 @@
+/* =========================================================
+SPORTLAB UI — MODAL
+========================================================= */
+.sl-modal {
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:grid;
+  place-items:center;
+  padding:var(--sl-space-4);
+}
+
+.sl-modal[hidden] {
+  display:none;
+}
+
+.sl-modal-backdrop {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.62);
+  backdrop-filter:blur(6px);
+}
+
+.sl-modal-dialog {
+  position:relative;
+  z-index:1;
+  width:min(560px,100%);
+  max-height:min(760px,calc(100vh - 32px));
+  overflow:auto;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:var(--sl-radius-lg);
+  background:var(--sl-surface);
+  box-shadow:var(--sl-shadow-lg);
+}
+
+.sl-modal-header,
+.sl-modal-body,
+.sl-modal-footer {
+  padding:var(--sl-space-5);
+}
+
+.sl-modal-header {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:var(--sl-space-4);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.sl-modal-body {
+  color:var(--sl-text-soft);
+}
+
+.sl-modal-footer {
+  display:flex;
+  justify-content:flex-end;
+  gap:var(--sl-space-2);
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+body.sl-modal-open {
+  overflow:hidden;
+}

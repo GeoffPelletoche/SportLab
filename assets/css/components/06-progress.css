@@ -1,0 +1,31 @@
+/* =========================================================
+SPORTLAB UI — PROGRESS
+========================================================= */
+.sl-progress {
+  display:grid;
+  gap:var(--sl-space-2);
+}
+
+.sl-progress-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sl-space-3);
+  font-size:.8125rem;
+}
+
+.sl-progress-track {
+  height:8px;
+  overflow:hidden;
+  border-radius:var(--sl-radius-pill);
+  background:rgba(255,255,255,.08);
+}
+
+.sl-progress-bar {
+  display:block;
+  width:var(--sl-progress,0%);
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--sl-primary),var(--sl-secondary));
+  transition:width var(--sl-transition-slow);
+}

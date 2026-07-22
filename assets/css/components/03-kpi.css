@@ -1,0 +1,44 @@
+/* =========================================================
+SPORTLAB UI — KPI
+========================================================= */
+.sl-kpi-card {
+  position:relative;
+  overflow:hidden;
+}
+
+.sl-kpi-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sl-space-3);
+}
+
+.sl-kpi-icon {
+  display:grid;
+  width:40px;
+  height:40px;
+  place-items:center;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  font-size:1.15rem;
+}
+
+.sl-kpi-trend {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:.75rem;
+  font-weight:800;
+}
+
+.sl-kpi-main {
+  display:grid;
+  gap:2px;
+  margin-top:var(--sl-space-3);
+}
+
+.sl-kpi-support {
+  margin-top:var(--sl-space-2);
+  color:var(--sl-muted);
+  font-size:.75rem;
+}

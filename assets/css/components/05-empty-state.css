@@ -1,0 +1,33 @@
+/* =========================================================
+SPORTLAB UI — EMPTY STATE
+========================================================= */
+.sl-empty-state {
+  display:grid;
+  justify-items:center;
+  gap:var(--sl-space-3);
+  padding:var(--sl-space-7) var(--sl-space-4);
+  text-align:center;
+}
+
+.sl-empty-state-icon {
+  display:grid;
+  width:64px;
+  height:64px;
+  place-items:center;
+  border-radius:20px;
+  background:rgba(255,255,255,.05);
+  font-size:1.8rem;
+}
+
+.sl-empty-state-title {
+  margin:0;
+  font-size:1rem;
+  font-weight:800;
+}
+
+.sl-empty-state-text {
+  max-width:48ch;
+  margin:0;
+  color:var(--sl-muted);
+  font-size:.875rem;
+}

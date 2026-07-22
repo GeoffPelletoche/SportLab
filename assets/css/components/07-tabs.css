@@ -1,0 +1,45 @@
+/* =========================================================
+SPORTLAB UI — TABS & SEGMENTED CONTROL
+========================================================= */
+.sl-tabs,
+.sl-segmented {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  width:max-content;
+  max-width:100%;
+  overflow-x:auto;
+  padding:4px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+
+.sl-tab,
+.sl-segmented-item {
+  min-height:38px;
+  padding:0 14px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--sl-muted);
+  font-weight:750;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+.sl-tab:hover,
+.sl-segmented-item:hover {
+  color:var(--sl-text);
+}
+
+.sl-tab.is-active,
+.sl-segmented-item.is-active {
+  background:var(--sl-surface-2);
+  color:var(--sl-text);
+  box-shadow:var(--sl-shadow-xs);
+}
+
+.sl-tab-panel[hidden] {
+  display:none;
+}

@@ -1,19 +1,17 @@
-# Changelog — Pack 0 et Pack 2
+# Changelog — SportLab V6.3.7 Pack 3
 
-## Pack 0
-- Création du SportLab Design Language SDL 1.0
-- Définition de la grille, des espacements, couleurs et typographie
-- Définition des contrats de composants
-- Règles de migration incrémentale
+## Ajouté
+- Bibliothèque CSS de composants Premium
+- Helpers de rendu HTML
+- Tabs accessibles au clavier
+- Modal avec focus trap
+- Toasts sans dépendance externe
+- Galerie de composants
+- Catalogue et checklist de validation
 
-## Pack 2
-- Nouveau système de tokens
-- Typographie officielle
-- Layout Framework conservé
-- Boutons, cartes, panneaux, badges, alertes
-- Formulaires et tableaux
-- KPI, empty states et skeletons
-- Navigation
-- Responsive et réduction des animations
-- Couleurs DrawHunter et FrenchFlair
-- Couche de compatibilité pour les vues déjà migrées
+## Non modifié
+- Moteurs DrawHunter et FrenchFlair
+- Services
+- Stores
+- Settlement engine
+- Données utilisateur

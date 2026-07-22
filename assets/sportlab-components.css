@@ -1,0 +1,527 @@
+/*!
+ * SportLab V6.3.7
+ * Pack 3 — UI Components Premium
+ * Requires Pack 2 Design System Premium.
+ */
+/* =========================================================
+SPORTLAB UI — CARD
+========================================================= */
+.sl-card-header,
+.sl-card-footer {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:var(--sl-space-4);
+}
+
+.sl-card-header {
+  margin-bottom:var(--sl-space-4);
+}
+
+.sl-card-footer {
+  margin-top:var(--sl-space-4);
+  padding-top:var(--sl-space-4);
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.sl-card-title {
+  margin:0;
+  font-size:1rem;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.sl-card-description {
+  margin:.25rem 0 0;
+  color:var(--sl-muted);
+  font-size:.8125rem;
+}
+
+.sl-card-actions {
+  display:flex;
+  align-items:center;
+  gap:var(--sl-space-2);
+  flex-wrap:wrap;
+}
+
+/* =========================================================
+SPORTLAB UI — BUTTON
+========================================================= */
+.sl-button-sm {
+  min-height:36px;
+  padding-inline:14px;
+  font-size:.8125rem;
+}
+
+.sl-button-lg {
+  min-height:50px;
+  padding-inline:22px;
+}
+
+.sl-button-icon {
+  width:44px;
+  min-width:44px;
+  padding:0;
+}
+
+.sl-button-group {
+  display:flex;
+  align-items:center;
+  gap:var(--sl-space-2);
+  flex-wrap:wrap;
+}
+
+.sl-button-spinner {
+  width:16px;
+  height:16px;
+  border:2px solid rgba(255,255,255,.35);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:sl-spin .8s linear infinite;
+}
+
+@keyframes sl-spin {
+  to { transform:rotate(360deg); }
+}
+
+/* =========================================================
+SPORTLAB UI — KPI
+========================================================= */
+.sl-kpi-card {
+  position:relative;
+  overflow:hidden;
+}
+
+.sl-kpi-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sl-space-3);
+}
+
+.sl-kpi-icon {
+  display:grid;
+  width:40px;
+  height:40px;
+  place-items:center;
+  border-radius:12px;
+  background:rgba(255,255,255,.06);
+  font-size:1.15rem;
+}
+
+.sl-kpi-trend {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-size:.75rem;
+  font-weight:800;
+}
+
+.sl-kpi-main {
+  display:grid;
+  gap:2px;
+  margin-top:var(--sl-space-3);
+}
+
+.sl-kpi-support {
+  margin-top:var(--sl-space-2);
+  color:var(--sl-muted);
+  font-size:.75rem;
+}
+
+/* =========================================================
+SPORTLAB UI — ALERT
+========================================================= */
+.sl-alert-icon {
+  display:grid;
+  flex:0 0 auto;
+  width:38px;
+  height:38px;
+  place-items:center;
+  border-radius:11px;
+  background:rgba(255,255,255,.06);
+}
+
+.sl-alert-content {
+  min-width:0;
+  flex:1;
+}
+
+.sl-alert-title {
+  display:block;
+  margin:0;
+  font-size:.875rem;
+  font-weight:800;
+}
+
+.sl-alert-description {
+  margin:.25rem 0 0;
+  color:var(--sl-muted);
+  font-size:.8125rem;
+}
+
+.sl-alert-actions {
+  display:flex;
+  align-items:center;
+  gap:var(--sl-space-2);
+  margin-top:var(--sl-space-3);
+  flex-wrap:wrap;
+}
+
+/* =========================================================
+SPORTLAB UI — EMPTY STATE
+========================================================= */
+.sl-empty-state {
+  display:grid;
+  justify-items:center;
+  gap:var(--sl-space-3);
+  padding:var(--sl-space-7) var(--sl-space-4);
+  text-align:center;
+}
+
+.sl-empty-state-icon {
+  display:grid;
+  width:64px;
+  height:64px;
+  place-items:center;
+  border-radius:20px;
+  background:rgba(255,255,255,.05);
+  font-size:1.8rem;
+}
+
+.sl-empty-state-title {
+  margin:0;
+  font-size:1rem;
+  font-weight:800;
+}
+
+.sl-empty-state-text {
+  max-width:48ch;
+  margin:0;
+  color:var(--sl-muted);
+  font-size:.875rem;
+}
+
+/* =========================================================
+SPORTLAB UI — PROGRESS
+========================================================= */
+.sl-progress {
+  display:grid;
+  gap:var(--sl-space-2);
+}
+
+.sl-progress-header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sl-space-3);
+  font-size:.8125rem;
+}
+
+.sl-progress-track {
+  height:8px;
+  overflow:hidden;
+  border-radius:var(--sl-radius-pill);
+  background:rgba(255,255,255,.08);
+}
+
+.sl-progress-bar {
+  display:block;
+  width:var(--sl-progress,0%);
+  height:100%;
+  border-radius:inherit;
+  background:linear-gradient(90deg,var(--sl-primary),var(--sl-secondary));
+  transition:width var(--sl-transition-slow);
+}
+
+/* =========================================================
+SPORTLAB UI — TABS & SEGMENTED CONTROL
+========================================================= */
+.sl-tabs,
+.sl-segmented {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  width:max-content;
+  max-width:100%;
+  overflow-x:auto;
+  padding:4px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+}
+
+.sl-tab,
+.sl-segmented-item {
+  min-height:38px;
+  padding:0 14px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--sl-muted);
+  font-weight:750;
+  white-space:nowrap;
+  cursor:pointer;
+}
+
+.sl-tab:hover,
+.sl-segmented-item:hover {
+  color:var(--sl-text);
+}
+
+.sl-tab.is-active,
+.sl-segmented-item.is-active {
+  background:var(--sl-surface-2);
+  color:var(--sl-text);
+  box-shadow:var(--sl-shadow-xs);
+}
+
+.sl-tab-panel[hidden] {
+  display:none;
+}
+
+/* =========================================================
+SPORTLAB UI — MODAL
+========================================================= */
+.sl-modal {
+  position:fixed;
+  inset:0;
+  z-index:2000;
+  display:grid;
+  place-items:center;
+  padding:var(--sl-space-4);
+}
+
+.sl-modal[hidden] {
+  display:none;
+}
+
+.sl-modal-backdrop {
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.62);
+  backdrop-filter:blur(6px);
+}
+
+.sl-modal-dialog {
+  position:relative;
+  z-index:1;
+  width:min(560px,100%);
+  max-height:min(760px,calc(100vh - 32px));
+  overflow:auto;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:var(--sl-radius-lg);
+  background:var(--sl-surface);
+  box-shadow:var(--sl-shadow-lg);
+}
+
+.sl-modal-header,
+.sl-modal-body,
+.sl-modal-footer {
+  padding:var(--sl-space-5);
+}
+
+.sl-modal-header {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:var(--sl-space-4);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.sl-modal-body {
+  color:var(--sl-text-soft);
+}
+
+.sl-modal-footer {
+  display:flex;
+  justify-content:flex-end;
+  gap:var(--sl-space-2);
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+body.sl-modal-open {
+  overflow:hidden;
+}
+
+/* =========================================================
+SPORTLAB UI — TOAST
+========================================================= */
+.sl-toast-region {
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:3000;
+  display:grid;
+  gap:10px;
+  width:min(380px,calc(100vw - 32px));
+  pointer-events:none;
+}
+
+.sl-toast {
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:start;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(17,28,45,.98);
+  box-shadow:var(--sl-shadow-lg);
+  pointer-events:auto;
+  animation:sl-toast-in .22s ease both;
+}
+
+.sl-toast.is-leaving {
+  animation:sl-toast-out .18s ease both;
+}
+
+.sl-toast-title {
+  display:block;
+  font-size:.875rem;
+  font-weight:800;
+}
+
+.sl-toast-text {
+  margin:.2rem 0 0;
+  color:var(--sl-muted);
+  font-size:.8125rem;
+}
+
+.sl-toast-close {
+  border:0;
+  background:none;
+  color:var(--sl-muted);
+  cursor:pointer;
+}
+
+@keyframes sl-toast-in {
+  from { opacity:0; transform:translateY(10px); }
+}
+
+@keyframes sl-toast-out {
+  to { opacity:0; transform:translateY(8px); }
+}
+
+/* =========================================================
+SPORTLAB UI — FIELD
+========================================================= */
+.sl-field-row {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:var(--sl-space-4);
+}
+
+.sl-field-message {
+  font-size:.75rem;
+}
+
+.sl-field.is-error .sl-input,
+.sl-field.is-error .sl-select,
+.sl-field.is-error .sl-textarea {
+  border-color:rgba(239,68,68,.78);
+}
+
+.sl-field.is-error .sl-field-message {
+  color:#fca5a5;
+}
+
+.sl-field.is-success .sl-input,
+.sl-field.is-success .sl-select,
+.sl-field.is-success .sl-textarea {
+  border-color:rgba(34,197,94,.72);
+}
+
+.sl-check {
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  cursor:pointer;
+}
+
+.sl-check input {
+  width:18px;
+  height:18px;
+  margin-top:2px;
+  accent-color:var(--sl-primary);
+}
+
+/* =========================================================
+SPORTLAB UI — DATA LIST
+========================================================= */
+.sl-data-list {
+  display:grid;
+  margin:0;
+}
+
+.sl-data-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:var(--sl-space-4);
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.sl-data-row:last-child {
+  border-bottom:0;
+}
+
+.sl-data-label {
+  color:var(--sl-muted);
+}
+
+.sl-data-value {
+  text-align:right;
+  font-weight:750;
+}
+
+/* =========================================================
+SPORTLAB UI — RESPONSIVE
+========================================================= */
+@media(max-width:640px) {
+  .sl-card-header,
+  .sl-card-footer {
+    align-items:stretch;
+    flex-direction:column;
+  }
+
+  .sl-card-actions,
+  .sl-button-group,
+  .sl-modal-footer {
+    width:100%;
+  }
+
+  .sl-card-actions .sl-button,
+  .sl-button-group .sl-button,
+  .sl-modal-footer .sl-button {
+    flex:1;
+  }
+
+  .sl-field-row {
+    grid-template-columns:1fr;
+  }
+
+  .sl-modal {
+    align-items:end;
+    padding:0;
+  }
+
+  .sl-modal-dialog {
+    width:100%;
+    max-height:88vh;
+    border-radius:var(--sl-radius-lg) var(--sl-radius-lg) 0 0;
+  }
+
+  .sl-toast-region {
+    right:10px;
+    bottom:10px;
+    width:calc(100vw - 20px);
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .sl-toast,
+  .sl-toast.is-leaving {
+    animation:none;
+  }
+}

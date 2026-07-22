@@ -1,0 +1,40 @@
+/* =========================================================
+SPORTLAB UI — CARD
+========================================================= */
+.sl-card-header,
+.sl-card-footer {
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:var(--sl-space-4);
+}
+
+.sl-card-header {
+  margin-bottom:var(--sl-space-4);
+}
+
+.sl-card-footer {
+  margin-top:var(--sl-space-4);
+  padding-top:var(--sl-space-4);
+  border-top:1px solid rgba(255,255,255,.08);
+}
+
+.sl-card-title {
+  margin:0;
+  font-size:1rem;
+  line-height:1.35;
+  font-weight:800;
+}
+
+.sl-card-description {
+  margin:.25rem 0 0;
+  color:var(--sl-muted);
+  font-size:.8125rem;
+}
+
+.sl-card-actions {
+  display:flex;
+  align-items:center;
+  gap:var(--sl-space-2);
+  flex-wrap:wrap;
+}

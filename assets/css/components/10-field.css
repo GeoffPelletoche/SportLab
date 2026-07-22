@@ -1,0 +1,42 @@
+/* =========================================================
+SPORTLAB UI — FIELD
+========================================================= */
+.sl-field-row {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:var(--sl-space-4);
+}
+
+.sl-field-message {
+  font-size:.75rem;
+}
+
+.sl-field.is-error .sl-input,
+.sl-field.is-error .sl-select,
+.sl-field.is-error .sl-textarea {
+  border-color:rgba(239,68,68,.78);
+}
+
+.sl-field.is-error .sl-field-message {
+  color:#fca5a5;
+}
+
+.sl-field.is-success .sl-input,
+.sl-field.is-success .sl-select,
+.sl-field.is-success .sl-textarea {
+  border-color:rgba(34,197,94,.72);
+}
+
+.sl-check {
+  display:flex;
+  align-items:flex-start;
+  gap:10px;
+  cursor:pointer;
+}
+
+.sl-check input {
+  width:18px;
+  height:18px;
+  margin-top:2px;
+  accent-color:var(--sl-primary);
+}

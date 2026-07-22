@@ -1,0 +1,38 @@
+/* =========================================================
+SPORTLAB UI — ALERT
+========================================================= */
+.sl-alert-icon {
+  display:grid;
+  flex:0 0 auto;
+  width:38px;
+  height:38px;
+  place-items:center;
+  border-radius:11px;
+  background:rgba(255,255,255,.06);
+}
+
+.sl-alert-content {
+  min-width:0;
+  flex:1;
+}
+
+.sl-alert-title {
+  display:block;
+  margin:0;
+  font-size:.875rem;
+  font-weight:800;
+}
+
+.sl-alert-description {
+  margin:.25rem 0 0;
+  color:var(--sl-muted);
+  font-size:.8125rem;
+}
+
+.sl-alert-actions {
+  display:flex;
+  align-items:center;
+  gap:var(--sl-space-2);
+  margin-top:var(--sl-space-3);
+  flex-wrap:wrap;
+}

@@ -1,14 +1,70 @@
-# SportLab V6.3.7 — Pack 0 + Pack 2
+# SportLab V6.3.7 — Pack 3 UI Components Premium
 
-Ce livrable contient :
+Ce pack construit la bibliothèque UI officielle au-dessus du Pack 2 Design System Premium.
 
-## Pack 0 — SportLab Design Language
-Référentiel officiel de conception et de migration.
+## Contenu
 
-## Pack 2 — Design System Premium
-Framework CSS modulaire et build complet prêt à intégrer.
+### CSS
+- cartes ;
+- boutons avancés ;
+- KPI ;
+- alertes ;
+- états vides ;
+- progression ;
+- tabs et segmented controls ;
+- modal ;
+- toast ;
+- formulaires enrichis ;
+- listes de données ;
+- responsive des composants.
 
-Commencer par lire :
+### JavaScript
+- fonctions de rendu HTML sans logique métier ;
+- initialisation des tabs ;
+- ouverture et fermeture des modals ;
+- gestion du focus dans les modals ;
+- notifications Toast.
 
-1. `pack-0-design-language/docs/SPORTLAB_DESIGN_LANGUAGE.md`
-2. `pack-2-design-system/docs/INSTALLATION.md`
+### Démonstration
+- galerie HTML de validation visuelle.
+
+## Dépendance
+
+Le Pack 3 nécessite le Pack 2 :
+
+```html
+<link rel="stylesheet" href="./assets/style.css">
+<link rel="stylesheet" href="./assets/sportlab.css">
+<link rel="stylesheet" href="./assets/sportlab-components.css">
+```
+
+## Installation
+
+Copier :
+
+```text
+assets/sportlab-components.css
+ui/components/sportlabComponents.js
+ui/interactions/sportlabUi.js
+```
+
+dans les dossiers correspondants du dépôt.
+
+Ajouter le CSS après `sportlab.css`.
+
+Initialiser les interactions une seule fois dans le point d’entrée de l’application :
+
+```js
+import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
+
+initSportLabUi();
+```
+
+## Sécurité de migration
+
+Le pack :
+- ne modifie aucun moteur métier ;
+- ne modifie aucun store ;
+- ne modifie pas le settlement engine ;
+- n’impose aucune réécriture immédiate des vues existantes ;
+- peut être intégré progressivement.

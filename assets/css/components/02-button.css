@@ -1,0 +1,39 @@
+/* =========================================================
+SPORTLAB UI — BUTTON
+========================================================= */
+.sl-button-sm {
+  min-height:36px;
+  padding-inline:14px;
+  font-size:.8125rem;
+}
+
+.sl-button-lg {
+  min-height:50px;
+  padding-inline:22px;
+}
+
+.sl-button-icon {
+  width:44px;
+  min-width:44px;
+  padding:0;
+}
+
+.sl-button-group {
+  display:flex;
+  align-items:center;
+  gap:var(--sl-space-2);
+  flex-wrap:wrap;
+}
+
+.sl-button-spinner {
+  width:16px;
+  height:16px;
+  border:2px solid rgba(255,255,255,.35);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:sl-spin .8s linear infinite;
+}
+
+@keyframes sl-spin {
+  to { transform:rotate(360deg); }
+}

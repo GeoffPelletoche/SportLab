@@ -1,0 +1,58 @@
+/* =========================================================
+SPORTLAB UI — TOAST
+========================================================= */
+.sl-toast-region {
+  position:fixed;
+  right:16px;
+  bottom:16px;
+  z-index:3000;
+  display:grid;
+  gap:10px;
+  width:min(380px,calc(100vw - 32px));
+  pointer-events:none;
+}
+
+.sl-toast {
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:start;
+  gap:12px;
+  padding:14px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:14px;
+  background:rgba(17,28,45,.98);
+  box-shadow:var(--sl-shadow-lg);
+  pointer-events:auto;
+  animation:sl-toast-in .22s ease both;
+}
+
+.sl-toast.is-leaving {
+  animation:sl-toast-out .18s ease both;
+}
+
+.sl-toast-title {
+  display:block;
+  font-size:.875rem;
+  font-weight:800;
+}
+
+.sl-toast-text {
+  margin:.2rem 0 0;
+  color:var(--sl-muted);
+  font-size:.8125rem;
+}
+
+.sl-toast-close {
+  border:0;
+  background:none;
+  color:var(--sl-muted);
+  cursor:pointer;
+}
+
+@keyframes sl-toast-in {
+  from { opacity:0; transform:translateY(10px); }
+}
+
+@keyframes sl-toast-out {
+  to { opacity:0; transform:translateY(8px); }
+}

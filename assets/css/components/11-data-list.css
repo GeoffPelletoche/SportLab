@@ -1,0 +1,28 @@
+/* =========================================================
+SPORTLAB UI — DATA LIST
+========================================================= */
+.sl-data-list {
+  display:grid;
+  margin:0;
+}
+
+.sl-data-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:var(--sl-space-4);
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+
+.sl-data-row:last-child {
+  border-bottom:0;
+}
+
+.sl-data-label {
+  color:var(--sl-muted);
+}
+
+.sl-data-value {
+  text-align:right;
+  font-weight:750;
+}

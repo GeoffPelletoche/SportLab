@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>SportLab — UI Components Premium</title>
+
+  <!-- Adapter les chemins dans le dépôt final -->
+  <link rel="stylesheet" href="../../assets/style.css">
+  <link rel="stylesheet" href="../../assets/sportlab.css">
+  <link rel="stylesheet" href="../assets/sportlab-components.css">
+</head>
+
+<body>
+  <div class="sl-app-root">
+    <main class="sl-main-content sl-stack sl-stack-lg">
+
+      <section class="sl-panel sl-hero">
+        <span class="sl-label">SportLab V6.3.7</span>
+        <h1 class="sl-h1">UI Components Premium</h1>
+        <p class="sl-muted">Galerie de validation du Pack 3.</p>
+      </section>
+
+      <section class="sl-section">
+        <h2 class="sl-section-title">Boutons et badges</h2>
+
+        <div class="sl-card">
+          <div class="sl-button-group">
+            <button class="sl-button sl-button-primary">Principal</button>
+            <button class="sl-button sl-button-secondary">Secondaire</button>
+            <button class="sl-button sl-button-success">Succès</button>
+            <button class="sl-button sl-button-warning">Attention</button>
+            <button class="sl-button sl-button-danger">Danger</button>
+            <button class="sl-button sl-button-ghost">Discret</button>
+          </div>
+
+          <div class="sl-button-group sl-mt-4">
+            <span class="sl-badge sl-badge-info">Information</span>
+            <span class="sl-badge sl-badge-success">VALUE</span>
+            <span class="sl-badge sl-badge-warning">À analyser</span>
+            <span class="sl-badge sl-badge-danger">Erreur</span>
+            <span class="sl-badge sl-badge-neutral">Neutre</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="sl-section">
+        <h2 class="sl-section-title">KPI</h2>
+
+        <div class="sl-kpi-grid">
+          <article class="sl-kpi-card">
+            <div class="sl-kpi-head">
+              <span class="sl-kpi-icon">🏟️</span>
+              <span class="sl-kpi-trend sl-positive">+4</span>
+            </div>
+            <div class="sl-kpi-main">
+              <strong class="sl-kpi-value">18</strong>
+              <span class="sl-kpi-label">Matchs</span>
+            </div>
+          </article>
+
+          <article class="sl-kpi-card">
+            <div class="sl-kpi-head">
+              <span class="sl-kpi-icon">💎</span>
+              <span class="sl-kpi-trend sl-positive">+2</span>
+            </div>
+            <div class="sl-kpi-main">
+              <strong class="sl-kpi-value">6</strong>
+              <span class="sl-kpi-label">VALUE</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="sl-section">
+        <h2 class="sl-section-title">Alertes</h2>
+
+        <div class="sl-stack">
+          <article class="sl-alert sl-alert-success">
+            <span class="sl-alert-icon">✅</span>
+            <div class="sl-alert-content">
+              <strong class="sl-alert-title">Synchronisation réussie</strong>
+              <p class="sl-alert-description">Les données sont à jour.</p>
+            </div>
+          </article>
+
+          <article class="sl-alert sl-alert-warning">
+            <span class="sl-alert-icon">⚠️</span>
+            <div class="sl-alert-content">
+              <strong class="sl-alert-title">Cotes à compléter</strong>
+              <p class="sl-alert-description">Trois matchs nécessitent une ligne Betclic.</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="sl-section" data-sl-tab-system>
+        <h2 class="sl-section-title">Tabs</h2>
+
+        <div class="sl-tabs" data-sl-tabs role="tablist">
+          <button class="sl-tab is-active" data-sl-tab="overview" role="tab" aria-selected="true">Vue générale</button>
+          <button class="sl-tab" data-sl-tab="analysis" role="tab" aria-selected="false" tabindex="-1">Analyse</button>
+        </div>
+
+        <section data-sl-tab-panel="overview" class="sl-card">
+          Vue générale du match.
+        </section>
+
+        <section data-sl-tab-panel="analysis" class="sl-card" hidden>
+          Détails de l’analyse.
+        </section>
+      </section>
+
+      <section class="sl-section">
+        <h2 class="sl-section-title">Modal et Toast</h2>
+
+        <div class="sl-button-group">
+          <button class="sl-button sl-button-primary" data-sl-modal-open="demo-modal">Ouvrir la modal</button>
+          <button class="sl-button sl-button-ghost" id="demo-toast">Afficher un toast</button>
+        </div>
+      </section>
+
+      <section class="sl-section">
+        <h2 class="sl-section-title">État vide</h2>
+
+        <section class="sl-card sl-empty-state">
+          <span class="sl-empty-state-icon">📭</span>
+          <h3 class="sl-empty-state-title">Aucun match à analyser</h3>
+          <p class="sl-empty-state-text">Les nouvelles rencontres apparaîtront après la prochaine synchronisation.</p>
+        </section>
+      </section>
+
+    </main>
+  </div>
+
+  <section
+    id="demo-modal"
+    class="sl-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="demo-modal-title"
+    aria-hidden="true"
+    tabindex="-1"
+    hidden
+  >
+    <div class="sl-modal-backdrop" data-sl-modal-close></div>
+
+    <div class="sl-modal-dialog">
+      <header class="sl-modal-header">
+        <div>
+          <h2 id="demo-modal-title" class="sl-card-title">Confirmer le pari</h2>
+          <p class="sl-card-description">Vérifie les informations avant validation.</p>
+        </div>
+
+        <button class="sl-button sl-button-ghost sl-button-icon" data-sl-modal-close aria-label="Fermer">×</button>
+      </header>
+
+      <div class="sl-modal-body">
+        Contenu de démonstration.
+      </div>
+
+      <footer class="sl-modal-footer">
+        <button class="sl-button sl-button-ghost" data-sl-modal-close>Annuler</button>
+        <button class="sl-button sl-button-primary" data-sl-modal-close>Confirmer</button>
+      </footer>
+    </div>
+  </section>
+
+  <script type="module">
+    import {
+      initSportLabUi,
+      showToast
+    } from "../ui/interactions/sportlabUi.js";
+
+    initSportLabUi();
+
+    document.getElementById("demo-toast").addEventListener("click", () => {
+      showToast({
+        title: "SportLab",
+        text: "Le composant Toast fonctionne.",
+        tone: "success"
+      });
+    });
+  </script>
+</body>
+</html>
