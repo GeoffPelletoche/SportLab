@@ -20,7 +20,7 @@ export function renderJournal(journal = {}) {
     } = journal;
 
     return `
-        <section class="journal-page">
+        <section class="journal-page sl-page sl-stack sl-stack-lg">
 
             ${renderJournalHeader(
                 totalEntries
@@ -45,7 +45,7 @@ export function renderJournal(journal = {}) {
                 totalEntries
             })}
 
-            <section class="journal-list">
+            <section class="journal-list sl-stack">
 
                 ${
                     entries.length === 0

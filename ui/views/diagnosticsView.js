@@ -28,7 +28,7 @@ function escapeHtml(value) {
 export function renderDiagnostics(diagnostic) {
   if (!diagnostic) {
     return `
-      <div class="diagnostics-page">
+      <div class="diagnostics-page sl-page sl-stack">
         <p>
           Aucun diagnostic de règlement n’a encore été enregistré.
         </p>
@@ -72,7 +72,7 @@ export function renderDiagnostics(diagnostic) {
     diagnostic.location?.displayMode || "inconnu";
 
   return `
-    <div class="diagnostics-page">
+    <div class="diagnostics-page sl-page sl-stack">
 
       <p>
         Dernier contrôle :

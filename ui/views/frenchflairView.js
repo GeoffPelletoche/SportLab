@@ -10,7 +10,7 @@ export function renderFrenchFlair(payload) {
   const meta = payload?.meta || null;
 
   return `
-    <section class="analysis-page analysis-page--frenchflair">
+    <section class="analysis-page analysis-page--frenchflair sl-page sl-stack" data-module="frenchflair">
       ${renderMeta(meta)}
       ${matches.length === 0 ? renderEmpty(meta) : renderMatches(matches)}
     </section>
@@ -20,7 +20,7 @@ export function renderFrenchFlair(payload) {
 function renderMeta(meta) {
   if (!meta) {
     return `
-      <div class="analysis-state analysis-state--muted">
+      <div class="analysis-state analysis-state--muted sl-panel sl-state">
         <span class="analysis-state__icon" aria-hidden="true">⚠️</span>
         <div>
           <strong>Synchronisation rugby non disponible</strong>
@@ -31,7 +31,7 @@ function renderMeta(meta) {
   }
 
   return `
-    <section class="analysis-summary analysis-summary--frenchflair" aria-label="Résumé FrenchFlair">
+    <section class="analysis-summary analysis-summary--frenchflair sl-panel sl-summary" aria-label="Résumé FrenchFlair">
       <div class="analysis-summary__heading">
         <div>
           <p class="analysis-eyebrow">🏉 FrenchFlair</p>
@@ -64,7 +64,7 @@ function renderSummaryItem(label, value) {
 
 function renderEmpty() {
   return `
-    <section class="analysis-empty">
+    <section class="analysis-empty sl-empty-state sl-panel">
       <div class="analysis-empty__icon" aria-hidden="true">🏉</div>
       <h3>Aucun match rugby trouvé</h3>
       <p>Aucune rencontre n’est disponible sur la période analysée.</p>
@@ -74,7 +74,7 @@ function renderEmpty() {
 
 function renderMatches(matches) {
   return `
-    <div class="analysis-grid">
+    <div class="analysis-grid sl-grid sl-grid-2">
       ${matches.map((match) => renderMatchCard(match)).join("")}
     </div>
   `;
@@ -86,7 +86,7 @@ function renderMatchCard(match) {
   const trendIcon = trend === "OVER" ? "📈" : "📉";
 
   return `
-    <article class="analysis-card analysis-card--frenchflair">
+    <article class="analysis-card analysis-card--frenchflair sl-card sl-analysis-card">
       <header class="analysis-card__header">
         <div>
           <p class="analysis-card__competition">🏉 ${safe(match.competition || "Compétition")}</p>
@@ -94,11 +94,11 @@ function renderMatchCard(match) {
         </div>
 
         ${predictionAvailable ? `
-          <span class="analysis-decision analysis-decision--trend analysis-decision--${trend.toLowerCase()}">
+          <span class="analysis-decision sl-badge analysis-decision--trend analysis-decision--${trend.toLowerCase()}">
             ${trendIcon} ${trend}
           </span>
         ` : `
-          <span class="analysis-decision analysis-decision--pass">INDISPONIBLE</span>
+          <span class="analysis-decision sl-badge analysis-decision--pass">INDISPONIBLE</span>
         `}
       </header>
 
@@ -123,7 +123,7 @@ function renderMatchCard(match) {
       <footer class="analysis-card__footer">
         <button
           type="button"
-          class="analysis-button analysis-button--frenchflair"
+          class="analysis-button analysis-button--frenchflair sl-button sl-button-secondary"
           onclick="analyzeFrenchFlairValue('${safeAttribute(match.id)}')"
         >
           <span>Analyser la value</span>
@@ -178,12 +178,12 @@ function renderPrediction(match) {
           </strong>
         </div>
 
-        <span class="analysis-confidence ${confidenceClass(confidence)}">
+        <span class="analysis-confidence sl-badge ${confidenceClass(confidence)}">
           ${confidenceLabel(confidence)} · ${confidence}%
         </span>
       </div>
 
-      <div class="analysis-progress" aria-label="Niveau de confiance">
+      <div class="analysis-progress sl-progress" aria-label="Niveau de confiance">
         <div class="analysis-progress__heading">
           <span>Confiance du modèle</span>
           <strong>${confidence}%</strong>
@@ -203,7 +203,7 @@ function renderPrediction(match) {
 
 function renderKpi(label, value, note) {
   return `
-    <div class="analysis-kpi">
+    <div class="analysis-kpi sl-kpi">
       <span>${label}</span>
       <strong>${value}</strong>
       <small>${note}</small>

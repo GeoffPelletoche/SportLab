@@ -8,7 +8,7 @@ export function renderDrawHunter(payload) {
   const meta = payload?.meta || null;
 
   return `
-    <section class="analysis-page analysis-page--drawhunter">
+    <section class="analysis-page analysis-page--drawhunter sl-page sl-stack" data-module="drawhunter">
       ${renderMeta(meta)}
       ${matches.length === 0 ? renderEmpty(meta) : renderMatches(matches)}
     </section>
@@ -18,7 +18,7 @@ export function renderDrawHunter(payload) {
 function renderMeta(meta) {
   if (!meta) {
     return `
-      <div class="analysis-state analysis-state--muted">
+      <div class="analysis-state analysis-state--muted sl-panel sl-state">
         <span class="analysis-state__icon" aria-hidden="true">⚠️</span>
         <div>
           <strong>Synchronisation non disponible</strong>
@@ -29,7 +29,7 @@ function renderMeta(meta) {
   }
 
   return `
-    <section class="analysis-summary analysis-summary--drawhunter" aria-label="Résumé DrawHunter">
+    <section class="analysis-summary analysis-summary--drawhunter sl-panel sl-summary" aria-label="Résumé DrawHunter">
       <div class="analysis-summary__heading">
         <div>
           <p class="analysis-eyebrow">⚽ DrawHunter</p>
@@ -61,7 +61,7 @@ function renderSummaryItem(label, value) {
 
 function renderEmpty(meta) {
   return `
-    <section class="analysis-empty">
+    <section class="analysis-empty sl-empty-state sl-panel">
       <div class="analysis-empty__icon" aria-hidden="true">⚽</div>
       <h3>Aucun match trouvé</h3>
       <p>
@@ -87,7 +87,7 @@ function renderEmpty(meta) {
 
 function renderMatches(matches) {
   return `
-    <div class="analysis-grid">
+    <div class="analysis-grid sl-grid sl-grid-2">
       ${matches.map((match, index) => renderMatchCard(match, index)).join("")}
     </div>
   `;
@@ -99,13 +99,13 @@ function renderMatchCard(match, index) {
   const value = toPercent(match.value);
 
   return `
-    <article class="analysis-card analysis-card--drawhunter ${isValue ? "analysis-card--value" : ""}">
+    <article class="analysis-card analysis-card--drawhunter sl-card sl-analysis-card ${isValue ? "analysis-card--value" : ""}">
       <header class="analysis-card__header">
         <div>
           <p class="analysis-card__competition">⚽ ${safe(match.competition || "Compétition")}</p>
           <p class="analysis-card__date">${formatDate(match.date)}</p>
         </div>
-        <span class="analysis-decision ${isValue ? "analysis-decision--value" : "analysis-decision--pass"}">
+        <span class="analysis-decision sl-badge ${isValue ? "analysis-decision--value" : "analysis-decision--pass"}">
           ${safe(match.decision || "À ANALYSER")}
         </span>
       </header>
@@ -133,7 +133,7 @@ function renderMatchCard(match, index) {
         ${renderKpi("Value", `${value}%`, valueTone(match.value))}
       </div>
 
-      <div class="analysis-progress" aria-label="Probabilité modèle">
+      <div class="analysis-progress sl-progress" aria-label="Probabilité modèle">
         <div class="analysis-progress__heading">
           <span>Probabilité de nul</span>
           <strong>${probability}%</strong>
@@ -152,7 +152,7 @@ function renderMatchCard(match, index) {
 
 function renderKpi(label, value, note) {
   return `
-    <div class="analysis-kpi">
+    <div class="analysis-kpi sl-kpi">
       <span>${label}</span>
       <strong>${value}</strong>
       <small>${note}</small>
@@ -179,7 +179,7 @@ function renderBetForm(index) {
         </div>
       </label>
 
-      <button type="button" class="analysis-button analysis-button--drawhunter" onclick="saveDrawHunterBet(${index})">
+      <button type="button" class="analysis-button analysis-button--drawhunter sl-button sl-button-primary" onclick="saveDrawHunterBet(${index})">
         <span>Valider le pari</span>
         <span aria-hidden="true">→</span>
       </button>

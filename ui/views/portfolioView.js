@@ -73,8 +73,8 @@ function renderSummaryCard(
   className = ""
 ) {
   return `
-    <div class="portfolio-stat">
-      <p class="small">
+    <div class="portfolio-stat sl-kpi-card">
+      <p class="small sl-muted">
         ${escapeHtml(label)}
       </p>
 
@@ -96,10 +96,10 @@ function renderStatisticsTable(
 
   if (safeRows.length === 0) {
     return `
-      <section class="portfolio-breakdown">
+      <section class="portfolio-breakdown sl-panel sl-section">
         <h3>${escapeHtml(title)}</h3>
 
-        <p class="small">
+        <p class="small sl-muted">
           Aucune donnée disponible.
         </p>
       </section>
@@ -107,11 +107,11 @@ function renderStatisticsTable(
   }
 
   return `
-    <section class="portfolio-breakdown">
+    <section class="portfolio-breakdown sl-panel sl-section">
       <h3>${escapeHtml(title)}</h3>
 
-      <div class="table-scroll">
-        <table class="portfolio-table">
+      <div class="table-scroll sl-table-wrap">
+        <table class="portfolio-table sl-table">
           <thead>
             <tr>
               <th>Catégorie</th>
@@ -187,9 +187,9 @@ export function renderPortfolio({
     statistics?.global || summary;
 
   return `
-    <div class="portfolio-page">
+    <div class="portfolio-page sl-page sl-stack sl-stack-lg">
 
-      <div class="grid portfolio-summary">
+      <div class="grid portfolio-summary sl-grid sl-kpi-grid">
         ${renderSummaryCard(
           "Paris placés",
           toNumber(global.placedBets)

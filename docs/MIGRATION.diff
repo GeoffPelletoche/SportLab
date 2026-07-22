@@ -1,0 +1,1129 @@
+diff --git a/./assets/sportlab.css b/./assets/sportlab.css
+new file mode 100644
+index 0000000..23974d8
+--- /dev/null
++++ b/./assets/sportlab.css
+@@ -0,0 +1,254 @@
++/*!
++ * SportLab V6.3.6
++ * Framework CSS Premium - Foundation
++ * Pack 2
++ */
++
++/* =========================================================
++01. DESIGN TOKENS
++========================================================= */
++:root{
++ --sl-bg:#08101d;
++ --sl-surface:#111c2d;
++ --sl-surface-2:#162235;
++ --sl-text:#f8fafc;
++ --sl-muted:#94a3b8;
++ --sl-primary:#38bdf8;
++ --sl-secondary:#8b5cf6;
++ --sl-success:#22c55e;
++ --sl-warning:#f59e0b;
++ --sl-danger:#ef4444;
++ --sl-radius:18px;
++ --sl-gap:16px;
++ --sl-shadow:0 16px 40px rgba(0,0,0,.25);
++ --sl-transition:.2s ease;
++}
++
++/* =========================================================
++02. RESET
++========================================================= */
++*,*:before,*:after{box-sizing:border-box}
++html{scroll-behavior:smooth}
++body{
++ margin:0;
++ background:var(--sl-bg);
++ color:var(--sl-text);
++ font-family:Inter,system-ui,sans-serif;
++}
++img{max-width:100%;display:block}
++button,input,select,textarea{font:inherit}
++
++/* =========================================================
++03. LAYOUT
++========================================================= */
++.sl-container{width:min(1240px,calc(100% - 32px));margin:auto}
++.sl-grid{display:grid;gap:var(--sl-gap)}
++.sl-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
++.sl-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
++.sl-stack>*+*{margin-top:var(--sl-gap)}
++
++/* =========================================================
++04. SURFACES
++========================================================= */
++.sl-card,.sl-panel{
++ background:var(--sl-surface);
++ border:1px solid rgba(255,255,255,.08);
++ border-radius:var(--sl-radius);
++ box-shadow:var(--sl-shadow);
++ padding:20px;
++ transition:all var(--sl-transition);
++}
++.sl-card:hover{transform:translateY(-2px)}
++
++/* =========================================================
++05. BUTTONS
++========================================================= */
++.sl-button{
++ display:inline-flex;
++ align-items:center;
++ justify-content:center;
++ min-height:44px;
++ padding:0 18px;
++ border-radius:12px;
++ border:0;
++ cursor:pointer;
++ color:white;
++ background:linear-gradient(135deg,var(--sl-primary),#2563eb);
++}
++.sl-button.secondary{
++ background:linear-gradient(135deg,var(--sl-secondary),#6d28d9);
++}
++.sl-button.success{background:var(--sl-success)}
++.sl-button.warning{background:var(--sl-warning)}
++.sl-button.danger{background:var(--sl-danger)}
++
++/* =========================================================
++06. BADGES
++========================================================= */
++.sl-badge{
++ display:inline-block;
++ padding:5px 10px;
++ border-radius:999px;
++ font-size:.75rem;
++ font-weight:700;
++}
++.sl-success{background:#133a24;color:#86efac}
++.sl-warning{background:#3b2d11;color:#fde68a}
++.sl-danger{background:#3d1414;color:#fca5a5}
++
++/* =========================================================
++07. KPI
++========================================================= */
++.sl-kpi{
++ padding:16px;
++ border-radius:14px;
++ background:var(--sl-surface-2);
++}
++.sl-kpi-label{color:var(--sl-muted);font-size:.75rem}
++.sl-kpi-value{font-size:1.5rem;font-weight:800}
++
++/* =========================================================
++08. TABLES
++========================================================= */
++.sl-table{width:100%;border-collapse:collapse}
++.sl-table th,.sl-table td{
++ padding:12px;
++ border-bottom:1px solid rgba(255,255,255,.08);
++}
++
++/* =========================================================
++09. FORMS
++========================================================= */
++.sl-input,.sl-select,.sl-textarea{
++ width:100%;
++ padding:12px;
++ border-radius:12px;
++ border:1px solid rgba(255,255,255,.08);
++ background:#0d1728;
++ color:white;
++}
++
++/* =========================================================
++10. NAVIGATION
++========================================================= */
++.sl-sidebar{}
++.sl-topbar{}
++.sl-nav{}
++.sl-nav-item{}
++
++/* =========================================================
++11. MODULE THEMES
++========================================================= */
++[data-module="drawhunter"]{--sl-primary:#38bdf8;}
++[data-module="frenchflair"]{--sl-primary:#a855f7;}
++
++/* =========================================================
++12. TRANSITION LAYER
++========================================================= */
++
++/* Legacy mapping */
++.analysis-card{ }
++.dashboard-card{ }
++.prediction-card{ }
++
++/* These legacy classes will progressively receive
++   .sl-card in Pack 3 before removal in Pack 4. */
++
++/* =========================================================
++13. RESPONSIVE
++========================================================= */
++@media(max-width:768px){
++ .sl-grid-2,.sl-grid-3{grid-template-columns:1fr}
++ .sl-container{width:min(100% - 20px,100%)}
++}
++/* =========================================================
++14. PACK 3 — MIGRATED VIEW COMPONENTS
++========================================================= */
++.sl-app-root{width:min(100% - 28px,1240px);margin:0 auto;padding:88px 0 32px}
++.sl-page{min-width:0}
++.sl-stack{display:grid;gap:var(--sl-gap)}
++.sl-stack-lg{gap:24px}
++.sl-page-section{margin-bottom:20px}
++.sl-section{display:grid;gap:16px}
++.sl-section-header{display:flex;align-items:center;justify-content:space-between;gap:16px}
++.sl-page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
++.sl-page-title,.sl-section-title{margin:0}
++.sl-muted{color:var(--sl-muted)}
++.sl-label{color:var(--sl-muted);font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
++.sl-positive{color:#86efac}.sl-negative{color:#fca5a5}.sl-value{color:#67e8f9}
++.sl-button-reset{border:0;background:none;color:inherit;padding:0}
++.sl-button-primary{background:linear-gradient(135deg,var(--sl-primary),#2563eb)}
++.sl-button-secondary{background:linear-gradient(135deg,var(--sl-secondary),#6d28d9)}
++.sl-card-compact{padding:14px}
++.sl-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
++.sl-kpi-card{padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:var(--sl-surface-2)}
++.sl-table-wrap{overflow-x:auto;border-radius:14px}
++.sl-empty-state{text-align:center;padding:32px 20px}
++.sl-state{display:flex;align-items:flex-start;gap:12px}
++.sl-summary{overflow:hidden}
++.sl-analysis-card{min-width:0}
++
++/* Navigation */
++.sl-topbar{position:fixed;inset:0 0 auto 0;z-index:1000;min-height:68px;display:flex;align-items:center;justify-content:space-between;padding:12px max(16px,calc((100vw - 1240px)/2));border-bottom:1px solid rgba(255,255,255,.08);background:rgba(8,16,29,.88);backdrop-filter:blur(18px)}
++.sl-brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:1.08rem;cursor:pointer}
++.sl-menu-toggle{display:grid;width:44px;height:44px;place-content:center;gap:5px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:var(--sl-surface);color:#fff}
++.sl-menu-toggle span{display:block;width:20px;height:2px;border-radius:99px;background:currentColor}
++.sl-mobile-menu{position:fixed;top:76px;right:16px;z-index:1010;display:grid;width:min(340px,calc(100vw - 32px));gap:8px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:18px;background:rgba(17,28,45,.98);box-shadow:var(--sl-shadow);transform:translateY(-8px);opacity:0;pointer-events:none;transition:opacity var(--sl-transition),transform var(--sl-transition)}
++.sl-mobile-menu.menu-open,.sl-mobile-menu.is-open{transform:none;opacity:1;pointer-events:auto}
++.sl-nav-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;min-height:48px;padding:10px 12px;border:0;border-radius:12px;background:transparent;color:var(--sl-text);text-align:left;cursor:pointer}
++.sl-nav-item:hover,.sl-nav-item.is-active,.sl-nav-item.nav-active{background:rgba(56,189,248,.10)}
++.sl-menu-backdrop{position:fixed;inset:68px 0 0;z-index:1005;background:rgba(0,0,0,.45);opacity:0;pointer-events:none}
++.sl-menu-backdrop.menu-open,.sl-menu-backdrop.is-open{opacity:1;pointer-events:auto}
++
++/* Dashboard */
++.sl-hero{position:relative;overflow:hidden;padding:28px}
++.sl-hero:after{position:absolute;right:-80px;top:-100px;width:260px;height:260px;border-radius:50%;content:"";background:radial-gradient(circle,rgba(56,189,248,.22),transparent 68%)}
++.sl-module-card{display:flex;min-height:280px;flex-direction:column}
++.premium-module-footer{margin-top:auto}
++.premium-module-stats,.premium-sync-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
++.premium-module-stat{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
++.premium-dashboard-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
++.premium-dashboard-kpis{margin-top:2px}
++.premium-alert-list{display:grid;gap:10px}
++
++/* Analysis views */
++.analysis-summary__grid,.analysis-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
++.analysis-grid{align-items:start}
++.analysis-card{display:flex;flex-direction:column;overflow:hidden}
++.analysis-card__header,.analysis-card__footer{padding:18px}
++.analysis-matchup{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding:20px 18px}
++.analysis-team--away{text-align:right}
++.analysis-vs{display:grid;width:40px;height:40px;place-items:center;border-radius:50%;background:rgba(255,255,255,.06)}
++.analysis-kpis{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 18px 18px}
++.analysis-progress{padding:0 18px 18px}
++.analysis-progress__track{height:8px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}
++.analysis-progress__track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--sl-primary),var(--sl-secondary))}
++.analysis-market,.analysis-total,.analysis-range,.analysis-state--inline{margin:0 18px 18px;padding:14px;border-radius:14px;background:rgba(255,255,255,.04)}
++.analysis-total{text-align:center}
++.analysis-bet-panel{display:grid;gap:12px;padding:14px;border-radius:14px;background:rgba(34,197,94,.07)}
++.analysis-button{width:100%}
++.analysis-field{display:grid;gap:7px}.analysis-field__control{display:grid;grid-template-columns:1fr auto;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#0d1728}.analysis-field__control input{width:100%;border:0;background:transparent;color:#fff;padding:12px;outline:0}.analysis-field__control span{padding:12px;color:var(--sl-muted)}
++
++/* Portfolio and journal */
++.portfolio-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
++.portfolio-stat h3{margin:.35rem 0 0}
++.journal-list{gap:14px}.journal-card{padding:18px}.journal-card-header,.journal-card-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.journal-card-metrics,.journal-financial-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.journal-metric,.journal-financial-item{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
++
++/* Status mappings */
++.sl-badge-info,.badge-info{background:rgba(59,130,246,.15);color:#93c5fd}
++.sl-badge-success,.badge-success{background:rgba(34,197,94,.15);color:#86efac}
++.sl-badge-warning,.badge-warning{background:rgba(245,158,11,.15);color:#fcd34d}
++.sl-badge-danger,.badge-danger{background:rgba(239,68,68,.15);color:#fca5a5}
++.sl-badge-neutral,.badge-secondary{background:rgba(148,163,184,.12);color:#cbd5e1}
++
++@media(max-width:900px){
++ .sl-kpi-grid,.portfolio-summary,.analysis-summary__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
++ .premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
++}
++@media(max-width:640px){
++ .sl-app-root{width:min(100% - 20px,1240px);padding-top:80px}
++ .sl-page-header,.sl-section-header,.journal-card-header,.journal-card-footer{align-items:stretch;flex-direction:column}
++ .sl-kpi-grid,.portfolio-summary,.analysis-summary__grid,.analysis-kpis,.premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:1fr}
++ .analysis-matchup{grid-template-columns:1fr;text-align:center}.analysis-team--away{text-align:center}.analysis-vs{margin:auto}
++ .sl-hero{padding:20px}
++}
+diff --git a/./docs/MIGRATION.diff b/./docs/MIGRATION.diff
+new file mode 100644
+index 0000000..d009838
+--- /dev/null
++++ b/./docs/MIGRATION.diff
+@@ -0,0 +1,258 @@
++diff --git a/./assets/sportlab.css b/./assets/sportlab.css
++new file mode 100644
++index 0000000..23974d8
++--- /dev/null
+++++ b/./assets/sportlab.css
++@@ -0,0 +1,254 @@
+++/*!
+++ * SportLab V6.3.6
+++ * Framework CSS Premium - Foundation
+++ * Pack 2
+++ */
+++
+++/* =========================================================
+++01. DESIGN TOKENS
+++========================================================= */
+++:root{
+++ --sl-bg:#08101d;
+++ --sl-surface:#111c2d;
+++ --sl-surface-2:#162235;
+++ --sl-text:#f8fafc;
+++ --sl-muted:#94a3b8;
+++ --sl-primary:#38bdf8;
+++ --sl-secondary:#8b5cf6;
+++ --sl-success:#22c55e;
+++ --sl-warning:#f59e0b;
+++ --sl-danger:#ef4444;
+++ --sl-radius:18px;
+++ --sl-gap:16px;
+++ --sl-shadow:0 16px 40px rgba(0,0,0,.25);
+++ --sl-transition:.2s ease;
+++}
+++
+++/* =========================================================
+++02. RESET
+++========================================================= */
+++*,*:before,*:after{box-sizing:border-box}
+++html{scroll-behavior:smooth}
+++body{
+++ margin:0;
+++ background:var(--sl-bg);
+++ color:var(--sl-text);
+++ font-family:Inter,system-ui,sans-serif;
+++}
+++img{max-width:100%;display:block}
+++button,input,select,textarea{font:inherit}
+++
+++/* =========================================================
+++03. LAYOUT
+++========================================================= */
+++.sl-container{width:min(1240px,calc(100% - 32px));margin:auto}
+++.sl-grid{display:grid;gap:var(--sl-gap)}
+++.sl-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+++.sl-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+++.sl-stack>*+*{margin-top:var(--sl-gap)}
+++
+++/* =========================================================
+++04. SURFACES
+++========================================================= */
+++.sl-card,.sl-panel{
+++ background:var(--sl-surface);
+++ border:1px solid rgba(255,255,255,.08);
+++ border-radius:var(--sl-radius);
+++ box-shadow:var(--sl-shadow);
+++ padding:20px;
+++ transition:all var(--sl-transition);
+++}
+++.sl-card:hover{transform:translateY(-2px)}
+++
+++/* =========================================================
+++05. BUTTONS
+++========================================================= */
+++.sl-button{
+++ display:inline-flex;
+++ align-items:center;
+++ justify-content:center;
+++ min-height:44px;
+++ padding:0 18px;
+++ border-radius:12px;
+++ border:0;
+++ cursor:pointer;
+++ color:white;
+++ background:linear-gradient(135deg,var(--sl-primary),#2563eb);
+++}
+++.sl-button.secondary{
+++ background:linear-gradient(135deg,var(--sl-secondary),#6d28d9);
+++}
+++.sl-button.success{background:var(--sl-success)}
+++.sl-button.warning{background:var(--sl-warning)}
+++.sl-button.danger{background:var(--sl-danger)}
+++
+++/* =========================================================
+++06. BADGES
+++========================================================= */
+++.sl-badge{
+++ display:inline-block;
+++ padding:5px 10px;
+++ border-radius:999px;
+++ font-size:.75rem;
+++ font-weight:700;
+++}
+++.sl-success{background:#133a24;color:#86efac}
+++.sl-warning{background:#3b2d11;color:#fde68a}
+++.sl-danger{background:#3d1414;color:#fca5a5}
+++
+++/* =========================================================
+++07. KPI
+++========================================================= */
+++.sl-kpi{
+++ padding:16px;
+++ border-radius:14px;
+++ background:var(--sl-surface-2);
+++}
+++.sl-kpi-label{color:var(--sl-muted);font-size:.75rem}
+++.sl-kpi-value{font-size:1.5rem;font-weight:800}
+++
+++/* =========================================================
+++08. TABLES
+++========================================================= */
+++.sl-table{width:100%;border-collapse:collapse}
+++.sl-table th,.sl-table td{
+++ padding:12px;
+++ border-bottom:1px solid rgba(255,255,255,.08);
+++}
+++
+++/* =========================================================
+++09. FORMS
+++========================================================= */
+++.sl-input,.sl-select,.sl-textarea{
+++ width:100%;
+++ padding:12px;
+++ border-radius:12px;
+++ border:1px solid rgba(255,255,255,.08);
+++ background:#0d1728;
+++ color:white;
+++}
+++
+++/* =========================================================
+++10. NAVIGATION
+++========================================================= */
+++.sl-sidebar{}
+++.sl-topbar{}
+++.sl-nav{}
+++.sl-nav-item{}
+++
+++/* =========================================================
+++11. MODULE THEMES
+++========================================================= */
+++[data-module="drawhunter"]{--sl-primary:#38bdf8;}
+++[data-module="frenchflair"]{--sl-primary:#a855f7;}
+++
+++/* =========================================================
+++12. TRANSITION LAYER
+++========================================================= */
+++
+++/* Legacy mapping */
+++.analysis-card{ }
+++.dashboard-card{ }
+++.prediction-card{ }
+++
+++/* These legacy classes will progressively receive
+++   .sl-card in Pack 3 before removal in Pack 4. */
+++
+++/* =========================================================
+++13. RESPONSIVE
+++========================================================= */
+++@media(max-width:768px){
+++ .sl-grid-2,.sl-grid-3{grid-template-columns:1fr}
+++ .sl-container{width:min(100% - 20px,100%)}
+++}
+++/* =========================================================
+++14. PACK 3 — MIGRATED VIEW COMPONENTS
+++========================================================= */
+++.sl-app-root{width:min(100% - 28px,1240px);margin:0 auto;padding:88px 0 32px}
+++.sl-page{min-width:0}
+++.sl-stack{display:grid;gap:var(--sl-gap)}
+++.sl-stack-lg{gap:24px}
+++.sl-page-section{margin-bottom:20px}
+++.sl-section{display:grid;gap:16px}
+++.sl-section-header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+++.sl-page-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+++.sl-page-title,.sl-section-title{margin:0}
+++.sl-muted{color:var(--sl-muted)}
+++.sl-label{color:var(--sl-muted);font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+++.sl-positive{color:#86efac}.sl-negative{color:#fca5a5}.sl-value{color:#67e8f9}
+++.sl-button-reset{border:0;background:none;color:inherit;padding:0}
+++.sl-button-primary{background:linear-gradient(135deg,var(--sl-primary),#2563eb)}
+++.sl-button-secondary{background:linear-gradient(135deg,var(--sl-secondary),#6d28d9)}
+++.sl-card-compact{padding:14px}
+++.sl-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+++.sl-kpi-card{padding:16px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:var(--sl-surface-2)}
+++.sl-table-wrap{overflow-x:auto;border-radius:14px}
+++.sl-empty-state{text-align:center;padding:32px 20px}
+++.sl-state{display:flex;align-items:flex-start;gap:12px}
+++.sl-summary{overflow:hidden}
+++.sl-analysis-card{min-width:0}
+++
+++/* Navigation */
+++.sl-topbar{position:fixed;inset:0 0 auto 0;z-index:1000;min-height:68px;display:flex;align-items:center;justify-content:space-between;padding:12px max(16px,calc((100vw - 1240px)/2));border-bottom:1px solid rgba(255,255,255,.08);background:rgba(8,16,29,.88);backdrop-filter:blur(18px)}
+++.sl-brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:1.08rem;cursor:pointer}
+++.sl-menu-toggle{display:grid;width:44px;height:44px;place-content:center;gap:5px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:var(--sl-surface);color:#fff}
+++.sl-menu-toggle span{display:block;width:20px;height:2px;border-radius:99px;background:currentColor}
+++.sl-mobile-menu{position:fixed;top:76px;right:16px;z-index:1010;display:grid;width:min(340px,calc(100vw - 32px));gap:8px;padding:12px;border:1px solid rgba(255,255,255,.10);border-radius:18px;background:rgba(17,28,45,.98);box-shadow:var(--sl-shadow);transform:translateY(-8px);opacity:0;pointer-events:none;transition:opacity var(--sl-transition),transform var(--sl-transition)}
+++.sl-mobile-menu.menu-open,.sl-mobile-menu.is-open{transform:none;opacity:1;pointer-events:auto}
+++.sl-nav-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;width:100%;min-height:48px;padding:10px 12px;border:0;border-radius:12px;background:transparent;color:var(--sl-text);text-align:left;cursor:pointer}
+++.sl-nav-item:hover,.sl-nav-item.is-active,.sl-nav-item.nav-active{background:rgba(56,189,248,.10)}
+++.sl-menu-backdrop{position:fixed;inset:68px 0 0;z-index:1005;background:rgba(0,0,0,.45);opacity:0;pointer-events:none}
+++.sl-menu-backdrop.menu-open,.sl-menu-backdrop.is-open{opacity:1;pointer-events:auto}
+++
+++/* Dashboard */
+++.sl-hero{position:relative;overflow:hidden;padding:28px}
+++.sl-hero:after{position:absolute;right:-80px;top:-100px;width:260px;height:260px;border-radius:50%;content:"";background:radial-gradient(circle,rgba(56,189,248,.22),transparent 68%)}
+++.sl-module-card{display:flex;min-height:280px;flex-direction:column}
+++.premium-module-footer{margin-top:auto}
+++.premium-module-stats,.premium-sync-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+++.premium-module-stat{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
+++.premium-dashboard-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+++.premium-dashboard-kpis{margin-top:2px}
+++.premium-alert-list{display:grid;gap:10px}
+++
+++/* Analysis views */
+++.analysis-summary__grid,.analysis-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+++.analysis-grid{align-items:start}
+++.analysis-card{display:flex;flex-direction:column;overflow:hidden}
+++.analysis-card__header,.analysis-card__footer{padding:18px}
+++.analysis-matchup{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding:20px 18px}
+++.analysis-team--away{text-align:right}
+++.analysis-vs{display:grid;width:40px;height:40px;place-items:center;border-radius:50%;background:rgba(255,255,255,.06)}
+++.analysis-kpis{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 18px 18px}
+++.analysis-progress{padding:0 18px 18px}
+++.analysis-progress__track{height:8px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}
+++.analysis-progress__track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--sl-primary),var(--sl-secondary))}
+++.analysis-market,.analysis-total,.analysis-range,.analysis-state--inline{margin:0 18px 18px;padding:14px;border-radius:14px;background:rgba(255,255,255,.04)}
+++.analysis-total{text-align:center}
+++.analysis-bet-panel{display:grid;gap:12px;padding:14px;border-radius:14px;background:rgba(34,197,94,.07)}
+++.analysis-button{width:100%}
+++.analysis-field{display:grid;gap:7px}.analysis-field__control{display:grid;grid-template-columns:1fr auto;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#0d1728}.analysis-field__control input{width:100%;border:0;background:transparent;color:#fff;padding:12px;outline:0}.analysis-field__control span{padding:12px;color:var(--sl-muted)}
+++
+++/* Portfolio and journal */
+++.portfolio-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+++.portfolio-stat h3{margin:.35rem 0 0}
+++.journal-list{gap:14px}.journal-card{padding:18px}.journal-card-header,.journal-card-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}.journal-card-metrics,.journal-financial-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.journal-metric,.journal-financial-item{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
+++
+++/* Status mappings */
+++.sl-badge-info,.badge-info{background:rgba(59,130,246,.15);color:#93c5fd}
+++.sl-badge-success,.badge-success{background:rgba(34,197,94,.15);color:#86efac}
+++.sl-badge-warning,.badge-warning{background:rgba(245,158,11,.15);color:#fcd34d}
+++.sl-badge-danger,.badge-danger{background:rgba(239,68,68,.15);color:#fca5a5}
+++.sl-badge-neutral,.badge-secondary{background:rgba(148,163,184,.12);color:#cbd5e1}
+++
+++@media(max-width:900px){
+++ .sl-kpi-grid,.portfolio-summary,.analysis-summary__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+++ .premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+++}
+++@media(max-width:640px){
+++ .sl-app-root{width:min(100% - 20px,1240px);padding-top:80px}
+++ .sl-page-header,.sl-section-header,.journal-card-header,.journal-card-footer{align-items:stretch;flex-direction:column}
+++ .sl-kpi-grid,.portfolio-summary,.analysis-summary__grid,.analysis-kpis,.premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:1fr}
+++ .analysis-matchup{grid-template-columns:1fr;
+\ No newline at end of file
+diff --git a/./docs/PACK3_MIGRATION.md b/./docs/PACK3_MIGRATION.md
+new file mode 100644
+index 0000000..1b1575e
+--- /dev/null
++++ b/./docs/PACK3_MIGRATION.md
+@@ -0,0 +1,43 @@
++# SportLab V6.3.6 — Pack 3
++
++## Objectif
++Migration des vues vers le Framework CSS Premium `.sl-*`, sans modification des moteurs métier.
++
++## Fichiers migrés
++- `index.html`
++- `ui/views/navigationView.js`
++- `ui/views/dashboardView.js`
++- `ui/views/drawhunterView.js`
++- `ui/views/frenchflairView.js`
++- `ui/views/betsView.js`
++- `ui/views/journalView.js`
++- `ui/views/portfolioView.js`
++- `ui/views/diagnosticsView.js`
++- `assets/sportlab.css`
++
++## Installation
++Le projet fourni est déjà configuré avec :
++
++```html
++<link rel="stylesheet" href="./assets/style.css" />
++<link rel="stylesheet" href="./assets/sportlab.css" />
++```
++
++Conserver les deux fichiers pendant ce Pack 3. `sportlab.css` est chargé en dernier.
++
++## Sécurité
++- Identifiants `id` conservés.
++- Fonctions `onclick` conservées.
++- Classes historiques conservées en double avec les classes `.sl-*`.
++- Services, stores, API et moteurs non modifiés.
++
++## Contrôles recommandés
++1. Ouverture/fermeture du menu hamburger.
++2. Navigation entre toutes les pages.
++3. Dashboard sur mobile et bureau.
++4. Saisie et validation des paris DrawHunter/FrenchFlair.
++5. Journal, Portfolio et Diagnostics.
++6. Persistance après actualisation.
++
++## Suite
++Le Pack 4 pourra supprimer progressivement les règles historiques uniquement après validation visuelle et fonctionnelle.
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/index.html b/./index.html
+index 0308256..8d9d148 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/index.html
++++ b/./index.html
+@@ -7,14 +7,15 @@
+   <title>SportLab</title>
+ 
+   <link rel="stylesheet" href="./assets/style.css" />
++  <link rel="stylesheet" href="./assets/sportlab.css" />
+ </head>
+ 
+-<body>
++<body class="sl-app">
+   <noscript>
+     SportLab nécessite JavaScript pour fonctionner.
+   </noscript>
+ 
+-  <div id="app">
++  <div id="app" class="sl-app-root">
+     <h1>🏟️ SportLab</h1>
+     <p>Chargement...</p>
+   </div>
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/betsView.js b/./ui/views/betsView.js
+index 3d7366c..7790adf 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/betsView.js
++++ b/./ui/views/betsView.js
+@@ -1,22 +1,22 @@
+ function formatResultBadge(bet) {
+   switch (bet.result) {
+     case "WON":
+-      return `<span class="badge badge-success">✅ Pari gagné</span>`;
++      return `<span class="badge sl-badge badge-success">✅ Pari gagné</span>`;
+ 
+     case "LOST":
+-      return `<span class="badge badge-danger">❌ Pari perdu</span>`;
++      return `<span class="badge sl-badge badge-danger">❌ Pari perdu</span>`;
+ 
+     case "PUSH":
+-      return `<span class="badge badge-warning">↩️ Pari remboursé</span>`;
++      return `<span class="badge sl-badge badge-warning">↩️ Pari remboursé</span>`;
+ 
+     case "PENDING":
+-      return `<span class="badge badge-info">⏳ Pari en attente</span>`;
++      return `<span class="badge sl-badge badge-info">⏳ Pari en attente</span>`;
+ 
+     case "NON_PLACED":
+-      return `<span class="badge badge-secondary">📝 Analyse uniquement</span>`;
++      return `<span class="badge sl-badge badge-secondary">📝 Analyse uniquement</span>`;
+ 
+     default:
+-      return `<span class="badge badge-secondary">Inconnu</span>`;
++      return `<span class="badge sl-badge badge-secondary">Inconnu</span>`;
+   }
+ }
+ 
+@@ -132,7 +132,7 @@ export function renderBets(bets = []) {
+     return `
+       <h2>🎯 Paris placés</h2>
+ 
+-      <p class="small">
++      <p class="small sl-muted">
+         Aucun pari placé pour le moment.
+       </p>
+     `;
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/dashboardView.js b/./ui/views/dashboardView.js
+index 1376c8c..5a4585d 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/dashboardView.js
++++ b/./ui/views/dashboardView.js
+@@ -28,7 +28,7 @@ export function renderDashboard({
+   switch (activePage) {
+     case "drawhunter":
+       content = `
+-        <section class="card">
++        <section class="card sl-card sl-page-section">
+           <h2>⚽ DrawHunter</h2>
+           ${drawhunterHtml}
+         </section>
+@@ -37,7 +37,7 @@ export function renderDashboard({
+ 
+     case "frenchflair":
+       content = `
+-        <section class="card">
++        <section class="card sl-card sl-page-section">
+           <h2>🏉 FrenchFlair</h2>
+           ${frenchflairHtml}
+         </section>
+@@ -46,7 +46,7 @@ export function renderDashboard({
+ 
+     case "journal":
+       content = `
+-        <section class="card">
++        <section class="card sl-card sl-page-section">
+           ${journalHtml}
+         </section>
+       `;
+@@ -54,7 +54,7 @@ export function renderDashboard({
+ 
+     case "bets":
+       content = `
+-        <section class="card">
++        <section class="card sl-card sl-page-section">
+           ${betsHtml}
+         </section>
+       `;
+@@ -62,7 +62,7 @@ export function renderDashboard({
+ 
+     case "portfolio":
+       content = `
+-        <section class="card">
++        <section class="card sl-card sl-page-section">
+           <h2>💼 Portfolio</h2>
+           ${portfolioHtml}
+         </section>
+@@ -71,7 +71,7 @@ export function renderDashboard({
+ 
+     case "diagnostics":
+       content = `
+-        <section class="card">
++        <section class="card sl-card sl-page-section">
+           <h2>🩺 Diagnostics</h2>
+           ${diagnosticsHtml}
+         </section>
+@@ -155,7 +155,7 @@ function renderPremiumHome({
+     ]);
+ 
+   return `
+-    <section class="premium-dashboard">
++    <section class="premium-dashboard sl-page sl-stack sl-stack-lg">
+ 
+       ${renderHero({
+         totalMatches,
+@@ -163,7 +163,7 @@ function renderPremiumHome({
+         latestSync
+       })}
+ 
+-      <section class="premium-module-grid">
++      <section class="premium-module-grid sl-grid sl-grid-2">
+ 
+         ${renderModuleCard({
+           type: "drawhunter",
+@@ -220,7 +220,7 @@ function renderHero({
+   latestSync
+ }) {
+   return `
+-    <section class="premium-dashboard-hero">
++    <section class="premium-dashboard-hero sl-hero sl-panel">
+ 
+       <div class="premium-dashboard-hero-content">
+ 
+@@ -300,7 +300,7 @@ function renderModuleCard({
+     <button
+       type="button"
+       class="
+-        premium-module-card
++        premium-module-card sl-card sl-module-card
+         premium-module-${escapeAttribute(type)}
+         ${hasValue ? "premium-module-has-value" : ""}
+       "
+@@ -398,7 +398,7 @@ function renderDashboardKpis({
+   roi
+ }) {
+   return `
+-    <section class="premium-dashboard-section">
++    <section class="premium-dashboard-section sl-section">
+ 
+       <header class="sl-section-header">
+         <h2 class="sl-section-title">
+@@ -465,7 +465,7 @@ function renderDashboardKpi({
+   valueClass = ""
+ }) {
+   return `
+-    <article class="sl-kpi-card premium-dashboard-kpi">
++    <article class="sl-kpi-card premium-dashboard-kpi sl-kpi-card">
+ 
+       <span class="premium-dashboard-kpi-icon">
+         ${icon}
+@@ -500,7 +500,7 @@ function renderAlerts({
+     frenchflairPayload?.meta?.error === true;
+ 
+   return `
+-    <section class="sl-panel premium-alert-panel">
++    <section class="sl-panel premium-alert-panel sl-panel">
+ 
+       <header class="sl-section-header">
+         <h2 class="sl-section-title">
+@@ -609,7 +609,7 @@ function renderSyncPanel({
+   frenchflairPayload
+ }) {
+   return `
+-    <section class="sl-panel premium-sync-panel">
++    <section class="sl-panel premium-sync-panel sl-panel">
+ 
+       <header class="sl-section-header">
+         <h2 class="sl-section-title">
+@@ -646,7 +646,7 @@ function renderSyncItem({
+     meta?.error === true;
+ 
+   return `
+-    <article class="premium-sync-item">
++    <article class="premium-sync-item sl-card sl-card-compact">
+ 
+       <div class="premium-sync-title">
+ 
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/diagnosticsView.js b/./ui/views/diagnosticsView.js
+index 73a6e2e..79e4dfc 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/diagnosticsView.js
++++ b/./ui/views/diagnosticsView.js
+@@ -28,7 +28,7 @@ function escapeHtml(value) {
+ export function renderDiagnostics(diagnostic) {
+   if (!diagnostic) {
+     return `
+-      <div class="diagnostics-page">
++      <div class="diagnostics-page sl-page sl-stack">
+         <p>
+           Aucun diagnostic de règlement n’a encore été enregistré.
+         </p>
+@@ -72,7 +72,7 @@ export function renderDiagnostics(diagnostic) {
+     diagnostic.location?.displayMode || "inconnu";
+ 
+   return `
+-    <div class="diagnostics-page">
++    <div class="diagnostics-page sl-page sl-stack">
+ 
+       <p>
+         Dernier contrôle :
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/drawhunterView.js b/./ui/views/drawhunterView.js
+index fa9f0b3..d7fad5f 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/drawhunterView.js
++++ b/./ui/views/drawhunterView.js
+@@ -8,7 +8,7 @@ export function renderDrawHunter(payload) {
+   const meta = payload?.meta || null;
+ 
+   return `
+-    <section class="analysis-page analysis-page--drawhunter">
++    <section class="analysis-page analysis-page--drawhunter sl-page sl-stack" data-module="drawhunter">
+       ${renderMeta(meta)}
+       ${matches.length === 0 ? renderEmpty(meta) : renderMatches(matches)}
+     </section>
+@@ -18,7 +18,7 @@ export function renderDrawHunter(payload) {
+ function renderMeta(meta) {
+   if (!meta) {
+     return `
+-      <div class="analysis-state analysis-state--muted">
++      <div class="analysis-state analysis-state--muted sl-panel sl-state">
+         <span class="analysis-state__icon" aria-hidden="true">⚠️</span>
+         <div>
+           <strong>Synchronisation non disponible</strong>
+@@ -29,7 +29,7 @@ function renderMeta(meta) {
+   }
+ 
+   return `
+-    <section class="analysis-summary analysis-summary--drawhunter" aria-label="Résumé DrawHunter">
++    <section class="analysis-summary analysis-summary--drawhunter sl-panel sl-summary" aria-label="Résumé DrawHunter">
+       <div class="analysis-summary__heading">
+         <div>
+           <p class="analysis-eyebrow">⚽ DrawHunter</p>
+@@ -61,7 +61,7 @@ function renderSummaryItem(label, value) {
+ 
+ function renderEmpty(meta) {
+   return `
+-    <section class="analysis-empty">
++    <section class="analysis-empty sl-empty-state sl-panel">
+       <div class="analysis-empty__icon" aria-hidden="true">⚽</div>
+       <h3>Aucun match trouvé</h3>
+       <p>
+@@ -87,7 +87,7 @@ function renderEmpty(meta) {
+ 
+ function renderMatches(matches) {
+   return `
+-    <div class="analysis-grid">
++    <div class="analysis-grid sl-grid sl-grid-2">
+       ${matches.map((match, index) => renderMatchCard(match, index)).join("")}
+     </div>
+   `;
+@@ -99,13 +99,13 @@ function renderMatchCard(match, index) {
+   const value = toPercent(match.value);
+ 
+   return `
+-    <article class="analysis-card analysis-card--drawhunter ${isValue ? "analysis-card--value" : ""}">
++    <article class="analysis-card analysis-card--drawhunter sl-card sl-analysis-card ${isValue ? "analysis-card--value" : ""}">
+       <header class="analysis-card__header">
+         <div>
+           <p class="analysis-card__competition">⚽ ${safe(match.competition || "Compétition")}</p>
+           <p class="analysis-card__date">${formatDate(match.date)}</p>
+         </div>
+-        <span class="analysis-decision ${isValue ? "analysis-decision--value" : "analysis-decision--pass"}">
++        <span class="analysis-decision sl-badge ${isValue ? "analysis-decision--value" : "analysis-decision--pass"}">
+           ${safe(match.decision || "À ANALYSER")}
+         </span>
+       </header>
+@@ -133,7 +133,7 @@ function renderMatchCard(match, index) {
+         ${renderKpi("Value", `${value}%`, valueTone(match.value))}
+       </div>
+ 
+-      <div class="analysis-progress" aria-label="Probabilité modèle">
++      <div class="analysis-progress sl-progress" aria-label="Probabilité modèle">
+         <div class="analysis-progress__heading">
+           <span>Probabilité de nul</span>
+           <strong>${probability}%</strong>
+@@ -152,7 +152,7 @@ function renderMatchCard(match, index) {
+ 
+ function renderKpi(label, value, note) {
+   return `
+-    <div class="analysis-kpi">
++    <div class="analysis-kpi sl-kpi">
+       <span>${label}</span>
+       <strong>${value}</strong>
+       <small>${note}</small>
+@@ -179,7 +179,7 @@ function renderBetForm(index) {
+         </div>
+       </label>
+ 
+-      <button type="button" class="analysis-button analysis-button--drawhunter" onclick="saveDrawHunterBet(${index})">
++      <button type="button" class="analysis-button analysis-button--drawhunter sl-button sl-button-primary" onclick="saveDrawHunterBet(${index})">
+         <span>Valider le pari</span>
+         <span aria-hidden="true">→</span>
+       </button>
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/frenchflairView.js b/./ui/views/frenchflairView.js
+index da10cb2..eb7fd1a 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/frenchflairView.js
++++ b/./ui/views/frenchflairView.js
+@@ -10,7 +10,7 @@ export function renderFrenchFlair(payload) {
+   const meta = payload?.meta || null;
+ 
+   return `
+-    <section class="analysis-page analysis-page--frenchflair">
++    <section class="analysis-page analysis-page--frenchflair sl-page sl-stack" data-module="frenchflair">
+       ${renderMeta(meta)}
+       ${matches.length === 0 ? renderEmpty(meta) : renderMatches(matches)}
+     </section>
+@@ -20,7 +20,7 @@ export function renderFrenchFlair(payload) {
+ function renderMeta(meta) {
+   if (!meta) {
+     return `
+-      <div class="analysis-state analysis-state--muted">
++      <div class="analysis-state analysis-state--muted sl-panel sl-state">
+         <span class="analysis-state__icon" aria-hidden="true">⚠️</span>
+         <div>
+           <strong>Synchronisation rugby non disponible</strong>
+@@ -31,7 +31,7 @@ function renderMeta(meta) {
+   }
+ 
+   return `
+-    <section class="analysis-summary analysis-summary--frenchflair" aria-label="Résumé FrenchFlair">
++    <section class="analysis-summary analysis-summary--frenchflair sl-panel sl-summary" aria-label="Résumé FrenchFlair">
+       <div class="analysis-summary__heading">
+         <div>
+           <p class="analysis-eyebrow">🏉 FrenchFlair</p>
+@@ -64,7 +64,7 @@ function renderSummaryItem(label, value) {
+ 
+ function renderEmpty() {
+   return `
+-    <section class="analysis-empty">
++    <section class="analysis-empty sl-empty-state sl-panel">
+       <div class="analysis-empty__icon" aria-hidden="true">🏉</div>
+       <h3>Aucun match rugby trouvé</h3>
+       <p>Aucune rencontre n’est disponible sur la période analysée.</p>
+@@ -74,7 +74,7 @@ function renderEmpty() {
+ 
+ function renderMatches(matches) {
+   return `
+-    <div class="analysis-grid">
++    <div class="analysis-grid sl-grid sl-grid-2">
+       ${matches.map((match) => renderMatchCard(match)).join("")}
+     </div>
+   `;
+@@ -86,7 +86,7 @@ function renderMatchCard(match) {
+   const trendIcon = trend === "OVER" ? "📈" : "📉";
+ 
+   return `
+-    <article class="analysis-card analysis-card--frenchflair">
++    <article class="analysis-card analysis-card--frenchflair sl-card sl-analysis-card">
+       <header class="analysis-card__header">
+         <div>
+           <p class="analysis-card__competition">🏉 ${safe(match.competition || "Compétition")}</p>
+@@ -94,11 +94,11 @@ function renderMatchCard(match) {
+         </div>
+ 
+         ${predictionAvailable ? `
+-          <span class="analysis-decision analysis-decision--trend analysis-decision--${trend.toLowerCase()}">
++          <span class="analysis-decision sl-badge analysis-decision--trend analysis-decision--${trend.toLowerCase()}">
+             ${trendIcon} ${trend}
+           </span>
+         ` : `
+-          <span class="analysis-decision analysis-decision--pass">INDISPONIBLE</span>
++          <span class="analysis-decision sl-badge analysis-decision--pass">INDISPONIBLE</span>
+         `}
+       </header>
+ 
+@@ -123,7 +123,7 @@ function renderMatchCard(match) {
+       <footer class="analysis-card__footer">
+         <button
+           type="button"
+-          class="analysis-button analysis-button--frenchflair"
++          class="analysis-button analysis-button--frenchflair sl-button sl-button-secondary"
+           onclick="analyzeFrenchFlairValue('${safeAttribute(match.id)}')"
+         >
+           <span>Analyser la value</span>
+@@ -178,12 +178,12 @@ function renderPrediction(match) {
+           </strong>
+         </div>
+ 
+-        <span class="analysis-confidence ${confidenceClass(confidence)}">
++        <span class="analysis-confidence sl-badge ${confidenceClass(confidence)}">
+           ${confidenceLabel(confidence)} · ${confidence}%
+         </span>
+       </div>
+ 
+-      <div class="analysis-progress" aria-label="Niveau de confiance">
++      <div class="analysis-progress sl-progress" aria-label="Niveau de confiance">
+         <div class="analysis-progress__heading">
+           <span>Confiance du modèle</span>
+           <strong>${confidence}%</strong>
+@@ -203,7 +203,7 @@ function renderPrediction(match) {
+ 
+ function renderKpi(label, value, note) {
+   return `
+-    <div class="analysis-kpi">
++    <div class="analysis-kpi sl-kpi">
+       <span>${label}</span>
+       <strong>${value}</strong>
+       <small>${note}</small>
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/journalView.js b/./ui/views/journalView.js
+index b5cbfef..26853ef 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/journalView.js
++++ b/./ui/views/journalView.js
+@@ -20,7 +20,7 @@ export function renderJournal(journal = {}) {
+     } = journal;
+ 
+     return `
+-        <section class="journal-page">
++        <section class="journal-page sl-page sl-stack sl-stack-lg">
+ 
+             ${renderJournalHeader(
+                 totalEntries
+@@ -45,7 +45,7 @@ export function renderJournal(journal = {}) {
+                 totalEntries
+             })}
+ 
+-            <section class="journal-list">
++            <section class="journal-list sl-stack">
+ 
+                 ${
+                     entries.length === 0
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/navigationView.js b/./ui/views/navigationView.js
+index 444dcf3..b47eed2 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/navigationView.js
++++ b/./ui/views/navigationView.js
+@@ -4,11 +4,11 @@
+ 
+ export function renderNavigation(activePage = "home") {
+   return `
+-    <header class="sportlab-app-header">
++    <header class="sportlab-app-header sl-topbar">
+ 
+       <button
+         type="button"
+-        class="sportlab-brand"
++        class="sportlab-brand sl-brand sl-button-reset"
+         onclick="navigateSportLab('home')"
+         aria-label="Retour à l'accueil"
+       >
+@@ -24,7 +24,7 @@ export function renderNavigation(activePage = "home") {
+       <button
+         type="button"
+         id="sportlab-menu-toggle"
+-        class="sportlab-menu-toggle"
++        class="sportlab-menu-toggle sl-menu-toggle"
+         aria-label="Ouvrir le menu"
+         aria-expanded="false"
+         aria-controls="sportlab-mobile-menu"
+@@ -37,7 +37,7 @@ export function renderNavigation(activePage = "home") {
+ 
+       <nav
+         id="sportlab-mobile-menu"
+-        class="sportlab-mobile-menu"
++        class="sportlab-mobile-menu sl-nav sl-mobile-menu"
+         aria-label="Navigation principale"
+       >
+         ${renderNavigationItem({
+@@ -77,7 +77,7 @@ export function renderNavigation(activePage = "home") {
+       </nav>
+ 
+       <div
+-        class="sportlab-menu-backdrop"
++        class="sportlab-menu-backdrop sl-menu-backdrop"
+         onclick="closeSportLabMenu()"
+         aria-hidden="true"
+       ></div>
+@@ -99,8 +99,8 @@ function renderNavigationItem({
+     <button
+       type="button"
+       class="
+-        sportlab-menu-item
+-        ${isActive ? "nav-active" : ""}
++        sportlab-menu-item sl-nav-item
++        ${isActive ? "nav-active is-active" : ""}
+       "
+       onclick="
+         closeSportLabMenu();
+diff --git a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/portfolioView.js b/./ui/views/portfolioView.js
+index b334fe8..13b2105 100644
+--- a/mnt/data/sportlab_pack3_work/SportLab-main/ui/views/portfolioView.js
++++ b/./ui/views/portfolioView.js
+@@ -73,8 +73,8 @@ function renderSummaryCard(
+   className = ""
+ ) {
+   return `
+-    <div class="portfolio-stat">
+-      <p class="small">
++    <div class="portfolio-stat sl-kpi-card">
++      <p class="small sl-muted">
+         ${escapeHtml(label)}
+       </p>
+ 
+@@ -96,10 +96,10 @@ function renderStatisticsTable(
+ 
+   if (safeRows.length === 0) {
+     return `
+-      <section class="portfolio-breakdown">
++      <section class="portfolio-breakdown sl-panel sl-section">
+         <h3>${escapeHtml(title)}</h3>
+ 
+-        <p class="small">
++        <p class="small sl-muted">
+           Aucune donnée disponible.
+         </p>
+       </section>
+@@ -107,11 +107,11 @@ function renderStatisticsTable(
+   }
+ 
+   return `
+-    <section class="portfolio-breakdown">
++    <section class="portfolio-breakdown sl-panel sl-section">
+       <h3>${escapeHtml(title)}</h3>
+ 
+-      <div class="table-scroll">
+-        <table class="portfolio-table">
++      <div class="table-scroll sl-table-wrap">
++        <table class="portfolio-table sl-table">
+           <thead>
+             <tr>
+               <th>Catégorie</th>
+@@ -187,9 +187,9 @@ export function renderPortfolio({
+     statistics?.global || summary;
+ 
+   return `
+-    <div class="portfolio-page">
++    <div class="portfolio-page sl-page sl-stack sl-stack-lg">
+ 
+-      <div class="grid portfolio-summary">
++      <div class="grid portfolio-summary sl-grid sl-kpi-grid">
+         ${renderSummaryCard(
+           "Paris placés",
+           toNumber(global.placedBets)

@@ -28,7 +28,7 @@ export function renderDashboard({
   switch (activePage) {
     case "drawhunter":
       content = `
-        <section class="card">
+        <section class="card sl-card sl-page-section">
           <h2>⚽ DrawHunter</h2>
           ${drawhunterHtml}
         </section>
@@ -37,7 +37,7 @@ export function renderDashboard({
 
     case "frenchflair":
       content = `
-        <section class="card">
+        <section class="card sl-card sl-page-section">
           <h2>🏉 FrenchFlair</h2>
           ${frenchflairHtml}
         </section>
@@ -46,7 +46,7 @@ export function renderDashboard({
 
     case "journal":
       content = `
-        <section class="card">
+        <section class="card sl-card sl-page-section">
           ${journalHtml}
         </section>
       `;
@@ -54,7 +54,7 @@ export function renderDashboard({
 
     case "bets":
       content = `
-        <section class="card">
+        <section class="card sl-card sl-page-section">
           ${betsHtml}
         </section>
       `;
@@ -62,7 +62,7 @@ export function renderDashboard({
 
     case "portfolio":
       content = `
-        <section class="card">
+        <section class="card sl-card sl-page-section">
           <h2>💼 Portfolio</h2>
           ${portfolioHtml}
         </section>
@@ -71,7 +71,7 @@ export function renderDashboard({
 
     case "diagnostics":
       content = `
-        <section class="card">
+        <section class="card sl-card sl-page-section">
           <h2>🩺 Diagnostics</h2>
           ${diagnosticsHtml}
         </section>
@@ -155,7 +155,7 @@ function renderPremiumHome({
     ]);
 
   return `
-    <section class="premium-dashboard">
+    <section class="premium-dashboard sl-page sl-stack sl-stack-lg">
 
       ${renderHero({
         totalMatches,
@@ -163,7 +163,7 @@ function renderPremiumHome({
         latestSync
       })}
 
-      <section class="premium-module-grid">
+      <section class="premium-module-grid sl-grid sl-grid-2">
 
         ${renderModuleCard({
           type: "drawhunter",
@@ -220,7 +220,7 @@ function renderHero({
   latestSync
 }) {
   return `
-    <section class="premium-dashboard-hero">
+    <section class="premium-dashboard-hero sl-hero sl-panel">
 
       <div class="premium-dashboard-hero-content">
 
@@ -300,7 +300,7 @@ function renderModuleCard({
     <button
       type="button"
       class="
-        premium-module-card
+        premium-module-card sl-card sl-module-card
         premium-module-${escapeAttribute(type)}
         ${hasValue ? "premium-module-has-value" : ""}
       "
@@ -398,7 +398,7 @@ function renderDashboardKpis({
   roi
 }) {
   return `
-    <section class="premium-dashboard-section">
+    <section class="premium-dashboard-section sl-section">
 
       <header class="sl-section-header">
         <h2 class="sl-section-title">
@@ -465,7 +465,7 @@ function renderDashboardKpi({
   valueClass = ""
 }) {
   return `
-    <article class="sl-kpi-card premium-dashboard-kpi">
+    <article class="sl-kpi-card premium-dashboard-kpi sl-kpi-card">
 
       <span class="premium-dashboard-kpi-icon">
         ${icon}
@@ -500,7 +500,7 @@ function renderAlerts({
     frenchflairPayload?.meta?.error === true;
 
   return `
-    <section class="sl-panel premium-alert-panel">
+    <section class="sl-panel premium-alert-panel sl-panel">
 
       <header class="sl-section-header">
         <h2 class="sl-section-title">
@@ -609,7 +609,7 @@ function renderSyncPanel({
   frenchflairPayload
 }) {
   return `
-    <section class="sl-panel premium-sync-panel">
+    <section class="sl-panel premium-sync-panel sl-panel">
 
       <header class="sl-section-header">
         <h2 class="sl-section-title">
@@ -646,7 +646,7 @@ function renderSyncItem({
     meta?.error === true;
 
   return `
-    <article class="premium-sync-item">
+    <article class="premium-sync-item sl-card sl-card-compact">
 
       <div class="premium-sync-title">
 

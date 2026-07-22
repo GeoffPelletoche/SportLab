@@ -4,11 +4,11 @@
 
 export function renderNavigation(activePage = "home") {
   return `
-    <header class="sportlab-app-header">
+    <header class="sportlab-app-header sl-topbar">
 
       <button
         type="button"
-        class="sportlab-brand"
+        class="sportlab-brand sl-brand sl-button-reset"
         onclick="navigateSportLab('home')"
         aria-label="Retour à l'accueil"
       >
@@ -24,7 +24,7 @@ export function renderNavigation(activePage = "home") {
       <button
         type="button"
         id="sportlab-menu-toggle"
-        class="sportlab-menu-toggle"
+        class="sportlab-menu-toggle sl-menu-toggle"
         aria-label="Ouvrir le menu"
         aria-expanded="false"
         aria-controls="sportlab-mobile-menu"
@@ -37,7 +37,7 @@ export function renderNavigation(activePage = "home") {
 
       <nav
         id="sportlab-mobile-menu"
-        class="sportlab-mobile-menu"
+        class="sportlab-mobile-menu sl-nav sl-mobile-menu"
         aria-label="Navigation principale"
       >
         ${renderNavigationItem({
@@ -77,7 +77,7 @@ export function renderNavigation(activePage = "home") {
       </nav>
 
       <div
-        class="sportlab-menu-backdrop"
+        class="sportlab-menu-backdrop sl-menu-backdrop"
         onclick="closeSportLabMenu()"
         aria-hidden="true"
       ></div>
@@ -99,8 +99,8 @@ function renderNavigationItem({
     <button
       type="button"
       class="
-        sportlab-menu-item
-        ${isActive ? "nav-active" : ""}
+        sportlab-menu-item sl-nav-item
+        ${isActive ? "nav-active is-active" : ""}
       "
       onclick="
         closeSportLabMenu();

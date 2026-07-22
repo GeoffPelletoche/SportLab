@@ -1,22 +1,22 @@
 function formatResultBadge(bet) {
   switch (bet.result) {
     case "WON":
-      return `<span class="badge badge-success">✅ Pari gagné</span>`;
+      return `<span class="badge sl-badge badge-success">✅ Pari gagné</span>`;
 
     case "LOST":
-      return `<span class="badge badge-danger">❌ Pari perdu</span>`;
+      return `<span class="badge sl-badge badge-danger">❌ Pari perdu</span>`;
 
     case "PUSH":
-      return `<span class="badge badge-warning">↩️ Pari remboursé</span>`;
+      return `<span class="badge sl-badge badge-warning">↩️ Pari remboursé</span>`;
 
     case "PENDING":
-      return `<span class="badge badge-info">⏳ Pari en attente</span>`;
+      return `<span class="badge sl-badge badge-info">⏳ Pari en attente</span>`;
 
     case "NON_PLACED":
-      return `<span class="badge badge-secondary">📝 Analyse uniquement</span>`;
+      return `<span class="badge sl-badge badge-secondary">📝 Analyse uniquement</span>`;
 
     default:
-      return `<span class="badge badge-secondary">Inconnu</span>`;
+      return `<span class="badge sl-badge badge-secondary">Inconnu</span>`;
   }
 }
 
@@ -132,7 +132,7 @@ export function renderBets(bets = []) {
     return `
       <h2>🎯 Paris placés</h2>
 
-      <p class="small">
+      <p class="small sl-muted">
         Aucun pari placé pour le moment.
       </p>
     `;
