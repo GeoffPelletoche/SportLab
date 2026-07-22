@@ -62,12 +62,19 @@ export function getJournalData(filters = {}) {
     );
 
     return {
-        entries: sortedEntries,
-        options,
-        filters: normalizedFilters,
-        totalEntries: allEntries.length,
-        filteredEntries: sortedEntries.length
-    };
+    entries: sortedEntries,
+    options,
+    filters: normalizedFilters,
+
+    summary:
+        buildJournalSummary(allEntries),
+
+    totalEntries:
+        allEntries.length,
+
+    filteredEntries:
+        sortedEntries.length
+};
 }
 
 /**
