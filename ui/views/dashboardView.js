@@ -219,7 +219,7 @@ function renderHero({
             class="sl-button sl-button-primary"
             data-dashboard-nav="${totals.value > 0 ? getPriorityPage(totals) : "drawhunter"}"
           >
-            ${totals.value > 0 ? "💎 Voir les opportunités" : "⚽ Commencer l’analyse"}
+            ${totals.value > 0 ? "💎 Voir les opportunités" : "Commencer l’analyse"}
           </button>
 
           <button
@@ -389,7 +389,7 @@ function renderModuleSection({
           type: "drawhunter",
           icon: "⚽",
           title: "DrawHunter",
-          description: "Marché nul et double chance",
+          description: "Marché nul",
           stats: drawhunterStats,
           meta: drawhunterPayload?.meta,
           page: "drawhunter"
