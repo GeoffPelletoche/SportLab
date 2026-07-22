@@ -1428,3 +1428,78 @@ section.card:has(.journal-page) {
     width: 100%;
   }
 }
+/* =========================================================
+   SPORTLAB V6.3.3 — NAVIGATION MOBILE EN GRILLE
+   ========================================================= */
+
+.sportlab-nav {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  gap: 10px;
+  margin:
+    16px
+    0
+    26px;
+
+  padding: 0;
+
+  overflow: visible;
+}
+
+.sportlab-nav button {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+
+  margin: 0;
+  padding: 10px 8px;
+
+  border-radius: 16px;
+
+  white-space: normal;
+  text-align: center;
+  line-height: 1.15;
+}
+
+/* Tablettes et écrans moyens */
+
+@media (max-width: 760px) {
+  .sportlab-nav {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+  .sportlab-nav button {
+    font-size: 0.86rem;
+  }
+}
+
+/* iPhone */
+
+@media (max-width: 520px) {
+  .sportlab-nav {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .sportlab-nav button {
+    min-height: 52px;
+    padding: 11px 10px;
+    font-size: 0.92rem;
+  }
+
+  /*
+   * Le bouton Diagnostics occupe toute la largeur
+   * sur la dernière ligne.
+   */
+  .sportlab-nav button:last-child {
+    grid-column: 1 / -1;
+  }
+}
