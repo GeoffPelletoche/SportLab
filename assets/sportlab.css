@@ -1,0 +1,163 @@
+/*!
+ * SportLab V6.3.6
+ * Framework CSS Premium - Foundation
+ * Pack 2
+ */
+
+/* =========================================================
+01. DESIGN TOKENS
+========================================================= */
+:root{
+ --sl-bg:#08101d;
+ --sl-surface:#111c2d;
+ --sl-surface-2:#162235;
+ --sl-text:#f8fafc;
+ --sl-muted:#94a3b8;
+ --sl-primary:#38bdf8;
+ --sl-secondary:#8b5cf6;
+ --sl-success:#22c55e;
+ --sl-warning:#f59e0b;
+ --sl-danger:#ef4444;
+ --sl-radius:18px;
+ --sl-gap:16px;
+ --sl-shadow:0 16px 40px rgba(0,0,0,.25);
+ --sl-transition:.2s ease;
+}
+
+/* =========================================================
+02. RESET
+========================================================= */
+*,*:before,*:after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+ margin:0;
+ background:var(--sl-bg);
+ color:var(--sl-text);
+ font-family:Inter,system-ui,sans-serif;
+}
+img{max-width:100%;display:block}
+button,input,select,textarea{font:inherit}
+
+/* =========================================================
+03. LAYOUT
+========================================================= */
+.sl-container{width:min(1240px,calc(100% - 32px));margin:auto}
+.sl-grid{display:grid;gap:var(--sl-gap)}
+.sl-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sl-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sl-stack>*+*{margin-top:var(--sl-gap)}
+
+/* =========================================================
+04. SURFACES
+========================================================= */
+.sl-card,.sl-panel{
+ background:var(--sl-surface);
+ border:1px solid rgba(255,255,255,.08);
+ border-radius:var(--sl-radius);
+ box-shadow:var(--sl-shadow);
+ padding:20px;
+ transition:all var(--sl-transition);
+}
+.sl-card:hover{transform:translateY(-2px)}
+
+/* =========================================================
+05. BUTTONS
+========================================================= */
+.sl-button{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ min-height:44px;
+ padding:0 18px;
+ border-radius:12px;
+ border:0;
+ cursor:pointer;
+ color:white;
+ background:linear-gradient(135deg,var(--sl-primary),#2563eb);
+}
+.sl-button.secondary{
+ background:linear-gradient(135deg,var(--sl-secondary),#6d28d9);
+}
+.sl-button.success{background:var(--sl-success)}
+.sl-button.warning{background:var(--sl-warning)}
+.sl-button.danger{background:var(--sl-danger)}
+
+/* =========================================================
+06. BADGES
+========================================================= */
+.sl-badge{
+ display:inline-block;
+ padding:5px 10px;
+ border-radius:999px;
+ font-size:.75rem;
+ font-weight:700;
+}
+.sl-success{background:#133a24;color:#86efac}
+.sl-warning{background:#3b2d11;color:#fde68a}
+.sl-danger{background:#3d1414;color:#fca5a5}
+
+/* =========================================================
+07. KPI
+========================================================= */
+.sl-kpi{
+ padding:16px;
+ border-radius:14px;
+ background:var(--sl-surface-2);
+}
+.sl-kpi-label{color:var(--sl-muted);font-size:.75rem}
+.sl-kpi-value{font-size:1.5rem;font-weight:800}
+
+/* =========================================================
+08. TABLES
+========================================================= */
+.sl-table{width:100%;border-collapse:collapse}
+.sl-table th,.sl-table td{
+ padding:12px;
+ border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+/* =========================================================
+09. FORMS
+========================================================= */
+.sl-input,.sl-select,.sl-textarea{
+ width:100%;
+ padding:12px;
+ border-radius:12px;
+ border:1px solid rgba(255,255,255,.08);
+ background:#0d1728;
+ color:white;
+}
+
+/* =========================================================
+10. NAVIGATION
+========================================================= */
+.sl-sidebar{}
+.sl-topbar{}
+.sl-nav{}
+.sl-nav-item{}
+
+/* =========================================================
+11. MODULE THEMES
+========================================================= */
+[data-module="drawhunter"]{--sl-primary:#38bdf8;}
+[data-module="frenchflair"]{--sl-primary:#a855f7;}
+
+/* =========================================================
+12. TRANSITION LAYER
+========================================================= */
+
+/* Legacy mapping */
+.analysis-card{ }
+.dashboard-card{ }
+.prediction-card{ }
+
+/* These legacy classes will progressively receive
+   .sl-card in Pack 3 before removal in Pack 4. */
+
+/* =========================================================
+13. RESPONSIVE
+========================================================= */
+@media(max-width:768px){
+ .sl-grid-2,.sl-grid-3{grid-template-columns:1fr}
+ .sl-container{width:min(100% - 20px,100%)}
+}
