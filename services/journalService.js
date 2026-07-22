@@ -88,6 +88,91 @@ export function getJournalEntries(filters = {}) {
 }
 
 /**
+ * Produit les KPI globaux du Journal.
+ */
+function buildJournalSummary(entries = []) {
+    const placedEntries = entries.filter(
+        entry => entry.placed === true
+    );
+
+    const settledEntries = placedEntries.filter(entry =>
+        ["WON", "LOST", "PUSH"].includes(
+            normalizeResult(entry.result)
+        )
+    );
+
+    const valueEntries = entries.filter(entry =>
+        isValueDecision(entry.decision)
+    );
+
+    const wins = settledEntries.filter(
+        entry => normalizeResult(entry.result) === "WON"
+    ).length;
+
+    const losses = settledEntries.filter(
+        entry => normalizeResult(entry.result) === "LOST"
+    ).length;
+
+    const pushes = settledEntries.filter(
+        entry => normalizeResult(entry.result) === "PUSH"
+    ).length;
+
+    const pendingEntries = placedEntries.filter(
+        entry => normalizeResult(entry.result) === "PENDING"
+    );
+
+    const invested = settledEntries.reduce(
+        (total, entry) =>
+            total + Math.max(toNumber(entry.stake), 0),
+        0
+    );
+
+    const pendingStake = pendingEntries.reduce(
+        (total, entry) =>
+            total + Math.max(toNumber(entry.stake), 0),
+        0
+    );
+
+    const profit = settledEntries.reduce(
+        (total, entry) =>
+            total + toNumber(entry.profit),
+        0
+    );
+
+    const roi =
+        invested > 0
+            ? (profit / invested) * 100
+            : 0;
+
+    return {
+        totalAnalyses: entries.length,
+        valueAnalyses: valueEntries.length,
+        placedBets: placedEntries.length,
+        settledBets: settledEntries.length,
+
+        wins,
+        losses,
+        pushes,
+        pending: pendingEntries.length,
+
+        invested: round(invested),
+        pendingStake: round(pendingStake),
+        profit: round(profit),
+        roi: round(roi)
+    };
+}
+
+function isValueDecision(value) {
+    const decision = normalizeDecision(value);
+
+    return [
+        "VALUE",
+        "VALUE BET",
+        "BET"
+    ].includes(decision);
+}
+
+/**
  * Fusionne les analyses avec les paris correspondants.
  */
 function mergeAnalysesAndBets() {
