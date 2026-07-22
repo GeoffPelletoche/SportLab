@@ -986,3 +986,156 @@ body {
     border-radius: 20px;
   }
 }
+
+/* =========================================================
+   SPORTLAB V6.3.2.2 — JOURNAL PREMIUM
+   ========================================================= */
+
+.journal-page {
+  display: grid;
+  gap: var(--sl-space-5);
+}
+
+.journal-kpi-grid {
+  margin-bottom: 0;
+}
+
+.journal-kpi-icon {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1.35rem;
+}
+
+.journal-summary-panel,
+.journal-filter-panel {
+  margin: 0;
+}
+
+.journal-summary-panel .sl-section-header,
+.journal-filter-panel .sl-section-header {
+  margin-top: 0;
+}
+
+.journal-financial-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: var(--sl-space-3);
+}
+
+.journal-financial-item {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-sm);
+  background: rgba(5, 18, 32, 0.34);
+}
+
+.journal-result-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.journal-search {
+  margin-bottom: var(--sl-space-3);
+}
+
+.journal-list {
+  display: grid;
+  gap: var(--sl-space-4);
+}
+
+.journal-card {
+  display: grid;
+  gap: var(--sl-space-4);
+}
+
+.journal-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sl-space-3);
+}
+
+.journal-card-heading {
+  min-width: 0;
+}
+
+.journal-card-heading h3 {
+  margin: 7px 0 5px;
+  color: var(--sl-text);
+  font-size: 1.15rem;
+  line-height: 1.25;
+}
+
+.journal-card-heading p {
+  margin: 0;
+  font-size: 0.84rem;
+}
+
+.journal-card-context {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.86rem;
+}
+
+.journal-card-metrics {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: var(--sl-space-3);
+}
+
+.journal-metric {
+  min-width: 0;
+  padding: 12px;
+  border-radius: var(--sl-radius-sm);
+  background: rgba(4, 16, 29, 0.38);
+}
+
+.journal-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sl-space-3);
+  padding-top: var(--sl-space-3);
+  border-top: 1px solid var(--sl-border);
+}
+
+.journal-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.journal-profit {
+  flex: 0 0 auto;
+  font-size: 1.05rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .journal-financial-grid,
+  .journal-card-metrics {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .journal-card-header,
+  .journal-card-footer {
+    align-items: flex-start;
+  }
+
+  .journal-card-footer {
+    display: grid;
+  }
+
+  .journal-profit {
+    font-size: 1.15rem;
+  }
+}
