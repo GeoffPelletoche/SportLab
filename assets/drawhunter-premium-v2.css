@@ -910,3 +910,15 @@
     box-shadow:0 20px 52px rgba(0,0,0,.22);
   }
 }
+
+/* V6.4.1 — Sprint 5.2 Workflow */
+.dh-filterbar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;padding:10px 12px;overflow:hidden}
+.dh-filterbar__buttons{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.dh-filterbar__buttons::-webkit-scrollbar{display:none}
+.dh-filter{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:7px 11px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.035);color:var(--dh-muted);font:inherit;font-size:.72rem;font-weight:800;white-space:nowrap;cursor:pointer}
+.dh-filter strong{display:grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:rgba(255,255,255,.07);font-size:.65rem}.dh-filter.is-active{border-color:rgba(79,140,255,.35);background:var(--dh-accent-soft);color:#d9e5ff}.dh-filterbar__visible{flex:0 0 auto;color:var(--dh-muted);font-size:.7rem}
+.dh-context-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.dh-context-actions .sl-button{min-height:36px;padding:7px 11px;font-size:.72rem}
+.dh-history{margin:0 20px 16px;padding:16px;border:1px solid rgba(79,140,255,.16);border-radius:16px;background:rgba(7,13,25,.5)}
+.dh-history__heading{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px}.dh-history__heading small{color:var(--dh-muted)}.dh-history ol{display:grid;gap:10px;margin:0;padding:0;list-style:none}.dh-history li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:start}.dh-history li i{width:9px;height:9px;margin-top:5px;border-radius:50%;background:var(--dh-accent);box-shadow:0 0 0 4px var(--dh-accent-soft)}.dh-history li div{min-width:0}.dh-history li strong{font-size:.75rem}.dh-history li p{margin:2px 0 0;color:var(--dh-muted);font-size:.67rem}.dh-history li time{color:var(--dh-muted);font-size:.64rem;white-space:nowrap}
+.dh-match-card--archived{opacity:.78;filter:saturate(.7)}.dh-match-card--archived::before{background:#64748b}.dh-status--archived{background:rgba(100,116,139,.14);color:#cbd5e1}
+[hidden]{display:none!important}
+@media(max-width:680px){.dh-filterbar{align-items:flex-start;flex-direction:column}.dh-filterbar__buttons{width:100%}.dh-filterbar__visible{padding-left:4px}.dh-history{margin-left:16px;margin-right:16px}.dh-history li{grid-template-columns:auto minmax(0,1fr)}.dh-history li time{grid-column:2}.dh-context-actions{display:grid;grid-template-columns:1fr 1fr}.dh-context-actions .sl-button:first-child{grid-column:1/-1}}
