@@ -26,6 +26,18 @@ let frenchflairPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 
+function initializeUi() {
+    // Design System & composants Premium
+    initSportLabUi();
+
+    // Packs futurs
+    // initDashboardPremium();
+    // initDrawHunterPremium();
+    // initFrenchFlairPremium();
+    // initSportLabScore();
+    // initAnimations();
+}
+
 async function init() {
   const app = document.getElementById("app");
 
@@ -45,7 +57,7 @@ frenchflairPayload = appData.frenchflairPayload;
   currentPage
 });
     
-    initSportLabUi();
+    initializeUi();
 
     try {
       const settlement = await runAutomaticSettlement();
@@ -68,11 +80,11 @@ frenchflairPayload = appData.frenchflairPayload;
         refreshedData.frenchflairPayload;
 
     renderApplication(app, {
-        ...refreshedData,
-        currentPage
-    });
+    ...refreshedData,
+    currentPage
+});
 
-        initSportLabUi();
+initializeUi();
 }
    } catch (error) {
       console.error(
@@ -752,13 +764,12 @@ document.addEventListener(
       frenchflairPayload =
         appData.frenchflairPayload;
 
-      renderApplication(
-        document.getElementById("app"),
-        {
-          ...appData,
-          currentPage
-        }
-      );
+      renderApplication(app, {
+    ...refreshedData,
+    currentPage
+});
+
+initializeUi();
     } catch (error) {
       console.error(
         "[Diagnostics] Échec du diagnostic :",
