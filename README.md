@@ -78,3 +78,8 @@ Dashboard Premium V2 intégré. Voir `docs/PACK4_DASHBOARD_PREMIUM_V2.md`.
 ## V6.3.8 — Pack 4.1
 
 Finition Desktop Cockpit ajoutée. Voir `docs/PACK4.1_DESKTOP_COCKPIT.md`.
+
+
+## V6.4.0 — Sprint 5.1
+
+Structure DrawHunter Premium V2 intégrée. Voir `docs/SPRINT5.1_DRAWHUNTER_PREMIUM_STRUCTURE.md`.

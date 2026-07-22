@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "6.3.8",
-  "pack": "Pack 4.1 — Desktop Cockpit",
+  "version": "6.4.0",
+  "pack": "Sprint 5.1 — Structure DrawHunter Premium V2",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -63,5 +63,12 @@
   ],
   "revision": "pre-launch-smart-routing",
   "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
-  "dashboard_primary_action": "Smart module routing"
+  "dashboard_primary_action": "Smart module routing",
+  "sprint5_1_files": [
+    "ui/views/drawhunterView.js",
+    "assets/drawhunter-premium-v2.css",
+    "index.html",
+    "docs/SPRINT5.1_DRAWHUNTER_PREMIUM_STRUCTURE.md",
+    "docs/SPRINT5.1_VALIDATION.md"
+  ]
 }

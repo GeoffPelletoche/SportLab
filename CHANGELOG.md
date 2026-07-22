@@ -38,3 +38,12 @@
 - clarification : DrawHunter centré sur l’analyse du match nul
 - Double Chance présentée comme marché dérivé si pertinente
 - bouton principal orienté automatiquement vers le module prioritaire
+
+
+## V6.4.0 — Sprint 5.1 DrawHunter Premium V2
+- nouveau Hero et scoreboard DrawHunter ;
+- pipeline visuel d’analyse ;
+- cartes Premium et timeline structurelle ;
+- responsive desktop / tablette / iPhone ;
+- libellés bookmaker neutralisés ;
+- logique métier conservée.
