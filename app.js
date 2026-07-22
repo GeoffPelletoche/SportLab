@@ -634,10 +634,91 @@ function computeFrenchFlairScore({ modelEdgePercent, confidence, sigma, predicte
   return Math.round(edgeScore + confidenceScore + sigmaScore + mathValueScore);
 }
 
+function toggleSportLabMenu() {
+  const header =
+    document.querySelector(
+      ".sportlab-app-header"
+    );
+
+  const toggle =
+    document.getElementById(
+      "sportlab-menu-toggle"
+    );
+
+  if (!header || !toggle) {
+    return;
+  }
+
+  const isOpen =
+    header.classList.toggle(
+      "sportlab-menu-open"
+    );
+
+  toggle.setAttribute(
+    "aria-expanded",
+    String(isOpen)
+  );
+
+  toggle.setAttribute(
+    "aria-label",
+    isOpen
+      ? "Fermer le menu"
+      : "Ouvrir le menu"
+  );
+
+  document.body.classList.toggle(
+    "sportlab-navigation-open",
+    isOpen
+  );
+}
+
+function closeSportLabMenu() {
+  const header =
+    document.querySelector(
+      ".sportlab-app-header"
+    );
+
+  const toggle =
+    document.getElementById(
+      "sportlab-menu-toggle"
+    );
+
+  if (!header) {
+    return;
+  }
+
+  header.classList.remove(
+    "sportlab-menu-open"
+  );
+
+  document.body.classList.remove(
+    "sportlab-navigation-open"
+  );
+
+  if (toggle) {
+    toggle.setAttribute(
+      "aria-expanded",
+      "false"
+    );
+
+    toggle.setAttribute(
+      "aria-label",
+      "Ouvrir le menu"
+    );
+  }
+}
+
 window.navigateSportLab = function(page) {
+  closeSportLabMenu();
+
   currentPage = page;
   init();
 };
+
+window.toggleSportLabMenu = toggleSportLabMenu;
+
+window.closeSportLabMenu = closeSportLabMenu;
+
 document.addEventListener(
   "click",
   async event => {
