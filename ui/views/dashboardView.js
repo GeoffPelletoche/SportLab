@@ -149,7 +149,14 @@ function renderPremiumHome({
       class="premium-dashboard-v2 sl-page sl-stack sl-stack-lg"
       data-dashboard-premium
     >
-      ${renderHero({ totals, roi, latestSync, syncErrors })}
+      ${renderHero({
+        totals,
+        roi,
+        latestSync,
+        syncErrors,
+        drawhunterStats,
+        frenchflairStats
+      })}
 
       ${renderPriorityStrip({
         totals,
@@ -193,12 +200,25 @@ function renderHero({
   totals,
   roi,
   latestSync,
-  syncErrors
+  syncErrors,
+  drawhunterStats,
+  frenchflairStats
 }) {
   const healthTone = syncErrors > 0 ? "warning" : "success";
   const healthLabel = syncErrors > 0
     ? "Synchronisation partielle"
     : "Système opérationnel";
+
+  const analysisTarget = getSmartAnalysisTarget({
+    drawhunterStats,
+    frenchflairStats
+  });
+
+  const analysisLabel = getSmartAnalysisLabel({
+    target: analysisTarget,
+    drawhunterStats,
+    frenchflairStats
+  });
 
   return `
     <section class="dashboard-v2-hero sl-hero sl-panel">
@@ -217,9 +237,10 @@ function renderHero({
           <button
             type="button"
             class="sl-button sl-button-primary"
-            data-dashboard-nav="${totals.value > 0 ? getPriorityPage(totals) : "drawhunter"}"
+            data-dashboard-nav="${analysisTarget}"
+            ${analysisTarget === "home" ? "disabled" : ""}
           >
-            ${totals.value > 0 ? "💎 Voir les opportunités" : "Commencer l’analyse"}
+            ${analysisLabel}
           </button>
 
           <button
@@ -389,7 +410,7 @@ function renderModuleSection({
           type: "drawhunter",
           icon: "⚽",
           title: "DrawHunter",
-          description: "Marché nul",
+          description: "Analyse du match nul · Double chance si pertinente",
           stats: drawhunterStats,
           meta: drawhunterPayload?.meta,
           page: "drawhunter"
@@ -804,8 +825,49 @@ function buildHeroSentence(totals) {
   return `${formatInteger(totals.matches)} matchs sont disponibles. Aucune opportunité ne dépasse encore les seuils VALUE.`;
 }
 
-function getPriorityPage(totals) {
-  return totals.matches > 0 ? "drawhunter" : "home";
+function getSmartAnalysisTarget({
+  drawhunterStats,
+  frenchflairStats
+}) {
+  if (drawhunterStats.value > 0 || frenchflairStats.value > 0) {
+    return drawhunterStats.value >= frenchflairStats.value
+      ? "drawhunter"
+      : "frenchflair";
+  }
+
+  if (drawhunterStats.matches > 0 || frenchflairStats.matches > 0) {
+    return drawhunterStats.matches >= frenchflairStats.matches
+      ? "drawhunter"
+      : "frenchflair";
+  }
+
+  return "home";
+}
+
+function getSmartAnalysisLabel({
+  target,
+  drawhunterStats,
+  frenchflairStats
+}) {
+  if (target === "home") {
+    return "✅ Aucune analyse en attente";
+  }
+
+  const targetStats =
+    target === "drawhunter"
+      ? drawhunterStats
+      : frenchflairStats;
+
+  const targetName =
+    target === "drawhunter"
+      ? "DrawHunter"
+      : "FrenchFlair";
+
+  if (targetStats.value > 0) {
+    return `💎 Voir les opportunités ${targetName}`;
+  }
+
+  return `▶ Continuer dans ${targetName}`;
 }
 
 function getLatestSyncDate(values) {

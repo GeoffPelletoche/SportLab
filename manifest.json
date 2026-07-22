@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "6.3.7",
-  "pack": "Pack 4 — Dashboard Premium V2",
+  "version": "6.3.8",
+  "pack": "Pack 4.1 — Desktop Cockpit",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -54,5 +54,14 @@
     "index.html",
     "docs/PACK4_DASHBOARD_PREMIUM_V2.md",
     "docs/PACK4_VALIDATION.md"
-  ]
+  ],
+  "pack4_1_files": [
+    "assets/dashboard-desktop-cockpit.css",
+    "index.html",
+    "docs/PACK4.1_DESKTOP_COCKPIT.md",
+    "docs/PACK4.1_VALIDATION.md"
+  ],
+  "revision": "pre-launch-smart-routing",
+  "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
+  "dashboard_primary_action": "Smart module routing"
 }

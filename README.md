@@ -73,3 +73,8 @@ Le pack :
 ## V6.3.7 — Pack 4
 
 Dashboard Premium V2 intégré. Voir `docs/PACK4_DASHBOARD_PREMIUM_V2.md`.
+
+
+## V6.3.8 — Pack 4.1
+
+Finition Desktop Cockpit ajoutée. Voir `docs/PACK4.1_DESKTOP_COCKPIT.md`.

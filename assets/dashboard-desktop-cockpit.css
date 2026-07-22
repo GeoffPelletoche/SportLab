@@ -1,0 +1,177 @@
+/*!
+ * SPORTLAB V6.3.8 — PACK 4.1
+ * Desktop Cockpit
+ *
+ * Couche de finition chargée après dashboard-premium-v2.css.
+ * Aucun impact sur la logique métier ou le rendu mobile validé.
+ */
+
+/* La grille des priorités s'adapte réellement au nombre de cartes. */
+.dashboard-v2-priority-grid {
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));
+}
+
+.dashboard-v2-priority:only-child {
+  max-width:none;
+}
+
+/* Zone de travail : meilleure occupation de la largeur intermédiaire. */
+@media (min-width:901px) and (max-width:1199px) {
+  .dashboard-v2-workspace {
+    grid-template-columns:minmax(0,1fr);
+  }
+
+  .dashboard-v2-sidebar {
+    position:static;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .dashboard-v2-module {
+    min-height:330px;
+  }
+}
+
+/* Véritable cockpit desktop. */
+@media (min-width:1200px) {
+  .sl-app-root {
+    --sl-layout-max:1440px;
+    --sl-layout-inline:20px;
+  }
+
+  .premium-dashboard-v2 {
+    gap:28px;
+  }
+
+  .dashboard-v2-hero {
+    grid-template-columns:minmax(0,1.65fr) minmax(390px,.8fr);
+    min-height:330px;
+    padding:34px 36px;
+    gap:36px;
+  }
+
+  .dashboard-v2-title {
+    max-width:800px;
+    font-size:clamp(2rem,2.45vw,2.75rem);
+  }
+
+  .dashboard-v2-lead {
+    max-width:76ch;
+    font-size:1rem;
+  }
+
+  .dashboard-v2-scoreboard {
+    min-width:390px;
+  }
+
+  .dashboard-v2-hero-metric {
+    padding:28px 18px;
+  }
+
+  .dashboard-v2-hero-metric strong {
+    font-size:1.75rem;
+  }
+
+  .dashboard-v2-priority-grid:has(> :only-child) {
+    grid-template-columns:1fr;
+  }
+
+  .dashboard-v2-priority:only-child {
+    grid-template-columns:auto minmax(0,1fr) auto;
+    min-height:112px;
+    padding:20px 22px;
+  }
+
+  .dashboard-v2-priority:only-child .dashboard-v2-priority-content strong {
+    font-size:1rem;
+  }
+
+  .dashboard-v2-priority:only-child .dashboard-v2-priority-content span {
+    font-size:.8125rem;
+  }
+
+  .dashboard-v2-workspace {
+    grid-template-columns:minmax(0,1fr) minmax(340px,380px);
+    gap:28px;
+  }
+
+  .dashboard-v2-main {
+    gap:28px;
+  }
+
+  .dashboard-v2-sidebar {
+    top:20px;
+    gap:18px;
+  }
+
+  .dashboard-v2-modules .sl-grid-2 {
+    gap:18px;
+  }
+
+  .dashboard-v2-module {
+    min-height:390px;
+    padding:22px;
+  }
+
+  .dashboard-v2-module-focus {
+    min-height:105px;
+    align-content:center;
+  }
+
+  .dashboard-v2-module-focus strong {
+    font-size:2.25rem;
+  }
+
+  .dashboard-v2-module-stats {
+    gap:12px;
+  }
+
+  .dashboard-v2-module-stat {
+    min-height:76px;
+    align-content:center;
+  }
+
+  .dashboard-v2-quick,
+  .dashboard-v2-sync {
+    padding:22px;
+  }
+
+  .dashboard-v2-quick-action {
+    min-height:62px;
+    padding:11px 12px;
+  }
+
+  .dashboard-v2-activity {
+    padding:24px;
+  }
+}
+
+/* Grands écrans : davantage de respiration sans étirer les textes. */
+@media (min-width:1500px) {
+  .sl-app-root {
+    --sl-layout-max:1540px;
+    --sl-layout-inline:24px;
+  }
+
+  .dashboard-v2-hero {
+    grid-template-columns:minmax(0,1.75fr) minmax(420px,.75fr);
+  }
+
+  .dashboard-v2-workspace {
+    grid-template-columns:minmax(0,1fr) 400px;
+    gap:32px;
+  }
+
+  .dashboard-v2-modules .sl-grid-2 {
+    gap:22px;
+  }
+}
+
+/* Fallback pour navigateurs sans :has(). */
+@supports not selector(:has(*)) {
+  @media (min-width:1200px) {
+    .dashboard-v2-priority-grid {
+      grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    }
+  }
+}

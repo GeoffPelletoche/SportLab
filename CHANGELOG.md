@@ -26,3 +26,15 @@
 - Activité récente
 - Synchronisation détaillée
 - Initialisation UI centralisée
+
+
+## V6.3.8 — Pack 4.1 Desktop Cockpit
+- meilleure occupation des écrans PC
+- priorité unique pleine largeur
+- grille desktop étendue
+- palier tablette/ordinateur intermédiaire
+- rendu mobile conservé
+
+- clarification : DrawHunter centré sur l’analyse du match nul
+- Double Chance présentée comme marché dérivé si pertinente
+- bouton principal orienté automatiquement vers le module prioritaire
