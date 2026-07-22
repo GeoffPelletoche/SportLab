@@ -92,6 +92,18 @@ export function renderApplication(app, data = {}) {
       journalHtml,
       betsHtml,
       portfolioHtml,
-      diagnosticsHtml
+      diagnosticsHtml,
+      dashboard:
+
+      data.dashboard || {},
+
+    drawhunterPayload:
+
+      data.drawhunterPayload || {},
+
+    frenchflairPayload:
+
+      data.frenchflairPayload || {}
+
     });
 }
