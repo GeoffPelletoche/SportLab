@@ -341,20 +341,47 @@ function renderFilters({
     filteredEntries,
     totalEntries
 }) {
+    const hasAdvancedFilter =
+        Boolean(
+            filters.sport ||
+            filters.source ||
+            filters.competition ||
+            filters.market ||
+            filters.decision ||
+            filters.result ||
+            (
+                filters.sort &&
+                filters.sort !== "date-desc"
+            )
+        );
+
     return `
         <section class="sl-panel journal-filter-panel">
 
-            <div class="sl-section-header">
+            <div class="journal-filter-heading">
 
-                <h3 class="sl-section-title">
-                    🔎 Recherche et filtres
-                </h3>
+                <div>
+                    <h3 class="sl-section-title">
+                        🔎 Recherche
+                    </h3>
 
-                <span class="sl-muted">
-                    ${formatInteger(filteredEntries)}
-                    sur
-                    ${formatInteger(totalEntries)}
-                </span>
+                    <span class="sl-muted">
+                        ${formatInteger(filteredEntries)}
+                        résultat${filteredEntries > 1 ? "s" : ""}
+                        sur
+                        ${formatInteger(totalEntries)}
+                    </span>
+                </div>
+
+                ${
+                    hasAdvancedFilter
+                        ? `
+                            <span class="sl-badge sl-badge-info">
+                                Filtres actifs
+                            </span>
+                        `
+                        : ""
+                }
 
             </div>
 
@@ -365,71 +392,80 @@ function renderFilters({
                 value="${escapeAttribute(
                     filters.search
                 )}"
-                placeholder="Match, compétition, marché..."
+                placeholder="Match, équipe, compétition, marché..."
                 autocomplete="off"
             >
 
-            <div class="sl-filter-grid">
+            <details
+                class="journal-advanced-filters"
+                ${hasAdvancedFilter ? "open" : ""}
+            >
 
-                ${renderSelect({
-                    id: "filter-sport",
-                    label: "Tous les sports",
-                    values:
-                        options.sports,
-                    selected:
-                        filters.sport
-                })}
+                <summary>
+                    <span>
+                        ⚙️ Filtres avancés
+                    </span>
 
-                ${renderSelect({
-                    id: "filter-source",
-                    label: "Tous les modules",
-                    values:
-                        options.sources,
-                    selected:
-                        filters.source
-                })}
+                    <span class="journal-filter-chevron">
+                        ›
+                    </span>
+                </summary>
 
-                ${renderSelect({
-                    id: "filter-competition",
-                    label: "Toutes les compétitions",
-                    values:
-                        options.competitions,
-                    selected:
-                        filters.competition
-                })}
+                <div class="journal-advanced-content">
 
-                ${renderSelect({
-                    id: "filter-market",
-                    label: "Tous les marchés",
-                    values:
-                        options.markets,
-                    selected:
-                        filters.market
-                })}
+                    <div class="sl-filter-grid">
 
-                ${renderSelect({
-                    id: "filter-decision",
-                    label: "Toutes les décisions",
-                    values:
-                        options.decisions,
-                    selected:
-                        filters.decision
-                })}
+                        ${renderSelect({
+                            id: "filter-sport",
+                            label: "Tous les sports",
+                            values: options.sports,
+                            selected: filters.sport
+                        })}
 
-                ${renderSelect({
-                    id: "filter-result",
-                    label: "Tous les résultats",
-                    values:
-                        options.results,
-                    selected:
-                        filters.result
-                })}
+                        ${renderSelect({
+                            id: "filter-source",
+                            label: "Tous les modules",
+                            values: options.sources,
+                            selected: filters.source
+                        })}
 
-                ${renderSortSelect(
-                    filters.sort
-                )}
+                        ${renderSelect({
+                            id: "filter-competition",
+                            label: "Toutes les compétitions",
+                            values: options.competitions,
+                            selected: filters.competition
+                        })}
 
-            </div>
+                        ${renderSelect({
+                            id: "filter-market",
+                            label: "Tous les marchés",
+                            values: options.markets,
+                            selected: filters.market
+                        })}
+
+                        ${renderSelect({
+                            id: "filter-decision",
+                            label: "Toutes les décisions",
+                            values: options.decisions,
+                            selected: filters.decision
+                        })}
+
+                        ${renderSelect({
+                            id: "filter-result",
+                            label: "Tous les résultats",
+                            values: options.results,
+                            selected: filters.result
+                        })}
+
+                        ${renderSortSelect(
+                            filters.sort
+                        )}
+
+                    </div>
+
+                </div>
+
+            </details>
 
         </section>
     `;
