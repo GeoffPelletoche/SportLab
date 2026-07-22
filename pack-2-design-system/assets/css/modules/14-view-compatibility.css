@@ -1,0 +1,52 @@
+/* =========================================================
+MIGRATED VIEW COMPATIBILITY — BASED ON CURRENT SPORTLAB.CSS
+========================================================= */
+.sl-summary{overflow:hidden}
+.sl-analysis-card{min-width:0}
+.sl-module-card{display:flex;min-height:280px;flex-direction:column}
+.premium-module-footer{margin-top:auto}
+.premium-module-stats,.premium-sync-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.premium-module-stat{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
+.premium-dashboard-hero-badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.premium-dashboard-kpis{margin-top:2px}
+.premium-alert-list{display:grid;gap:10px}
+
+.analysis-summary__grid,.analysis-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.analysis-grid{align-items:start}
+.analysis-card{display:flex;flex-direction:column;overflow:hidden}
+.analysis-card__header,.analysis-card__footer{padding:18px}
+.analysis-matchup{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;padding:20px 18px}
+.analysis-team--away{text-align:right}
+.analysis-vs{display:grid;width:40px;height:40px;place-items:center;border-radius:50%;background:rgba(255,255,255,.06)}
+.analysis-kpis{grid-template-columns:repeat(3,minmax(0,1fr));padding:0 18px 18px}
+.analysis-progress{padding:0 18px 18px}
+.analysis-progress__track{height:8px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}
+.analysis-progress__track>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--sl-primary),var(--sl-secondary))}
+.analysis-market,.analysis-total,.analysis-range,.analysis-state--inline{margin:0 18px 18px;padding:14px;border-radius:14px;background:rgba(255,255,255,.04)}
+.analysis-total{text-align:center}
+.analysis-bet-panel{display:grid;gap:12px;padding:14px;border-radius:14px;background:rgba(34,197,94,.07)}
+.analysis-button{width:100%}
+.analysis-field{display:grid;gap:7px}
+.analysis-field__control{display:grid;grid-template-columns:1fr auto;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:#0d1728}
+.analysis-field__control input{width:100%;border:0;background:transparent;color:#fff;padding:12px;outline:0}
+.analysis-field__control span{padding:12px;color:var(--sl-muted)}
+
+.portfolio-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.portfolio-stat h3{margin:.35rem 0 0}
+.journal-list{gap:14px}
+.journal-card{padding:18px}
+.journal-card-header,.journal-card-footer{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.journal-card-metrics,.journal-financial-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.journal-metric,.journal-financial-item{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
+
+@media(max-width:900px){
+  .portfolio-summary,.analysis-summary__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  .portfolio-summary,.analysis-summary__grid,.analysis-kpis,.premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:1fr}
+  .journal-card-header,.journal-card-footer{align-items:stretch;flex-direction:column}
+  .analysis-matchup{grid-template-columns:1fr;text-align:center}
+  .analysis-team--away{text-align:center}
+  .analysis-vs{margin:auto}
+}

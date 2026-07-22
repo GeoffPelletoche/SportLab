@@ -1,0 +1,37 @@
+{
+  "version": "6.3.7",
+  "packs": [
+    "Pack 0 - SportLab Design Language",
+    "Pack 2 - Design System Premium"
+  ],
+  "source_basis": [
+    "sportlab.css V6.3.6 foundation",
+    "dashboardView.js V6.3.4 structure"
+  ],
+  "business_logic_modified": false,
+  "files": [
+    "README.md",
+    "CHANGELOG.md",
+    "pack-0-design-language/docs/COMPONENT_CONTRACTS.md",
+    "pack-0-design-language/docs/SPORTLAB_DESIGN_LANGUAGE.md",
+    "pack-0-design-language/docs/MIGRATION_RULES.md",
+    "pack-2-design-system/assets/sportlab.css",
+    "pack-2-design-system/docs/INSTALLATION.md",
+    "pack-2-design-system/assets/css/sportlab-modular.css",
+    "pack-2-design-system/assets/css/modules/10-navigation.css",
+    "pack-2-design-system/assets/css/modules/14-view-compatibility.css",
+    "pack-2-design-system/assets/css/modules/08-tables.css",
+    "pack-2-design-system/assets/css/modules/12-responsive.css",
+    "pack-2-design-system/assets/css/modules/11-utilities.css",
+    "pack-2-design-system/assets/css/modules/02-typography.css",
+    "pack-2-design-system/assets/css/modules/03-layout.css",
+    "pack-2-design-system/assets/css/modules/09-kpi-states.css",
+    "pack-2-design-system/assets/css/modules/06-badges-alerts.css",
+    "pack-2-design-system/assets/css/modules/05-buttons.css",
+    "pack-2-design-system/assets/css/modules/01-reset.css",
+    "pack-2-design-system/assets/css/modules/13-module-themes.css",
+    "pack-2-design-system/assets/css/modules/04-surfaces.css",
+    "pack-2-design-system/assets/css/modules/07-forms.css",
+    "pack-2-design-system/assets/css/modules/00-tokens.css"
+  ]
+}
