@@ -89,10 +89,12 @@ export function renderDashboard({
   }
 
   return `
-  ${navigationHtml}
+    ${navigationHtml}
 
-  ${content}
-`;
+    <main class="sl-main-content">
+      ${content}
+    </main>
+  `;
 }
 
 /* =========================================================

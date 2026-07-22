@@ -1,0 +1,53 @@
+/* =========================================================
+SPORTLAB V6.3.6 — LAYOUT FRAMEWORK
+À utiliser uniquement si tu ne remplaces pas le fichier complet.
+========================================================= */
+
+:root {
+  --sl-layout-max: 1240px;
+  --sl-layout-inline: 14px;
+  --sl-layout-inline-mobile: 10px;
+  --sl-layout-header-gap: 12px;
+  --sl-layout-section-gap: 24px;
+  --sl-layout-bottom: 32px;
+}
+
+.sl-app-root {
+  width: min(
+    calc(100% - (var(--sl-layout-inline) * 2)),
+    var(--sl-layout-max)
+  );
+  margin-inline: auto;
+  padding-bottom: var(--sl-layout-bottom);
+}
+
+.sl-topbar {
+  margin-bottom: 0;
+}
+
+.sl-main-content {
+  width: 100%;
+  min-width: 0;
+  margin-top: var(--sl-layout-header-gap);
+}
+
+.sl-main-content > :first-child {
+  margin-top: 0;
+}
+
+.sl-page-section {
+  margin: 0 0 var(--sl-layout-section-gap);
+}
+
+.sl-stack-lg {
+  gap: var(--sl-layout-section-gap);
+}
+
+@media (max-width: 640px) {
+  .sl-app-root {
+    width: min(
+      calc(100% - (var(--sl-layout-inline-mobile) * 2)),
+      var(--sl-layout-max)
+    );
+  }
+}
