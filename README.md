@@ -68,3 +68,8 @@ Le pack :
 - ne modifie pas le settlement engine ;
 - n’impose aucune réécriture immédiate des vues existantes ;
 - peut être intégré progressivement.
+
+
+## V6.3.7 — Pack 4
+
+Dashboard Premium V2 intégré. Voir `docs/PACK4_DASHBOARD_PREMIUM_V2.md`.

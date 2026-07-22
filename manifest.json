@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
   "version": "6.3.7",
-  "pack": "Pack 3 — UI Components Premium",
+  "pack": "Pack 4 — Dashboard Premium V2",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -45,5 +45,14 @@
     "assets/css/components/01-card.css",
     "assets/css/components/03-kpi.css",
     "assets/css/components/05-empty-state.css"
+  ],
+  "pack4_files": [
+    "ui/views/dashboardView.js",
+    "ui/interactions/dashboardPremium.js",
+    "assets/dashboard-premium-v2.css",
+    "app.js",
+    "index.html",
+    "docs/PACK4_DASHBOARD_PREMIUM_V2.md",
+    "docs/PACK4_VALIDATION.md"
   ]
 }

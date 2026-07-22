@@ -15,11 +15,12 @@ import { saveAnalysis, getAnalysisForMatch } from "./core/stores/analysisStore.j
 
 import { renderApplication } from "./services/renderService.js";
 
+import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
+import { initDashboardPremium } from "./ui/interactions/dashboardPremium.js";
+
 import {
   runSettlementDiagnostics
 } from "./debug/settlementDiagnostics.js";
-
-import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
@@ -27,15 +28,8 @@ const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 
 function initializeUi() {
-    // Design System & composants Premium
-    initSportLabUi();
-
-    // Packs futurs
-    // initDashboardPremium();
-    // initDrawHunterPremium();
-    // initFrenchFlairPremium();
-    // initSportLabScore();
-    // initAnimations();
+  initSportLabUi();
+  initDashboardPremium();
 }
 
 async function init() {
@@ -53,10 +47,10 @@ drawhunterPayload = appData.drawhunterPayload;
 frenchflairPayload = appData.frenchflairPayload;
 
     renderApplication(app, {
-  ...appData,
-  currentPage
-});
-    
+      ...appData,
+      currentPage
+    });
+
     initializeUi();
 
     try {
@@ -80,11 +74,11 @@ frenchflairPayload = appData.frenchflairPayload;
         refreshedData.frenchflairPayload;
 
     renderApplication(app, {
-    ...refreshedData,
-    currentPage
-});
+      ...refreshedData,
+      currentPage
+    });
 
-initializeUi();
+    initializeUi();
 }
    } catch (error) {
       console.error(
@@ -726,6 +720,11 @@ function closeSportLabMenu() {
   }
 }
 
+window.refreshSportLab = async function() {
+  currentPage = "home";
+  await init();
+};
+
 window.navigateSportLab = function(page) {
   closeSportLabMenu();
 
@@ -764,12 +763,15 @@ document.addEventListener(
       frenchflairPayload =
         appData.frenchflairPayload;
 
-      renderApplication(app, {
-    ...refreshedData,
-    currentPage
-});
+      renderApplication(
+        document.getElementById("app"),
+        {
+          ...appData,
+          currentPage
+        }
+      );
 
-initializeUi();
+      initializeUi();
     } catch (error) {
       console.error(
         "[Diagnostics] Échec du diagnostic :",

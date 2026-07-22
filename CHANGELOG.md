@@ -15,3 +15,14 @@
 - Stores
 - Settlement engine
 - Données utilisateur
+
+
+## V6.3.7 — Pack 4 Dashboard Premium V2
+- Nouveau cockpit d’accueil
+- Priorités dynamiques
+- Modules enrichis
+- KPI consolidés
+- Actions rapides
+- Activité récente
+- Synchronisation détaillée
+- Initialisation UI centralisée

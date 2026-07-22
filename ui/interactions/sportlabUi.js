@@ -5,6 +5,7 @@
 
 let activeModal = null;
 let previousFocus = null;
+let modalTriggersReady = false;
 
 export function initSportLabUi(root = document) {
   initTabs(root);
@@ -63,6 +64,12 @@ export function activateTab(tabList, tabId) {
 }
 
 export function initModalTriggers(root = document) {
+  if (modalTriggersReady) {
+    return;
+  }
+
+  modalTriggersReady = true;
+
   root.addEventListener("click", event => {
     const openButton = event.target.closest("[data-sl-modal-open]");
     if (openButton) {
