@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "6.4.0",
-  "pack": "Sprint 5.1 — Structure DrawHunter Premium V2",
+  "version": "6.4.1",
+  "pack": "Sprint 5.2 — Workflow DrawHunter",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -70,5 +70,14 @@
     "index.html",
     "docs/SPRINT5.1_DRAWHUNTER_PREMIUM_STRUCTURE.md",
     "docs/SPRINT5.1_VALIDATION.md"
+  ],
+  "sprint5_2_files": [
+    "core/stores/drawHunterWorkflowStore.js",
+    "ui/interactions/drawHunterWorkflow.js",
+    "ui/views/drawhunterView.js",
+    "assets/drawhunter-premium-v2.css",
+    "app.js",
+    "docs/SPRINT5.2_DRAWHUNTER_WORKFLOW.md",
+    "docs/SPRINT5.2_VALIDATION.md"
   ]
 }

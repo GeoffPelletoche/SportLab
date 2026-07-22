@@ -83,3 +83,8 @@ Finition Desktop Cockpit ajoutée. Voir `docs/PACK4.1_DESKTOP_COCKPIT.md`.
 ## V6.4.0 — Sprint 5.1
 
 Structure DrawHunter Premium V2 intégrée. Voir `docs/SPRINT5.1_DRAWHUNTER_PREMIUM_STRUCTURE.md`.
+
+
+## V6.4.1 — Sprint 5.2
+
+Workflow DrawHunter Premium intégré. Voir `docs/SPRINT5.2_DRAWHUNTER_WORKFLOW.md`.

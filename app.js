@@ -17,6 +17,8 @@ import { renderApplication } from "./services/renderService.js";
 
 import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
 import { initDashboardPremium } from "./ui/interactions/dashboardPremium.js";
+import { initDrawHunterWorkflow } from "./ui/interactions/drawHunterWorkflow.js";
+import { saveDrawHunterMatchWorkflow } from "./core/stores/drawHunterWorkflowStore.js";
 
 import {
   runSettlementDiagnostics
@@ -30,6 +32,7 @@ let currentPage = "home";
 function initializeUi() {
   initSportLabUi();
   initDashboardPremium();
+  initDrawHunterWorkflow();
 }
 
 async function init() {
@@ -146,6 +149,17 @@ window.saveDrawHunterBet = function(index) {
   placed,
   stake
 });
+
+  saveDrawHunterMatchWorkflow(match.id, {
+    status: saved.placed ? "tracked" : (String(match.decision || "").toUpperCase().includes("VALUE") ? "value" : "decided"),
+    placed: Boolean(saved.placed),
+    stake: Number(saved.stake || 0),
+    event: {
+      type: saved.placed ? "tracked" : "decided",
+      label: saved.placed ? "Pari enregistré" : "Analyse enregistrée",
+      note: saved.placed ? `Mise : ${Number(saved.stake || 0).toFixed(2)} €` : "Aucun pari placé"
+    }
+  });
 
   alert(saved.placed ? "Pari DrawHunter sauvegardé." : "Analyse DrawHunter sauvegardée.");
   init();

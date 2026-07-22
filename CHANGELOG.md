@@ -47,3 +47,11 @@
 - responsive desktop / tablette / iPhone ;
 - libellés bookmaker neutralisés ;
 - logique métier conservée.
+
+## V6.4.1 — Sprint 5.2 Workflow DrawHunter
+- workflow UI persistant ;
+- journal par rencontre ;
+- actions contextuelles ;
+- filtres Premium ;
+- restauration du contexte ;
+- moteurs métier inchangés.
