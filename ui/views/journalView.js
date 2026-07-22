@@ -797,19 +797,28 @@ function renderResultStatusBadge(result) {
 
 function renderEmptyState() {
     return `
-        <div class="sl-empty-state">
+        <div class="sl-empty-state journal-empty-state">
 
             <span class="sl-empty-state-icon">
                 📭
             </span>
 
             <h3>
-                Aucune entrée trouvée
+                Le Journal est vide
             </h3>
 
             <p>
-                Modifie les filtres ou enregistre une nouvelle analyse.
+                Les analyses sauvegardées depuis DrawHunter
+                et FrenchFlair apparaîtront ici.
             </p>
+
+            <button
+                type="button"
+                class="sl-button sl-button-primary journal-empty-action"
+                onclick="navigateSportLab('home')"
+            >
+                🏠 Retour à l’accueil
+            </button>
 
         </div>
     `;
