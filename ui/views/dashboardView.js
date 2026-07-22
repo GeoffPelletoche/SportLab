@@ -89,12 +89,10 @@ export function renderDashboard({
   }
 
   return `
-    <h1>🏟️ SportLab</h1>
+  ${navigationHtml}
 
-    ${navigationHtml}
-
-    ${content}
-  `;
+  ${content}
+`;
 }
 
 /* =========================================================
