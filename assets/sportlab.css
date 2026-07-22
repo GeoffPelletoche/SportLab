@@ -169,7 +169,7 @@ button,input,select,textarea{font:inherit}
 .sl-app-root {
   width: min(100% - 28px, 1240px);
   margin: 0 auto;
-  padding: 100px 0 32px;
+  padding: 0 0 32px;
 }
 .sl-page{min-width:0}
 .sl-stack{display:grid;gap:var(--sl-gap)}
@@ -196,17 +196,11 @@ button,input,select,textarea{font:inherit}
 
 /* Navigation */
 .sl-topbar {
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 1000;
-  min-height: var(--sl-header-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px max(16px, calc((100vw - 1240px) / 2));
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(8, 16, 29, 0.88);
-  backdrop-filter: blur(18px);
+  position: relative;
+  inset: auto;
+  z-index: 100;
+  width: 100%;
+  margin-bottom: 12px;
 }
 .sl-brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:1.08rem;cursor:pointer}
 .sl-menu-toggle{display:grid;width:44px;height:44px;place-content:center;gap:5px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:var(--sl-surface);color:#fff}
@@ -266,7 +260,7 @@ button,input,select,textarea{font:inherit}
 @media(max-width:640px){
  .sl-app-root {
   width: min(100% - 20px, 1240px);
-  padding-top: 100px;
+  padding-top: 0;
 }
  .sl-page-header,.sl-section-header,.journal-card-header,.journal-card-footer{align-items:stretch;flex-direction:column}
  .sl-kpi-grid,.portfolio-summary,.analysis-summary__grid,.analysis-kpis,.premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:1fr}
