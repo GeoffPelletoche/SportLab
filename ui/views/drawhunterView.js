@@ -1,8 +1,14 @@
+import {
+  deriveDrawHunterWorkflowState,
+  getDrawHunterMatchWorkflow,
+  statusLabel
+} from "../../core/stores/drawHunterWorkflowStore.js";
+
 /**
- * SPORTLAB V6.4.0 — SPRINT 5.1
- * DrawHunter Premium V2 — structure du cockpit.
+ * SPORTLAB V6.4.1 — SPRINT 5.2
+ * DrawHunter Premium V2 — workflow interactif.
  *
- * Présentation uniquement :
+ * Workflow UI persistant :
  * - aucune modification du moteur DrawHunter ;
  * - aucune modification des probabilités ou de la décision ;
  * - aucune modification du store ou du settlement engine.
@@ -154,12 +160,49 @@ function renderWorkspace(matches, meta, stats) {
 
         ${matches.length === 0
           ? renderEmpty(meta)
-          : `<div class="dh-match-grid">${matches.map(renderMatchCard).join("")}</div>`
+          : `
+            ${renderFilters(matches)}
+            <div class="dh-match-grid">${matches.map(renderMatchCard).join("")}</div>
+          `
         }
       </div>
 
       ${renderSidebar(stats, meta)}
     </section>
+  `;
+}
+
+function renderFilters(matches) {
+  const counts = matches.reduce((acc, match) => {
+    const workflow = getDrawHunterMatchWorkflow(match?.id);
+    const state = deriveDrawHunterWorkflowState(match, workflow);
+    acc.all += 1;
+    acc[state] = (acc[state] || 0) + 1;
+    if (state === "value") acc.value += 0;
+    return acc;
+  }, { all: 0, new: 0, pending: 0, analyzed: 0, value: 0, tracked: 0, resulted: 0, archived: 0 });
+
+  const filters = [
+    ["all", "Tous", counts.all],
+    ["new", "Nouveaux", counts.new],
+    ["pending", "À analyser", counts.pending],
+    ["value", "VALUE", counts.value],
+    ["tracked", "Paris", counts.tracked],
+    ["resulted", "Résultats", counts.resulted],
+    ["archived", "Archives", counts.archived]
+  ];
+
+  return `
+    <nav class="dh-filterbar sl-panel" aria-label="Filtres DrawHunter">
+      <div class="dh-filterbar__buttons">
+        ${filters.map(([key, label, count]) => `
+          <button type="button" class="dh-filter" data-dh-filter="${key}">
+            <span>${label}</span><strong>${count}</strong>
+          </button>
+        `).join("")}
+      </div>
+      <span class="dh-filterbar__visible"><strong data-dh-visible-count>${counts.all}</strong> affiché(s)</span>
+    </nav>
   `;
 }
 
@@ -248,7 +291,9 @@ function renderEmpty(meta) {
 }
 
 function renderMatchCard(match, index) {
-  const state = getMatchState(match);
+  const storedWorkflow = getDrawHunterMatchWorkflow(match?.id);
+  const workflowState = deriveDrawHunterWorkflowState(match, storedWorkflow);
+  const state = getMatchState(match, workflowState);
   const probability = toPercent(match?.probability);
   const value = toPercent(match?.value);
   const confidence = getConfidence(match);
@@ -258,6 +303,9 @@ function renderMatchCard(match, index) {
     <article
       class="dh-match-card dh-match-card--${state.tone} sl-card"
       data-match-index="${index}"
+      data-match-id="${safe(match?.id ?? index)}"
+      data-dh-card
+      data-workflow-state="${workflowState}"
     >
       <header class="dh-match-card__header">
         <div>
@@ -269,8 +317,8 @@ function renderMatchCard(match, index) {
           </time>
         </div>
 
-        <span class="dh-status dh-status--${state.tone}">
-          ${state.label}
+        <span class="dh-status dh-status--${state.tone}" data-dh-status-label>
+          ${safe(statusLabel(workflowState)).toUpperCase()}
         </span>
       </header>
 
@@ -323,18 +371,66 @@ function renderMatchCard(match, index) {
 
       <div class="dh-card-timeline" aria-label="Étapes du match">
         ${renderTimelineStep("Importé", true)}
-        ${renderTimelineStep("Analysé", hasAnalysis(match))}
-        ${renderTimelineStep("Décidé", hasDecision(match))}
-        ${renderTimelineStep("Suivi", false)}
+        ${renderTimelineStep("Analysé", ["analyzed","decided","value","tracked","resulted","archived"].includes(workflowState))}
+        ${renderTimelineStep("Décidé", ["decided","value","tracked","resulted","archived"].includes(workflowState))}
+        ${renderTimelineStep("Suivi", ["tracked","resulted","archived"].includes(workflowState))}
       </div>
 
+      ${renderHistory(storedWorkflow, match)}
+
       <footer class="dh-match-card__footer">
+        ${renderContextActions(workflowState)}
         ${state.isValue
           ? renderBetForm(index, matchId)
           : renderNoBet(state)
         }
       </footer>
     </article>
+  `;
+}
+
+function renderContextActions(workflowState) {
+  const primary = workflowState === "new"
+    ? ["start", "Commencer"]
+    : workflowState === "pending"
+      ? ["complete", "Terminer l’analyse"]
+      : ["history", "Voir l’historique"];
+
+  return `
+    <div class="dh-context-actions">
+      <button type="button" class="sl-button sl-button-secondary" data-dh-action="${primary[0]}">
+        ${primary[1]}
+      </button>
+      ${primary[0] !== "history" ? `<button type="button" class="sl-button sl-button-ghost" data-dh-action="history" aria-expanded="false">Historique</button>` : ""}
+      ${workflowState !== "archived" ? `<button type="button" class="sl-button sl-button-ghost" data-dh-action="archive">Archiver</button>` : ""}
+    </div>
+  `;
+}
+
+function renderHistory(workflow, match) {
+  const baseEvent = {
+    label: "Match importé",
+    note: `${match?.competition || "Compétition"} · ${formatDate(match?.date)}`,
+    at: workflow?.createdAt || Date.now()
+  };
+  const events = [baseEvent, ...(Array.isArray(workflow?.history) ? workflow.history : [])];
+
+  return `
+    <section class="dh-history" data-dh-history hidden>
+      <div class="dh-history__heading">
+        <strong>Journal de la rencontre</strong>
+        <small>${events.length} événement(s)</small>
+      </div>
+      <ol>
+        ${events.slice().reverse().map(event => `
+          <li>
+            <i aria-hidden="true"></i>
+            <div><strong>${safe(event.label)}</strong>${event.note ? `<p>${safe(event.note)}</p>` : ""}</div>
+            <time>${formatRelativeDate(event.at)}</time>
+          </li>
+        `).join("")}
+      </ol>
+    </section>
   `;
 }
 
@@ -430,8 +526,11 @@ function buildStats(matches, meta) {
   };
 }
 
-function getMatchState(match) {
+function getMatchState(match, workflowState = null) {
   const decision = String(match?.decision || "").trim().toUpperCase();
+  if (workflowState === "archived") {
+    return { label: "ARCHIVÉ", shortLabel: "Archivé", note: "Rencontre classée", tone: "archived", isValue: false, isPending: false };
+  }
   const isValue = decision.includes("VALUE");
   const isPending = !decision || decision.includes("ANALYS");
 
