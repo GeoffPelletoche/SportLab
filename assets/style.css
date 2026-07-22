@@ -2018,3 +2018,362 @@ section.card:has(.journal-page) {
     animation: none;
   }
 }
+/* =========================================================
+   SPORTLAB — NAVIGATION HAMBURGER
+   ========================================================= */
+
+.sportlab-app-header {
+  position: relative;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 66px;
+  margin-bottom: var(--sl-space-5);
+  padding: 10px 14px;
+
+  border: 1px solid var(--sl-border);
+  border-radius: 21px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 46, 75, 0.97),
+      rgba(8, 24, 42, 0.97)
+    );
+
+  box-shadow:
+    var(--sl-shadow-md),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Marque SportLab */
+
+.sportlab-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  width: auto;
+  min-width: 0;
+  min-height: 44px;
+
+  margin: 0;
+  padding: 7px 9px;
+
+  border: 0;
+  border-radius: 14px;
+
+  color: var(--sl-text);
+  background: transparent;
+
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  text-align: left;
+}
+
+.sportlab-brand:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sportlab-brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  border: 1px solid var(--sl-border);
+  border-radius: 13px;
+
+  background: rgba(5, 18, 32, 0.45);
+  font-size: 1.25rem;
+}
+
+/* Bouton hamburger */
+
+.sportlab-menu-toggle {
+  position: relative;
+  z-index: 103;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+
+  margin: 0;
+  padding: 0;
+
+  border: 1px solid var(--sl-border);
+  border-radius: 15px;
+
+  background: rgba(5, 18, 32, 0.48);
+}
+
+.sportlab-menu-toggle span {
+  display: block;
+
+  width: 21px;
+  height: 2px;
+
+  border-radius: 999px;
+
+  background: var(--sl-text);
+
+  transition:
+    transform 190ms ease,
+    opacity 150ms ease;
+}
+
+/* Transformation ☰ vers ✕ */
+
+.sportlab-menu-open
+.sportlab-menu-toggle span:nth-child(1) {
+  transform:
+    translateY(7px)
+    rotate(45deg);
+}
+
+.sportlab-menu-open
+.sportlab-menu-toggle span:nth-child(2) {
+  opacity: 0;
+}
+
+.sportlab-menu-open
+.sportlab-menu-toggle span:nth-child(3) {
+  transform:
+    translateY(-7px)
+    rotate(-45deg);
+}
+
+/* Menu déroulant */
+
+.sportlab-mobile-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 102;
+
+  display: grid;
+  gap: 7px;
+
+  padding: 12px;
+
+  border: 1px solid var(--sl-border-strong);
+  border-radius: 21px;
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(20, 46, 75, 0.99),
+      rgba(7, 22, 39, 0.99)
+    );
+
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transform:
+    translateY(-10px)
+    scale(0.985);
+
+  transform-origin: top center;
+
+  pointer-events: none;
+
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease,
+    transform 180ms ease;
+}
+
+.sportlab-menu-open
+.sportlab-mobile-menu {
+  opacity: 1;
+  visibility: visible;
+
+  transform:
+    translateY(0)
+    scale(1);
+
+  pointer-events: auto;
+}
+
+/* Élément du menu */
+
+.sportlab-menu-item {
+  display: grid;
+  grid-template-columns:
+    auto
+    minmax(0, 1fr)
+    auto;
+  align-items: center;
+  gap: 12px;
+
+  width: 100%;
+  min-height: 55px;
+
+  margin: 0;
+  padding: 9px 12px;
+
+  border: 1px solid transparent;
+  border-radius: 15px;
+
+  color: var(--sl-text);
+  background: transparent;
+
+  text-align: left;
+
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.sportlab-menu-item:active {
+  transform: scale(0.985);
+}
+
+.sportlab-menu-item:hover {
+  border-color: var(--sl-border);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sportlab-menu-item.nav-active {
+  border-color: rgba(88, 184, 255, 0.36);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(88, 184, 255, 0.17),
+      rgba(156, 140, 255, 0.11)
+    );
+}
+
+.sportlab-menu-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+  background: rgba(5, 18, 32, 0.48);
+
+  font-size: 1.1rem;
+}
+
+.sportlab-menu-item-label {
+  font-size: 0.96rem;
+  font-weight: 800;
+}
+
+.sportlab-menu-arrow {
+  color: var(--sl-text-muted);
+  font-size: 1.5rem;
+}
+
+.sportlab-menu-current {
+  padding: 5px 8px;
+
+  border-radius: 999px;
+
+  color: var(--sl-primary);
+  background: rgba(88, 184, 255, 0.1);
+
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* Fond assombri */
+
+.sportlab-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+
+  background: rgba(2, 10, 18, 0.58);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+
+  transition:
+    opacity 180ms ease,
+    visibility 180ms ease;
+}
+
+.sportlab-menu-open
+.sportlab-menu-backdrop {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+body.sportlab-navigation-open {
+  overflow: hidden;
+}
+
+/* Désactivation de l’ancienne grille */
+
+.sportlab-app-header .sportlab-nav {
+  display: none;
+}
+
+/* Mobile */
+
+@media (max-width: 520px) {
+  .sportlab-app-header {
+    min-height: 62px;
+    margin-bottom: 18px;
+    padding: 8px 10px;
+    border-radius: 18px;
+  }
+
+  .sportlab-brand {
+    font-size: 1.1rem;
+  }
+
+  .sportlab-brand-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .sportlab-menu-toggle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .sportlab-mobile-menu {
+    top: calc(100% + 8px);
+    border-radius: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sportlab-mobile-menu,
+  .sportlab-menu-toggle span,
+  .sportlab-menu-backdrop,
+  .sportlab-menu-item {
+    transition: none;
+  }
+}
