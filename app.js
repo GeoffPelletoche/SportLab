@@ -19,6 +19,8 @@ import {
   runSettlementDiagnostics
 } from "./debug/settlementDiagnostics.js";
 
+import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
+
 let drawhunterPayload = null;
 let frenchflairPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
@@ -42,6 +44,8 @@ frenchflairPayload = appData.frenchflairPayload;
   ...appData,
   currentPage
 });
+    
+    initSportLabUi();
 
     try {
       const settlement = await runAutomaticSettlement();
@@ -67,6 +71,8 @@ frenchflairPayload = appData.frenchflairPayload;
         ...refreshedData,
         currentPage
     });
+
+        initSportLabUi();
 }
    } catch (error) {
       console.error(
