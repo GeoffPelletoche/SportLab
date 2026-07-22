@@ -1139,3 +1139,292 @@ body {
     font-size: 1.15rem;
   }
 }
+/* =========================================================
+   SPORTLAB V6.3.3 — JOURNAL UX COMPACT
+   ========================================================= */
+
+/* Évite que le grand .card parent engloutisse visuellement
+   toute la page Journal. */
+
+section.card:has(.journal-page) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* En-tête des filtres */
+
+.journal-filter-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sl-space-3);
+  margin-bottom: var(--sl-space-4);
+}
+
+.journal-filter-heading h3 {
+  margin-bottom: 5px;
+}
+
+.journal-filter-heading .sl-muted {
+  display: block;
+  font-size: 0.85rem;
+}
+
+/* Champ de recherche */
+
+.journal-search {
+  min-height: 52px;
+  margin: 0;
+  padding-inline: 16px;
+  border-radius: 16px;
+  font-size: 1rem;
+}
+
+/* Accordéon des filtres */
+
+.journal-advanced-filters {
+  margin-top: var(--sl-space-3);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-md);
+  background: rgba(5, 18, 32, 0.34);
+  overflow: hidden;
+}
+
+.journal-advanced-filters summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sl-space-3);
+
+  min-height: 50px;
+  padding: 13px 16px;
+
+  color: var(--sl-text);
+  font-size: 0.92rem;
+  font-weight: 800;
+
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.journal-advanced-filters summary::-webkit-details-marker {
+  display: none;
+}
+
+.journal-filter-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 28px;
+  height: 28px;
+
+  border-radius: 50%;
+  color: var(--sl-text-muted);
+  background: var(--sl-neutral-soft);
+
+  font-size: 1.35rem;
+  line-height: 1;
+
+  transform: rotate(90deg);
+  transition: transform 180ms ease;
+}
+
+.journal-advanced-filters[open]
+.journal-filter-chevron {
+  transform: rotate(-90deg);
+}
+
+.journal-advanced-content {
+  padding:
+    4px
+    14px
+    14px;
+  border-top: 1px solid var(--sl-border);
+}
+
+/* Selects légèrement plus compacts */
+
+.journal-advanced-content .sl-select {
+  min-height: 48px;
+  margin: 0;
+  border-radius: 14px;
+}
+
+/* KPI plus expressifs */
+
+.journal-kpi-icon {
+  margin-bottom: 12px;
+  font-size: 1.6rem;
+}
+
+.journal-kpi-grid .sl-kpi-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 136px;
+}
+
+.journal-kpi-grid .sl-kpi-card::after {
+  content: "";
+  position: absolute;
+  top: -45px;
+  right: -45px;
+
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(88, 184, 255, 0.13),
+      transparent 68%
+    );
+
+  pointer-events: none;
+}
+
+.journal-kpi-grid .sl-kpi-value {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.8rem, 8vw, 2.65rem);
+}
+
+.journal-kpi-grid .sl-kpi-label {
+  position: relative;
+  z-index: 1;
+  font-size: 0.83rem;
+}
+
+/* Résultats sous forme de chips homogènes */
+
+.journal-result-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.journal-result-summary .sl-badge {
+  min-width: 0;
+  min-height: 42px;
+  padding: 9px 10px;
+  font-size: 0.75rem;
+}
+
+/* État vide plus compact */
+
+.journal-empty-state {
+  padding: 38px 22px;
+}
+
+.journal-empty-state p {
+  max-width: 430px;
+  margin-inline: auto;
+}
+
+.journal-empty-action {
+  width: auto;
+  margin: 22px auto 0;
+  padding-inline: 20px;
+}
+
+/* Animation d’arrivée */
+
+@keyframes sportlab-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.journal-kpi-grid,
+.journal-summary-panel,
+.journal-result-summary,
+.journal-filter-panel,
+.journal-list {
+  animation:
+    sportlab-card-enter
+    260ms
+    ease
+    both;
+}
+
+.journal-summary-panel {
+  animation-delay: 35ms;
+}
+
+.journal-result-summary {
+  animation-delay: 70ms;
+}
+
+.journal-filter-panel {
+  animation-delay: 105ms;
+}
+
+.journal-list {
+  animation-delay: 140ms;
+}
+
+/* Respect des préférences d’accessibilité */
+
+@media (prefers-reduced-motion: reduce) {
+  .journal-kpi-grid,
+  .journal-summary-panel,
+  .journal-result-summary,
+  .journal-filter-panel,
+  .journal-list {
+    animation: none;
+  }
+
+  .journal-filter-chevron {
+    transition: none;
+  }
+}
+
+/* iPhone */
+
+@media (max-width: 600px) {
+  .journal-page {
+    gap: 16px;
+  }
+
+  .journal-filter-panel {
+    padding: 15px;
+  }
+
+  .journal-filter-heading {
+    align-items: center;
+  }
+
+  .journal-result-summary {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .journal-kpi-grid .sl-kpi-card {
+    min-height: 128px;
+  }
+
+  .journal-financial-item {
+    padding: 13px;
+  }
+
+  .journal-empty-state {
+    padding:
+      34px
+      18px;
+  }
+
+  .journal-empty-action {
+    width: 100%;
+  }
+}
