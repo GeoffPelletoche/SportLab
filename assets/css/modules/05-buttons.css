@@ -1,0 +1,26 @@
+/* Buttons */
+.sl-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:var(--sl-space-2);
+  min-height:44px;
+  padding:0 18px;
+  border:1px solid transparent;
+  border-radius:var(--sl-radius-sm);
+  cursor:pointer;
+  color:#fff;
+  font-weight:750;
+  transition:transform var(--sl-transition-fast),filter var(--sl-transition),box-shadow var(--sl-transition);
+}
+.sl-button:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.sl-button:active{transform:translateY(0)}
+.sl-button:focus-visible{outline:0;box-shadow:var(--sl-focus)}
+.sl-button:disabled{cursor:not-allowed;opacity:.5;transform:none;filter:none}
+.sl-button-primary{background:linear-gradient(135deg,var(--sl-primary),#2563eb)}
+.sl-button-secondary{background:linear-gradient(135deg,var(--sl-secondary),#6d28d9)}
+.sl-button-success{background:var(--sl-success)}
+.sl-button-warning{background:var(--sl-warning)}
+.sl-button-danger{background:var(--sl-danger)}
+.sl-button-ghost{border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.04)}
+.sl-button-reset{border:0;background:none;color:inherit;padding:0}

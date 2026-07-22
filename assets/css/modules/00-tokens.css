@@ -1,0 +1,51 @@
+/* SportLab V6.3.7 — Design Tokens */
+:root {
+  --sl-bg:#08101d;
+  --sl-surface:#111c2d;
+  --sl-surface-2:#162235;
+  --sl-surface-3:#1b2a40;
+  --sl-text:#f8fafc;
+  --sl-text-soft:#cbd5e1;
+  --sl-muted:#94a3b8;
+
+  --sl-primary:#38bdf8;
+  --sl-secondary:#8b5cf6;
+  --sl-success:#22c55e;
+  --sl-warning:#f59e0b;
+  --sl-danger:#ef4444;
+  --sl-info:#3b82f6;
+
+  --sl-space-1:4px;
+  --sl-space-2:8px;
+  --sl-space-3:12px;
+  --sl-space-4:16px;
+  --sl-space-5:24px;
+  --sl-space-6:32px;
+  --sl-space-7:48px;
+  --sl-space-8:64px;
+
+  --sl-radius-xs:8px;
+  --sl-radius-sm:12px;
+  --sl-radius-md:18px;
+  --sl-radius-lg:24px;
+  --sl-radius-pill:999px;
+
+  --sl-shadow-xs:0 1px 2px rgba(0,0,0,.18);
+  --sl-shadow-sm:0 8px 20px rgba(0,0,0,.18);
+  --sl-shadow-md:0 16px 40px rgba(0,0,0,.25);
+  --sl-shadow-lg:0 24px 64px rgba(0,0,0,.32);
+  --sl-focus:0 0 0 3px rgba(56,189,248,.28);
+
+  --sl-transition-fast:160ms ease;
+  --sl-transition:200ms ease;
+  --sl-transition-slow:280ms ease;
+
+  --sl-layout-max:1240px;
+  --sl-layout-inline:14px;
+  --sl-layout-inline-mobile:10px;
+  --sl-layout-header-gap:12px;
+  --sl-layout-section-gap:24px;
+  --sl-layout-bottom:32px;
+
+  --sl-header-height:68px;
+}

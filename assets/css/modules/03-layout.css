@@ -1,0 +1,29 @@
+/* App Shell and Layout */
+.sl-app-root{
+  width:min(calc(100% - (var(--sl-layout-inline) * 2)),var(--sl-layout-max));
+  margin-inline:auto;
+  padding-bottom:var(--sl-layout-bottom);
+}
+.sl-main-content{
+  width:100%;
+  min-width:0;
+  margin-top:var(--sl-layout-header-gap);
+}
+.sl-main-content>:first-child{margin-top:0}
+.sl-page{min-width:0}
+.sl-container{width:min(100%,var(--sl-layout-max));margin-inline:auto}
+.sl-grid{display:grid;gap:var(--sl-space-4)}
+.sl-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sl-grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.sl-grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.sl-stack{display:grid;gap:var(--sl-space-4)}
+.sl-stack-lg{gap:var(--sl-layout-section-gap)}
+.sl-page-section{margin:0 0 var(--sl-layout-section-gap)}
+.sl-section{display:grid;gap:var(--sl-space-4)}
+.sl-section-header,.sl-page-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:var(--sl-space-4);
+}
+.sl-page-header{align-items:flex-start}

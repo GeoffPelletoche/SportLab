@@ -1,0 +1,15 @@
+/* Utilities */
+.sl-hidden{display:none!important}
+.sl-w-full{width:100%}
+.sl-min-w-0{min-width:0}
+.sl-text-center{text-align:center}
+.sl-overflow-hidden{overflow:hidden}
+.sl-overflow-x-auto{overflow-x:auto}
+.sl-m-0{margin:0}
+.sl-mt-2{margin-top:var(--sl-space-2)}
+.sl-mt-3{margin-top:var(--sl-space-3)}
+.sl-mt-4{margin-top:var(--sl-space-4)}
+.sl-mt-5{margin-top:var(--sl-space-5)}
+.sl-gap-2{gap:var(--sl-space-2)}
+.sl-gap-3{gap:var(--sl-space-3)}
+.sl-gap-4{gap:var(--sl-space-4)}
