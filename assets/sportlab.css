@@ -166,9 +166,11 @@ button,input,select,textarea{font:inherit}
 /* =========================================================
 14. PACK 3 — MIGRATED VIEW COMPONENTS
 ========================================================= */
-.sl-app-root{width:min(100% - 28px,1240px);margin:0 auto;padding:calc(var(--sl-header-height) + var(--sl-header-gap))
-    0
-    32px;}
+.sl-app-root {
+  width: min(100% - 28px, 1240px);
+  margin: 0 auto;
+  padding: 100px 0 32px;
+}
 .sl-page{min-width:0}
 .sl-stack{display:grid;gap:var(--sl-gap)}
 .sl-stack-lg{gap:24px}
@@ -262,7 +264,10 @@ button,input,select,textarea{font:inherit}
  .premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(max-width:640px){
- .sl-app-root{width:min(100% - 20px,1240px);padding-top:80px}
+ .sl-app-root {
+  width: min(100% - 20px, 1240px);
+  padding-top: 100px;
+}
  .sl-page-header,.sl-section-header,.journal-card-header,.journal-card-footer{align-items:stretch;flex-direction:column}
  .sl-kpi-grid,.portfolio-summary,.analysis-summary__grid,.analysis-kpis,.premium-module-stats,.premium-sync-grid,.journal-card-metrics,.journal-financial-grid{grid-template-columns:1fr}
  .analysis-matchup{grid-template-columns:1fr;text-align:center}.analysis-team--away{text-align:center}.analysis-vs{margin:auto}
