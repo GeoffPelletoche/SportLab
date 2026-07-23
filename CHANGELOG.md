@@ -101,3 +101,29 @@
 - optimisation du rendu et compatibilité renforcée ;
 - Pack 5 officiellement clôturé ;
 - moteurs métier inchangés.
+
+## V6.5.3 — Sprint 6.4 / Clôture officielle du Pack 6
+
+### Ajouté
+- Recherche instantanée par équipe et compétition dans FrenchFlair.
+- Tri par date, confiance, total modèle, sigma, VALUE et workflow.
+- Densités d’affichage Confort et Compact.
+- KPIs VALUE, paris suivis, décisions en attente et résultats.
+- Persistance en session de la recherche, du tri, du filtre et de la densité.
+
+### Optimisé
+- Mise à jour du workflow sans `location.reload()`.
+- Tri et filtrage directement dans le DOM.
+- Écouteur de scroll unique avec `AbortController`.
+- Responsive iPhone du centre de contrôle.
+
+### Documentation
+- Manifest consolidé en V6.5.3.
+- Documentation et validation Sprint 6.4.
+- Pack 6 officiellement clôturé.
+
+### Non modifié
+- Moteurs statistiques Rugby.
+- API Rugby.
+- Calcul VALUE.
+- Settlement engine.

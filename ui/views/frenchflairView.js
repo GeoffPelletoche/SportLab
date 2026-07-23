@@ -63,6 +63,8 @@ function renderKpiRail(stats) {
       ${renderHeroKpi("Projection", `${formatNumber(stats.avgTotal)} pts`, "moyenne", "total")}
       ${renderHeroKpi("Sigma", `${formatNumber(stats.avgSigma)} pts`, "moyen", "sigma")}
       ${renderHeroKpi("Confiance", `${stats.avgConfidence}%`, confidenceLabel(stats.avgConfidence), "confidence")}
+      ${renderHeroKpi("VALUE", stats.workflow.value, `${stats.workflow.tracked} pari(s) suivi(s)`, "value")}
+      ${renderHeroKpi("À décider", stats.workflow.pending + stats.workflow.analyzed, `${stats.workflow.resulted} résultat(s)`, "decision")}
     </section>
   `;
 }
@@ -154,12 +156,38 @@ function renderWorkflowFilters(matches) {
     ["resulted", "Résultats", counts.resulted], ["archived", "Archives", counts.archived]
   ];
   return `
-    <nav class="ff-workflow-filters sl-panel" aria-label="Filtres du workflow FrenchFlair">
-      <div class="ff-workflow-filters__buttons">
-        ${filters.map(([key,label,count]) => `<button type="button" class="ff-workflow-filter" data-ff-filter="${key}">${label}<b>${count}</b></button>`).join("")}
+    <section class="ff-control-center sl-panel" aria-label="Recherche et tri FrenchFlair">
+      <div class="ff-control-center__top">
+        <label class="ff-search-field">
+          <span>Recherche</span>
+          <input type="search" inputmode="search" autocomplete="off" placeholder="Équipe ou compétition…" data-ff-search>
+        </label>
+        <label class="ff-sort-field">
+          <span>Trier par</span>
+          <select data-ff-sort>
+            <option value="date-asc">Date · prochain d’abord</option>
+            <option value="date-desc">Date · plus lointain</option>
+            <option value="confidence-desc">Confiance · élevée</option>
+            <option value="total-desc">Total modèle · élevé</option>
+            <option value="sigma-asc">Sigma · faible</option>
+            <option value="value-first">VALUE · prioritaire</option>
+            <option value="status">État du workflow</option>
+          </select>
+        </label>
+        <div class="ff-density-control" role="group" aria-label="Densité d’affichage">
+          <button type="button" data-ff-density="comfort">Confort</button>
+          <button type="button" data-ff-density="compact">Compact</button>
+        </div>
+        <button type="button" class="sl-button sl-button-ghost ff-reset-controls" data-ff-reset>Réinitialiser</button>
       </div>
-      <span><strong data-ff-visible-count>${counts.all}</strong> affiché(s)</span>
-    </nav>`;
+      <nav class="ff-workflow-filters" aria-label="Filtres du workflow FrenchFlair">
+        <div class="ff-workflow-filters__buttons">
+          ${filters.map(([key,label,count]) => `<button type="button" class="ff-workflow-filter" data-ff-filter="${key}">${label}<b>${count}</b></button>`).join("")}
+        </div>
+        <span><strong data-ff-visible-count>${counts.all}</strong> affiché(s)</span>
+      </nav>
+      <p class="ff-control-summary" data-ff-summary>${counts.all} rencontre(s) affichée(s)</p>
+    </section>`;
 }
 
 function renderMatches(matches) {
@@ -187,6 +215,11 @@ function renderMatchCard(match, index) {
       data-ff-card
       data-match-id="${id}"
       data-workflow-state="${workflowState}"
+      data-search="${safeAttribute(`${match.home || ""} ${match.away || ""} ${match.competition || ""}`.toLowerCase())}"
+      data-date="${safeAttribute(new Date(match.date || 0).getTime())}"
+      data-confidence="${safeAttribute(confidence)}"
+      data-total="${safeAttribute(Number(match.predictedTotalPoints) || 0)}"
+      data-sigma="${safeAttribute(Number(match.sigma) || 999)}"
       style="--ff-delay:${Math.min(index, 8) * 45}ms"
     >
       <div class="ff-match-card__rail" aria-hidden="true"></div>
@@ -333,6 +366,11 @@ function computePageStats(matches, meta) {
   const avgSigma = average(available.map(match => match.sigma));
   const total = matches.length || Number(meta?.visibleTotal || meta?.total || 0);
 
+  const workflow = { new:0, pending:0, analyzed:0, decided:0, value:0, tracked:0, resulted:0, archived:0 };
+  matches.forEach(match => {
+    const state = deriveFrenchFlairWorkflowState(match, getFrenchFlairMatchWorkflow(match?.id));
+    if (Object.hasOwn(workflow, state)) workflow[state] += 1;
+  });
   return {
     total,
     available: available.length,
@@ -341,6 +379,7 @@ function computePageStats(matches, meta) {
     avgConfidence,
     avgTotal,
     avgSigma,
+    workflow,
     coverage: total > 0 ? Math.round((available.length / total) * 100) : 0
   };
 }

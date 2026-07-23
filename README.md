@@ -1,16 +1,19 @@
-# SportLab V6.5.2 — Sprint 6.3 FrenchFlair Premium UX
+# SportLab V6.5.3 — Sprint 6.4 / Clôture Pack 6
 
-Projet complet basé sur la V6.5.1.
+Projet complet consolidant DrawHunter Premium et FrenchFlair Premium avant SportLab V7 Core.
 
-## Sprint 6.3
+## FrenchFlair — finalisation Pack 6
 
-- Hero FrenchFlair compact.
-- Signal du jour placé au-dessus des rencontres.
-- KPI condensés et lisibles sur mobile.
-- Filtres workflow conservés et rendus sticky.
-- Cartes de rencontre remontées dans la hiérarchie.
-- Cockpit et méthode rendus repliables.
-- Responsive iPhone renforcé.
-- Aucun changement des moteurs, API, calculs VALUE ou settlement.
+- Recherche instantanée par équipe ou compétition.
+- Tri avancé : date, confiance, total modèle, sigma, VALUE et workflow.
+- Densités Confort / Compact.
+- KPIs enrichis et filtres persistants.
+- Workflow fluide sans rechargement complet.
+- Interface mobile-first conservée.
+- Moteurs Rugby, calcul VALUE, API et settlement inchangés.
 
-Voir `docs/SPRINT6.3_FRENCHFLAIR_PREMIUM_UX.md` et `docs/SPRINT6.3_VALIDATION.md`.
+Documentation :
+- `docs/SPRINT6.4_CLOTURE_PACK6.md`
+- `docs/SPRINT6.4_VALIDATION.md`
+
+Le Pack 6 est officiellement clôturé dans cette version.

@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "6.5.2",
-  "pack": "Sprint 6.1 — Structure FrenchFlair Premium",
+  "version": "6.5.3",
+  "pack": "Sprint 6.4 — Clôture officielle du Pack 6",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -61,7 +61,7 @@
     "docs/PACK4.1_DESKTOP_COCKPIT.md",
     "docs/PACK4.1_VALIDATION.md"
   ],
-  "revision": "sprint6.1-frenchflair-premium-structure",
+  "revision": "sprint6.4-cloture-pack6",
   "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
   "dashboard_primary_action": "Smart module routing",
   "sprint5_1_files": [
@@ -92,13 +92,37 @@
     "CHANGELOG.md",
     "manifest.json"
   ],
-  "pack6_status": "in_progress",
+  "pack6_status": "closed",
   "sprint6_1_files": [
     "ui/views/frenchflairView.js",
     "assets/frenchflair-premium-v2.css",
     "index.html",
     "docs/SPRINT6.1_FRENCHFLAIR_PREMIUM_STRUCTURE.md",
     "docs/SPRINT6.1_VALIDATION.md",
+    "README.md",
+    "CHANGELOG.md",
+    "manifest.json"
+  ],
+  "sprint6_2_files": [
+    "core/stores/frenchFlairWorkflowStore.js",
+    "ui/interactions/frenchFlairWorkflow.js",
+    "ui/views/frenchflairView.js",
+    "assets/frenchflair-premium-v2.css",
+    "docs/SPRINT6.2_FRENCHFLAIR_WORKFLOW.md",
+    "docs/SPRINT6.2_VALIDATION.md"
+  ],
+  "sprint6_3_files": [
+    "ui/views/frenchflairView.js",
+    "assets/frenchflair-premium-v2.css",
+    "docs/SPRINT6.3_FRENCHFLAIR_PREMIUM_UX.md",
+    "docs/SPRINT6.3_VALIDATION.md"
+  ],
+  "sprint6_4_files": [
+    "ui/views/frenchflairView.js",
+    "ui/interactions/frenchFlairWorkflow.js",
+    "assets/frenchflair-premium-v2.css",
+    "docs/SPRINT6.4_CLOTURE_PACK6.md",
+    "docs/SPRINT6.4_VALIDATION.md",
     "README.md",
     "CHANGELOG.md",
     "manifest.json"
