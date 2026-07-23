@@ -1,5 +1,16 @@
 # Changelog
 
+## 7.0.0 — Sprint 7.1 Core Foundation
+
+- Nouveau bootstrap V7 placé avant le runtime historique.
+- Ajout du registre de modules et des définitions DrawHunter/FrenchFlair.
+- Ajout du bus d’événements, du cycle de vie et du routeur fondation.
+- Ajout d’un adaptateur de stockage et de migrations non destructives.
+- Ajout d’un store de réglages, d’un moteur de thème et de densité.
+- Ajout de services communs de notification, dialogue et diagnostic.
+- Encapsulation de la V6.5.3 dans `legacyApp.js`.
+- Aucun moteur métier ou algorithme VALUE modifié.
+
 ## V6.5.2 — Sprint 6.3 FrenchFlair Premium UX
 
 - Refonte de la hiérarchie mobile FrenchFlair.

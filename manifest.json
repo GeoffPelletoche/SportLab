@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "6.5.3",
-  "pack": "Sprint 6.4 — Clôture officielle du Pack 6",
+  "version": "7.0.0",
+  "pack": "Sprint 7.1 — Core Foundation",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -61,7 +61,7 @@
     "docs/PACK4.1_DESKTOP_COCKPIT.md",
     "docs/PACK4.1_VALIDATION.md"
   ],
-  "revision": "sprint6.4-cloture-pack6",
+  "revision": "sprint7.1-core-foundation",
   "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
   "dashboard_primary_action": "Smart module routing",
   "sprint5_1_files": [
@@ -126,5 +126,29 @@
     "README.md",
     "CHANGELOG.md",
     "manifest.json"
+  ],
+  "v7_core_status": "foundation",
+  "legacy_compatibility": "V6.5.3 preserved",
+  "sprint7_1_files": [
+    "app.js",
+    "legacyApp.js",
+    "assets/sportlab-v7-core.css",
+    "core/app/bootstrap.js",
+    "core/app/router.js",
+    "core/app/moduleRegistry.js",
+    "core/app/lifecycle.js",
+    "core/events/eventBus.js",
+    "core/storage/storageService.js",
+    "core/storage/schema.js",
+    "core/storage/migrations.js",
+    "core/settings/settingsStore.js",
+    "core/ui/themeService.js",
+    "core/ui/notificationService.js",
+    "core/ui/dialogService.js",
+    "core/diagnostics/logger.js",
+    "modules/drawhunter/index.js",
+    "modules/frenchflair/index.js",
+    "docs/SPRINT7.1_CORE_FOUNDATION.md",
+    "docs/SPRINT7.1_VALIDATION.md"
   ]
 }

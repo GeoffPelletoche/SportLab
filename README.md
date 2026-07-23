@@ -1,4 +1,6 @@
-# SportLab V6.5.3 — Sprint 6.4 / Clôture Pack 6
+# SportLab V7.0.0 — Sprint 7.1 Core Foundation
+
+SportLab V7 introduit un noyau modulaire, un bus d’événements, un stockage versionné, des réglages partagés, des services UI et un registre de modules, tout en conservant intégralement le runtime métier V6.5.3.
 
 Projet complet consolidant DrawHunter Premium et FrenchFlair Premium avant SportLab V7 Core.
 
