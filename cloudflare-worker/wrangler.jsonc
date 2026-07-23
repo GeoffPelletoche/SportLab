@@ -1,0 +1,20 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sportlab-cloud-sync",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-22",
+  "workers_dev": true,
+  "vars": {
+    "APP_ENV": "production",
+    "API_VERSION": "v1",
+    "ALLOWED_ORIGINS": "https://YOUR_GITHUB_USERNAME.github.io"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sportlab-sync-db",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
