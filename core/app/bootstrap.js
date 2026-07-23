@@ -11,6 +11,8 @@ import { createLifecycle } from "./lifecycle.js";
 import { createRouter } from "./router.js";
 import { drawHunterModule } from "../../modules/drawhunter/index.js";
 import { frenchFlairModule } from "../../modules/frenchflair/index.js";
+import { createSyncEngine } from "../sync/syncEngine.js";
+import { createSyncPanel } from "../sync/syncPanel.js";
 
 export async function bootstrapSportLabV7({ startLegacyApplication }) {
   const logger = createLogger({ namespace: "SportLab V7 Core", level: "info", eventBus });
@@ -19,9 +21,11 @@ export async function bootstrapSportLabV7({ startLegacyApplication }) {
   const moduleRegistry = createModuleRegistry({ eventBus, logger });
   const lifecycle = createLifecycle({ eventBus, logger });
   const router = createRouter({ eventBus });
+  const notifications = createNotificationService();
+  const syncEngine = createSyncEngine({ eventBus, logger, notifications });
   const context = Object.freeze({
-    version: "7.0.0", eventBus, logger, storage: localStorageService,
-    settingsStore, themeService, notifications: createNotificationService(),
+    version: "7.0.2", eventBus, logger, storage: localStorageService,
+    settingsStore, themeService, notifications, syncEngine,
     dialogs: createDialogService(), moduleRegistry, lifecycle, router
   });
 
@@ -33,9 +37,12 @@ export async function bootstrapSportLabV7({ startLegacyApplication }) {
   await drawHunterModule.mount(context);
   await frenchFlairModule.mount(context);
   await startLegacyApplication();
+  createSyncPanel({ engine: syncEngine, eventBus, notifications });
+  syncEngine.start();
 
   window.SportLabCore = Object.freeze({
     version: context.version,
+    cloud: Object.freeze({ status: syncEngine.getStatus, syncNow: syncEngine.syncNow, connect: syncEngine.connect, disconnect: syncEngine.disconnect }),
     modules: moduleRegistry.list().map(({ id, label, sport, capabilities }) => ({ id, label, sport, capabilities })),
     settings: () => settingsStore.getState(),
     setTheme: themeService.setTheme,

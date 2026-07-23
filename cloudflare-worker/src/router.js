@@ -16,7 +16,7 @@ export async function route(request, env) {
   const path = url.pathname.replace(/\/+$/, '') || '/';
 
   if (request.method === 'GET' && path === '/health') {
-    return json({ ok: true, service: 'sportlab-cloud-sync', version: '7.0.1', environment: env.APP_ENV || 'unknown', time: Date.now() });
+    return json({ ok: true, service: 'sportlab-cloud-sync', version: '7.0.2', environment: env.APP_ENV || 'unknown', time: Date.now() });
   }
 
   if (request.method === 'POST' && path === '/v1/auth/bootstrap') {
@@ -59,6 +59,20 @@ export async function route(request, env) {
   }
 
   if (request.method === 'GET' && path === '/v1/sync/snapshot') return json({ records: await getSnapshot(env, user.id) });
+
+  if (request.method === 'GET' && path === '/v1/backup') {
+    return json({ version: '7.0.2', exportedAt: Date.now(), records: await getSnapshot(env, user.id) });
+  }
+
+  if (request.method === 'POST' && path === '/v1/restore') {
+    const body = await readJson(request);
+    if (!Array.isArray(body.records) || body.records.length > 5000) throw new HttpError(400, 'invalid_records', 'records doit contenir au maximum 5000 éléments.');
+    const deviceId = assertString(body.deviceId || (await registerDevice(env, user.id, { name: 'Restore', platform: 'backend' })).id, 'deviceId', { max: 100 });
+    await assertDevice(env, user.id, deviceId);
+    const changes = body.records.map(record => validateChange({ ...record, clientUpdatedAt: Number(record.clientUpdatedAt || Date.now()) }));
+    return json(await pushChanges(env, user.id, deviceId, changes), 200);
+  }
+
 
   throw new HttpError(404, 'not_found', 'Route inconnue.');
 }
