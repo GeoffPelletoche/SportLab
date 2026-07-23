@@ -1,4 +1,39 @@
-# Changelog — SportLab V6.3.7 Pack 3
+# Changelog
+
+## V6.5.2 — Sprint 6.3 FrenchFlair Premium UX
+
+- Refonte de la hiérarchie mobile FrenchFlair.
+- Hero compact et signal décisionnel prioritaire.
+- KPI synthétiques.
+- Rencontres affichées avant les blocs pédagogiques.
+- Cockpit et méthode repliables.
+- Filtres workflow sticky et cohérents avec le thème sombre.
+- Optimisation des cartes et actions sur iPhone.
+- Moteurs et workflow Sprint 6.2 préservés.
+
+## V6.5.1 — Sprint 6.2 FrenchFlair Workflow
+
+- Ajout du workflow persistant FrenchFlair.
+- Ajout du journal par rencontre et des actions contextuelles.
+- Ajout des filtres Premium par état.
+- Restauration du contexte utilisateur.
+- Synchronisation du workflow avec les analyses et paris sauvegardés.
+- Aucun changement des moteurs métier.
+
+## V6.5.0 — Sprint 6.1 : FrenchFlair Premium
+
+### Ajouté
+- Hero et scoreboard FrenchFlair.
+- KPI de couverture, total modèle, sigma et confiance.
+- Cockpit latéral et signal de tendance.
+- Cartes Premium Over/Under avec projections et détails repliables.
+- Feuille de style responsive dédiée.
+- Documentation et checklist Sprint 6.1.
+
+### Conservé
+- Moteurs rugby, calcul VALUE, API, stockage, synchronisation et settlement.
+
+— SportLab V6.3.7 Pack 3
 
 ## Ajouté
 - Bibliothèque CSS de composants Premium

@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "6.4.1",
-  "pack": "Sprint 5.2 — Workflow DrawHunter",
+  "version": "6.5.2",
+  "pack": "Sprint 6.1 — Structure FrenchFlair Premium",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -61,7 +61,7 @@
     "docs/PACK4.1_DESKTOP_COCKPIT.md",
     "docs/PACK4.1_VALIDATION.md"
   ],
-  "revision": "pre-launch-smart-routing",
+  "revision": "sprint6.1-frenchflair-premium-structure",
   "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
   "dashboard_primary_action": "Smart module routing",
   "sprint5_1_files": [
@@ -79,5 +79,28 @@
     "app.js",
     "docs/SPRINT5.2_DRAWHUNTER_WORKFLOW.md",
     "docs/SPRINT5.2_VALIDATION.md"
+  ],
+  "pack5_status": "closed",
+  "sprint5_3_files": [
+    "ui/views/drawhunterView.js",
+    "ui/interactions/drawHunterWorkflow.js",
+    "core/stores/drawHunterWorkflowStore.js",
+    "assets/drawhunter-premium-v2.css",
+    "docs/SPRINT5.3_PACK5_CLOTURE.md",
+    "docs/SPRINT5.3_VALIDATION.md",
+    "README.md",
+    "CHANGELOG.md",
+    "manifest.json"
+  ],
+  "pack6_status": "in_progress",
+  "sprint6_1_files": [
+    "ui/views/frenchflairView.js",
+    "assets/frenchflair-premium-v2.css",
+    "index.html",
+    "docs/SPRINT6.1_FRENCHFLAIR_PREMIUM_STRUCTURE.md",
+    "docs/SPRINT6.1_VALIDATION.md",
+    "README.md",
+    "CHANGELOG.md",
+    "manifest.json"
   ]
 }

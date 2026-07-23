@@ -1,3 +1,4 @@
+// SPORTLAB V6.5.2 — Sprint 6.3 FrenchFlair Premium UX
 import { loadApplicationData } from "./services/appService.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
@@ -18,7 +19,9 @@ import { renderApplication } from "./services/renderService.js";
 import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
 import { initDashboardPremium } from "./ui/interactions/dashboardPremium.js";
 import { initDrawHunterWorkflow } from "./ui/interactions/drawHunterWorkflow.js";
+import { initFrenchFlairWorkflow } from "./ui/interactions/frenchFlairWorkflow.js";
 import { saveDrawHunterMatchWorkflow } from "./core/stores/drawHunterWorkflowStore.js";
+import { saveFrenchFlairMatchWorkflow } from "./core/stores/frenchFlairWorkflowStore.js";
 
 import {
   runSettlementDiagnostics
@@ -33,6 +36,7 @@ function initializeUi() {
   initSportLabUi();
   initDashboardPremium();
   initDrawHunterWorkflow();
+  initFrenchFlairWorkflow();
 }
 
 async function init() {
@@ -522,6 +526,11 @@ window.saveFrenchFlairAnalysis = function(matchId) {
   }
 
   saveAnalysis(pending);
+  saveFrenchFlairMatchWorkflow(matchId, {
+    status: pending.finalDecision === "VALUE" ? "value" : "decided",
+    decision: pending.finalDecision,
+    event: { type: pending.finalDecision === "VALUE" ? "value" : "decided", label: pending.finalDecision === "VALUE" ? "VALUE détectée" : "Analyse enregistrée", note: `${pending.market} ${Number(pending.line).toFixed(1)} · cote ${Number(pending.odds).toFixed(2)}` }
+  });
   pendingFrenchFlairAnalyses.delete(String(matchId));
 
   alert("Analyse sauvegardée dans le Journal.");
@@ -572,7 +581,7 @@ if (!match?.id || !match?.date) {
   return;
 }
 
-  createBet({
+  const savedBet = createBet({
   source: "FrenchFlair",
   sport: "rugby",
   competition: match.competition || null,
@@ -592,6 +601,11 @@ if (!match?.id || !match?.date) {
   stake
 });
 
+  saveFrenchFlairMatchWorkflow(matchId, {
+    status: placed ? "tracked" : (analysis.finalDecision === "VALUE" ? "value" : "decided"),
+    placed: Boolean(placed), stake,
+    event: { type: placed ? "tracked" : "decided", label: placed ? "Pari enregistré" : "Analyse enregistrée", note: placed ? `Mise : ${stake.toFixed(2)} €` : "Aucun pari placé" }
+  });
   alert("Analyse FrenchFlair sauvegardée.");
   init();
 };

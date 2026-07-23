@@ -1,6 +1,12 @@
+import {
+  deriveFrenchFlairWorkflowState,
+  getFrenchFlairMatchWorkflow,
+  statusLabel
+} from "../../core/stores/frenchFlairWorkflowStore.js";
+
 /**
- * SPORTLAB V6.5.0 — FRENCHFLAIR PREMIUM
- * Sprint 6.1 — Structure Premium
+ * SPORTLAB V6.5.2 — FRENCHFLAIR PREMIUM UX
+ * Sprint 6.3 — Hiérarchie mobile et cockpit décisionnel
  *
  * Refonte exclusivement visuelle : les moteurs, calculs, identifiants et
  * fonctions globales de FrenchFlair restent inchangés.
@@ -21,58 +27,30 @@ export function renderFrenchFlair(payload) {
 }
 
 function renderHero(stats, meta) {
+  const signal = dominantTrend(stats);
+  const signalClass = stats.over > stats.under ? "over" : stats.under > stats.over ? "under" : "pending";
   return `
-    <header class="ff-hero sl-panel">
+    <header class="ff-hero ff-hero--compact sl-panel">
       <div class="ff-hero__ambient" aria-hidden="true"></div>
-      <div class="ff-hero__content">
-        <div class="ff-hero__copy">
+      <div class="ff-hero__compact-row">
+        <div class="ff-hero__identity">
           <span class="ff-eyebrow">🏉 FRENCHFLAIR · RUGBY TOTALS</span>
-          <h1>Le terrain d’analyse<br><span>Over / Under</span></h1>
-          <p>
-            Projections de points, dispersion du modèle et lecture de tendance
-            réunies dans un espace de décision clair et mobile-first.
-          </p>
-          <div class="ff-hero__actions">
-            <a class="sl-button sl-button-primary ff-primary-action" href="#ff-match-list">
-              Voir les rencontres <span aria-hidden="true">↓</span>
-            </a>
-            <span class="ff-sync-pill">
-              <i aria-hidden="true"></i>
-              ${meta?.error ? "Synchronisation limitée" : `Synchronisé ${relativeSync(meta?.syncedAt)}`}
-            </span>
-          </div>
+          <h1>Over / Under</h1>
+          <p>Décider vite à partir du total modèle, du sigma et de la VALUE.</p>
         </div>
-
-        <div class="ff-scoreboard" aria-label="Synthèse FrenchFlair">
-          <div class="ff-scoreboard__topline">
-            <span>SESSION ACTIVE</span>
-            <strong>${formatPeriod(meta)}</strong>
-          </div>
-          <div class="ff-scoreboard__focus">
-            <div>
-              <small>RENCONTRES</small>
-              <strong>${stats.total}</strong>
-            </div>
-            <span class="ff-scoreboard__divider">/</span>
-            <div>
-              <small>PRÉDICTIONS</small>
-              <strong>${stats.available}</strong>
-            </div>
-          </div>
-          <div class="ff-scoreboard__trend">
-            <div class="ff-scoreboard__trend-item ff-scoreboard__trend-item--over">
-              <span>↗</span><strong>${stats.over}</strong><small>tendances OVER</small>
-            </div>
-            <div class="ff-scoreboard__trend-item ff-scoreboard__trend-item--under">
-              <span>↘</span><strong>${stats.under}</strong><small>tendances UNDER</small>
-            </div>
-          </div>
-          <div class="ff-scoreboard__confidence">
-            <span>Confiance moyenne</span>
-            <strong>${stats.avgConfidence}%</strong>
-            <div class="ff-meter"><i style="width:${clamp(stats.avgConfidence, 0, 100)}%"></i></div>
-          </div>
+        <div class="ff-hero__session">
+          <span>${formatPeriod(meta)}</span>
+          <strong>${stats.total} rencontre${stats.total > 1 ? "s" : ""}</strong>
+          <small>${meta?.error ? "Synchronisation limitée" : `Synchronisé ${relativeSync(meta?.syncedAt)}`}</small>
         </div>
+      </div>
+      <div class="ff-decision-strip ff-decision-strip--${signalClass}">
+        <div>
+          <small>SIGNAL DU JOUR</small>
+          <strong>${signal}</strong>
+          <span>${dominantTrendNote(stats)}</span>
+        </div>
+        <a class="sl-button sl-button-primary ff-primary-action" href="#ff-match-list">Voir les rencontres <span aria-hidden="true">↓</span></a>
       </div>
     </header>
   `;
@@ -80,11 +58,10 @@ function renderHero(stats, meta) {
 
 function renderKpiRail(stats) {
   return `
-    <section class="ff-kpi-rail" aria-label="Indicateurs FrenchFlair">
-      ${renderHeroKpi("Matchs visibles", stats.total, "Calendrier actif", "calendar")}
-      ${renderHeroKpi("Modèles disponibles", stats.available, `${stats.coverage}% de couverture`, "model")}
-      ${renderHeroKpi("Projection moyenne", `${formatNumber(stats.avgTotal)} pts`, "Total modèle", "total")}
-      ${renderHeroKpi("Sigma moyen", `${formatNumber(stats.avgSigma)} pts`, "Dispersion", "sigma")}
+    <section class="ff-kpi-rail ff-kpi-rail--compact" aria-label="Indicateurs FrenchFlair">
+      ${renderHeroKpi("À analyser", stats.available, `${stats.coverage}% couverts`, "model")}
+      ${renderHeroKpi("Projection", `${formatNumber(stats.avgTotal)} pts`, "moyenne", "total")}
+      ${renderHeroKpi("Sigma", `${formatNumber(stats.avgSigma)} pts`, "moyen", "sigma")}
       ${renderHeroKpi("Confiance", `${stats.avgConfidence}%`, confidenceLabel(stats.avgConfidence), "confidence")}
     </section>
   `;
@@ -102,61 +79,46 @@ function renderHeroKpi(label, value, note, type) {
 
 function renderMainLayout(matches, stats, meta) {
   return `
-    <div class="ff-layout">
-      <aside class="ff-sidebar sl-panel" aria-label="Cockpit FrenchFlair">
-        <div class="ff-sidebar__heading">
-          <span>COCKPIT</span>
-          <strong>Lecture rapide</strong>
+    <main class="ff-workspace" id="ff-match-list">
+      <div class="ff-workspace__header ff-workspace__header--decision">
+        <div>
+          <span class="ff-section-label">TABLEAU DE DÉCISION</span>
+          <h2>Rencontres à examiner</h2>
+          <p>${stats.available} modèle${stats.available > 1 ? "s" : ""} exploitable${stats.available > 1 ? "s" : ""} sur ${stats.total} rencontre${stats.total > 1 ? "s" : ""}.</p>
         </div>
+        <div class="ff-legend" aria-label="Légende">
+          <span><i class="is-over"></i> OVER</span>
+          <span><i class="is-under"></i> UNDER</span>
+          <span><i class="is-pending"></i> LIMITÉ</span>
+        </div>
+      </div>
 
-        <nav class="ff-sidebar__nav">
-          <a class="is-active" href="#ff-match-list"><span>◉</span> Rencontres <b>${stats.total}</b></a>
-          <a href="#ff-over"><span>↗</span> Tendance Over <b>${stats.over}</b></a>
-          <a href="#ff-under"><span>↘</span> Tendance Under <b>${stats.under}</b></a>
-          <a href="#ff-method"><span>∑</span> Lecture modèle</a>
-        </nav>
+      ${renderWorkflowFilters(matches)}
+      ${meta?.error ? renderError(meta) : ""}
+      ${matches.length === 0 ? renderEmpty() : renderMatches(matches)}
 
-        <div class="ff-sidebar__separator"></div>
-
-        <section class="ff-sidebar__signal">
-          <span class="ff-sidebar__signal-icon">◎</span>
-          <div>
+      <details class="ff-cockpit sl-panel">
+        <summary>
+          <span><small>COCKPIT</small><strong>Lecture rapide & contexte</strong></span>
+          <b>Ouvrir</b>
+        </summary>
+        <div class="ff-cockpit__content">
+          <section class="ff-cockpit__signal">
             <small>SIGNAL DU JOUR</small>
             <strong>${dominantTrend(stats)}</strong>
             <p>${dominantTrendNote(stats)}</p>
-          </div>
-        </section>
-
-        <section class="ff-sidebar__meta">
-          <div><span>Compétitions</span><strong>${safe(meta?.competitions || "Toutes")}</strong></div>
-          <div><span>Masqués</span><strong>${Number(meta?.hiddenTotal || 0)}</strong></div>
-          <div><span>Dernière synchro</span><strong>${formatCompactDateTime(meta?.syncedAt)}</strong></div>
-        </section>
-
-        <p class="ff-sidebar__notice">
-          Les tendances sont des projections statistiques. La saisie de la ligne et de la cote reste nécessaire pour calculer une VALUE.
-        </p>
-      </aside>
-
-      <main class="ff-workspace" id="ff-match-list">
-        <div class="ff-workspace__header">
-          <div>
-            <span class="ff-section-label">ANALYSES DISPONIBLES</span>
-            <h2>Rencontres à examiner</h2>
-            <p>${stats.available} modèle${stats.available > 1 ? "s" : ""} exploitable${stats.available > 1 ? "s" : ""} sur ${stats.total} rencontre${stats.total > 1 ? "s" : ""}.</p>
-          </div>
-          <div class="ff-legend" aria-label="Légende">
-            <span><i class="is-over"></i> OVER</span>
-            <span><i class="is-under"></i> UNDER</span>
-            <span><i class="is-pending"></i> Données limitées</span>
-          </div>
+          </section>
+          <section class="ff-cockpit__metrics">
+            <div><span>Over</span><strong>${stats.over}</strong></div>
+            <div><span>Under</span><strong>${stats.under}</strong></div>
+            <div><span>Compétitions</span><strong>${safe(meta?.competitions || "Toutes")}</strong></div>
+            <div><span>Dernière synchro</span><strong>${formatCompactDateTime(meta?.syncedAt)}</strong></div>
+          </section>
+          <p class="ff-sidebar__notice">Les tendances sont des projections statistiques. La ligne et la cote Betclic restent nécessaires pour calculer une VALUE.</p>
         </div>
-
-        ${meta?.error ? renderError(meta) : ""}
-        ${matches.length === 0 ? renderEmpty() : renderMatches(matches)}
-        ${renderMethodPanel()}
-      </main>
-    </div>
+      </details>
+      ${renderMethodPanel()}
+    </main>
   `;
 }
 
@@ -179,9 +141,30 @@ function renderEmpty() {
   `;
 }
 
+function renderWorkflowFilters(matches) {
+  const counts = { all: matches.length, new:0, pending:0, analyzed:0, value:0, tracked:0, resulted:0, archived:0 };
+  matches.forEach(match => {
+    const state = deriveFrenchFlairWorkflowState(match, getFrenchFlairMatchWorkflow(match?.id));
+    if (Object.hasOwn(counts, state)) counts[state] += 1;
+  });
+  const filters = [
+    ["all", "Tous", counts.all], ["new", "Nouveaux", counts.new],
+    ["pending", "À analyser", counts.pending], ["analyzed", "Analysés", counts.analyzed],
+    ["value", "VALUE", counts.value], ["tracked", "Paris", counts.tracked],
+    ["resulted", "Résultats", counts.resulted], ["archived", "Archives", counts.archived]
+  ];
+  return `
+    <nav class="ff-workflow-filters sl-panel" aria-label="Filtres du workflow FrenchFlair">
+      <div class="ff-workflow-filters__buttons">
+        ${filters.map(([key,label,count]) => `<button type="button" class="ff-workflow-filter" data-ff-filter="${key}">${label}<b>${count}</b></button>`).join("")}
+      </div>
+      <span><strong data-ff-visible-count>${counts.all}</strong> affiché(s)</span>
+    </nav>`;
+}
+
 function renderMatches(matches) {
   return `
-    <div class="ff-match-grid">
+    <div class="ff-match-grid" data-ff-grid>
       ${matches.map((match, index) => renderMatchCard(match, index)).join("")}
     </div>
   `;
@@ -194,11 +177,16 @@ function renderMatchCard(match, index) {
   const total = formatNumber(match.predictedTotalPoints);
   const sigma = formatNumber(match.sigma);
   const id = safeAttribute(match.id);
+  const workflow = getFrenchFlairMatchWorkflow(match.id);
+  const workflowState = deriveFrenchFlairWorkflowState(match, workflow);
 
   return `
     <article
-      class="ff-match-card ${predictionAvailable ? `ff-match-card--${trend.toLowerCase()}` : "ff-match-card--pending"}"
+      class="ff-match-card ${predictionAvailable ? `ff-match-card--${trend.toLowerCase()}` : "ff-match-card--pending"} ff-workflow-state--${workflowState}"
       id="ff-${trend.toLowerCase()}-${id}"
+      data-ff-card
+      data-match-id="${id}"
+      data-workflow-state="${workflowState}"
       style="--ff-delay:${Math.min(index, 8) * 45}ms"
     >
       <div class="ff-match-card__rail" aria-hidden="true"></div>
@@ -207,6 +195,7 @@ function renderMatchCard(match, index) {
           <span class="ff-competition">${safe(match.competition || "Compétition rugby")}</span>
           <span class="ff-kickoff">${formatDate(match.date)} · ${formatTime(match.date)}</span>
         </div>
+        <span class="ff-workflow-badge" data-ff-status-label>${safe(statusLabel(workflowState)).toUpperCase()}</span>
         ${predictionAvailable ? `
           <span class="ff-trend-badge ff-trend-badge--${trend.toLowerCase()}">
             <i>${trend === "OVER" ? "↗" : "↘"}</i>${trend}
@@ -265,21 +254,54 @@ function renderMatchCard(match, index) {
         </div>
       </details>
 
-      <footer class="ff-match-card__footer">
-        <button
-          type="button"
-          class="sl-button sl-button-primary ff-analyse-button"
-          onclick="analyzeFrenchFlairValue('${id}')"
-          ${predictionAvailable ? "" : "aria-describedby=\"ff-pending-note\""}
-        >
-          <span>Analyser la VALUE</span><span aria-hidden="true">→</span>
-        </button>
-        <div class="ff-card-status"><i></i><span>Ligne et cote à renseigner</span></div>
+      ${renderWorkflowTimeline(workflowState)}
+      <footer class="ff-match-card__footer ff-workflow-actions">
+        ${renderWorkflowActions(workflowState, id, predictionAvailable)}
+        <div class="ff-card-status"><i></i><span>${workflowStatusNote(workflowState)}</span></div>
       </footer>
 
+      <section class="ff-workflow-panel" data-ff-workflow-details hidden>
+        <strong>Détails du workflow</strong>
+        <p>État courant : ${safe(statusLabel(workflowState))}. La ligne, la cote et la décision restent gérées par le moteur FrenchFlair existant.</p>
+      </section>
+      ${renderWorkflowHistory(workflow, match)}
       <div id="ff-result-${id}" class="analysis-result ff-analysis-result"></div>
     </article>
   `;
+}
+
+function renderWorkflowTimeline(state) {
+  const order = ["new","pending","analyzed","decided","value","tracked","resulted","archived"];
+  const index = order.indexOf(state);
+  const done = key => index >= order.indexOf(key);
+  return `<div class="ff-workflow-timeline" aria-label="Progression de l’analyse">
+    <span class="${done("pending") ? "is-done" : ""}">Ouvert</span>
+    <i></i><span class="${done("analyzed") ? "is-done" : ""}">Analysé</span>
+    <i></i><span class="${done("decided") ? "is-done" : ""}">Décidé</span>
+    <i></i><span class="${done("tracked") ? "is-done" : ""}">Suivi</span>
+  </div>`;
+}
+
+function renderWorkflowActions(state, id, predictionAvailable) {
+  const primary = state === "new" ? ["start","Commencer"] : state === "pending" ? ["continue","Continuer"] : ["history","Historique"];
+  return `<div class="ff-workflow-actions__buttons">
+    ${predictionAvailable ? `<button type="button" class="sl-button sl-button-primary ff-analyse-button" onclick="analyzeFrenchFlairValue('${id}')"><span>Analyser la VALUE</span><span aria-hidden="true">→</span></button>` : ""}
+    <button type="button" class="sl-button sl-button-secondary" data-ff-action="${primary[0]}">${primary[1]}</button>
+    ${state === "pending" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="complete">Terminer</button>` : ""}
+    <button type="button" class="sl-button sl-button-ghost" data-ff-action="details" aria-expanded="false">Détails</button>
+    ${primary[0] !== "history" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="history" aria-expanded="false">Historique</button>` : ""}
+    ${state !== "archived" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="archive">Archiver</button>` : ""}
+  </div>`;
+}
+
+function renderWorkflowHistory(workflow, match) {
+  const base = { label:"Match importé", note:`${match.home || "Équipe"} vs ${match.away || "Équipe"}`, at:workflow?.createdAt || Date.parse(match.date || "") || Date.now() };
+  const events = [base, ...(Array.isArray(workflow?.history) ? workflow.history : [])];
+  return `<section class="ff-workflow-history" data-ff-history hidden><strong>Journal de la rencontre</strong>${events.map(event => `<article><time>${formatCompactDateTime(event.at)}</time><div><b>${safe(event.label || "Événement")}</b>${event.note ? `<p>${safe(event.note)}</p>` : ""}</div></article>`).join("")}</section>`;
+}
+
+function workflowStatusNote(state) {
+  return ({ new:"Rencontre nouvellement importée", pending:"Analyse en cours", analyzed:"Analyse terminée", decided:"Décision enregistrée", value:"VALUE détectée", tracked:"Pari enregistré", resulted:"Résultat disponible", archived:"Rencontre archivée" })[state] || "Ligne et cote à renseigner";
 }
 
 function renderMetric(label, value, note) {
@@ -288,18 +310,17 @@ function renderMetric(label, value, note) {
 
 function renderMethodPanel() {
   return `
-    <section class="ff-method sl-panel" id="ff-method">
-      <div class="ff-method__intro">
-        <span class="ff-section-label">MÉTHODE FRENCHFLAIR</span>
-        <h3>Trois repères avant la décision</h3>
-        <p>La structure Premium met en avant les informations utiles sans modifier le moteur statistique existant.</p>
-      </div>
+    <details class="ff-method ff-method--compact sl-panel" id="ff-method">
+      <summary>
+        <span><small>MÉTHODE FRENCHFLAIR</small><strong>Comprendre les trois repères</strong></span>
+        <b>Afficher</b>
+      </summary>
       <div class="ff-method__steps">
         <article><b>01</b><strong>Total modèle</strong><p>Projection combinée des points attendus pour les deux équipes.</p></article>
-        <article><b>02</b><strong>Sigma</strong><p>Mesure de dispersion qui encadre l’incertitude autour de la projection.</p></article>
-        <article><b>03</b><strong>VALUE</strong><p>Comparaison calculée après saisie de la ligne et de la cote disponibles.</p></article>
+        <article><b>02</b><strong>Sigma</strong><p>Dispersion utilisée pour mesurer l’incertitude autour de la projection.</p></article>
+        <article><b>03</b><strong>VALUE</strong><p>Comparaison calculée après saisie de la ligne et de la cote Betclic.</p></article>
       </div>
-    </section>
+    </details>
   `;
 }
 

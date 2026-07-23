@@ -1,90 +1,16 @@
-# SportLab V6.3.7 — Pack 3 UI Components Premium
+# SportLab V6.5.2 — Sprint 6.3 FrenchFlair Premium UX
 
-Ce pack construit la bibliothèque UI officielle au-dessus du Pack 2 Design System Premium.
+Projet complet basé sur la V6.5.1.
 
-## Contenu
+## Sprint 6.3
 
-### CSS
-- cartes ;
-- boutons avancés ;
-- KPI ;
-- alertes ;
-- états vides ;
-- progression ;
-- tabs et segmented controls ;
-- modal ;
-- toast ;
-- formulaires enrichis ;
-- listes de données ;
-- responsive des composants.
+- Hero FrenchFlair compact.
+- Signal du jour placé au-dessus des rencontres.
+- KPI condensés et lisibles sur mobile.
+- Filtres workflow conservés et rendus sticky.
+- Cartes de rencontre remontées dans la hiérarchie.
+- Cockpit et méthode rendus repliables.
+- Responsive iPhone renforcé.
+- Aucun changement des moteurs, API, calculs VALUE ou settlement.
 
-### JavaScript
-- fonctions de rendu HTML sans logique métier ;
-- initialisation des tabs ;
-- ouverture et fermeture des modals ;
-- gestion du focus dans les modals ;
-- notifications Toast.
-
-### Démonstration
-- galerie HTML de validation visuelle.
-
-## Dépendance
-
-Le Pack 3 nécessite le Pack 2 :
-
-```html
-<link rel="stylesheet" href="./assets/style.css">
-<link rel="stylesheet" href="./assets/sportlab.css">
-<link rel="stylesheet" href="./assets/sportlab-components.css">
-```
-
-## Installation
-
-Copier :
-
-```text
-assets/sportlab-components.css
-ui/components/sportlabComponents.js
-ui/interactions/sportlabUi.js
-```
-
-dans les dossiers correspondants du dépôt.
-
-Ajouter le CSS après `sportlab.css`.
-
-Initialiser les interactions une seule fois dans le point d’entrée de l’application :
-
-```js
-import { initSportLabUi } from "./ui/interactions/sportlabUi.js";
-
-initSportLabUi();
-```
-
-## Sécurité de migration
-
-Le pack :
-- ne modifie aucun moteur métier ;
-- ne modifie aucun store ;
-- ne modifie pas le settlement engine ;
-- n’impose aucune réécriture immédiate des vues existantes ;
-- peut être intégré progressivement.
-
-
-## V6.3.7 — Pack 4
-
-Dashboard Premium V2 intégré. Voir `docs/PACK4_DASHBOARD_PREMIUM_V2.md`.
-
-
-## V6.3.8 — Pack 4.1
-
-Finition Desktop Cockpit ajoutée. Voir `docs/PACK4.1_DESKTOP_COCKPIT.md`.
-
-
-## V6.4.0 — Sprint 5.1
-
-Structure DrawHunter Premium V2 intégrée. Voir `docs/SPRINT5.1_DRAWHUNTER_PREMIUM_STRUCTURE.md`.
-
-
-## V6.4.1 — Sprint 5.2
-
-Workflow DrawHunter Premium intégré. Voir `docs/SPRINT5.2_DRAWHUNTER_WORKFLOW.md`.
+Voir `docs/SPRINT6.3_FRENCHFLAIR_PREMIUM_UX.md` et `docs/SPRINT6.3_VALIDATION.md`.
