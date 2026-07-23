@@ -22,7 +22,7 @@ export function saveDrawHunterMatchWorkflow(matchId, patch = {}) {
   const now = Date.now();
   const nextStatus = normalizeStatus(patch.status || previous.status);
   const event = patch.event ? {
-    id: crypto.randomUUID(),
+    id: globalThis.crypto?.randomUUID?.() || `dh-${now}-${Math.random().toString(36).slice(2)}`,
     type: patch.event.type || nextStatus,
     label: patch.event.label || statusLabel(nextStatus),
     note: patch.event.note || "",
@@ -56,9 +56,9 @@ export function archiveDrawHunterMatch(matchId) {
 
 export function getDrawHunterContext() {
   try {
-    return JSON.parse(sessionStorage.getItem(CONTEXT_KEY)) || { filter: "all", scrollY: 0, selectedMatchId: null };
+    return JSON.parse(sessionStorage.getItem(CONTEXT_KEY)) || defaultContext();
   } catch {
-    return { filter: "all", scrollY: 0, selectedMatchId: null };
+    return defaultContext();
   }
 }
 
@@ -94,4 +94,8 @@ function normalizeStatus(status) {
   const allowed = ["new", "pending", "analyzed", "decided", "value", "tracked", "resulted", "archived"];
   const normalized = String(status || "new").toLowerCase();
   return allowed.includes(normalized) ? normalized : "new";
+}
+
+function defaultContext() {
+  return { filter: "all", query: "", sort: "priority", density: "comfortable", scrollY: 0, selectedMatchId: null, detailsMatchId: null };
 }

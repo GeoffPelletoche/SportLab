@@ -5,8 +5,8 @@ import {
 } from "../../core/stores/drawHunterWorkflowStore.js";
 
 /**
- * SPORTLAB V6.4.1 — SPRINT 5.2
- * DrawHunter Premium V2 — workflow interactif.
+ * SPORTLAB V6.4.2 — SPRINT 5.3 / PACK 5 FINAL
+ * DrawHunter Premium V2 — finalisation du poste d’analyse.
  *
  * Workflow UI persistant :
  * - aucune modification du moteur DrawHunter ;
@@ -161,13 +161,49 @@ function renderWorkspace(matches, meta, stats) {
         ${matches.length === 0
           ? renderEmpty(meta)
           : `
+            ${renderWorkspaceToolbar()}
             ${renderFilters(matches)}
-            <div class="dh-match-grid">${matches.map(renderMatchCard).join("")}</div>
+            <div class="dh-match-grid" data-dh-grid>${matches.map(renderMatchCard).join("")}</div>
           `
         }
       </div>
 
       ${renderSidebar(stats, meta)}
+    </section>
+  `;
+}
+
+function renderWorkspaceToolbar() {
+  return `
+    <section class="dh-toolbar sl-panel" aria-label="Outils de recherche et de tri">
+      <label class="dh-search">
+        <span>Rechercher</span>
+        <div>
+          <span aria-hidden="true">⌕</span>
+          <input type="search" data-dh-search placeholder="Équipe ou compétition" autocomplete="off">
+          <button type="button" data-dh-clear-search aria-label="Effacer la recherche" hidden>×</button>
+        </div>
+      </label>
+
+      <label class="dh-sort">
+        <span>Trier par</span>
+        <select data-dh-sort>
+          <option value="priority">Priorité</option>
+          <option value="date-asc">Date croissante</option>
+          <option value="date-desc">Date décroissante</option>
+          <option value="probability-desc">Probabilité décroissante</option>
+          <option value="value-desc">Value décroissante</option>
+          <option value="competition">Compétition</option>
+        </select>
+      </label>
+
+      <div class="dh-density" role="group" aria-label="Densité d’affichage">
+        <span>Affichage</span>
+        <div>
+          <button type="button" data-dh-density="comfortable" aria-pressed="true">Confort</button>
+          <button type="button" data-dh-density="compact" aria-pressed="false">Compact</button>
+        </div>
+      </div>
     </section>
   `;
 }
@@ -306,6 +342,12 @@ function renderMatchCard(match, index) {
       data-match-id="${safe(match?.id ?? index)}"
       data-dh-card
       data-workflow-state="${workflowState}"
+      data-dh-search-text="${safe(`${match?.home || ""} ${match?.away || ""} ${match?.competition || ""}`.toLowerCase())}"
+      data-dh-date="${safe(match?.date || "")}" 
+      data-dh-probability="${Number(match?.probability) || 0}"
+      data-dh-value="${Number(match?.value) || 0}"
+      data-dh-competition="${safe(String(match?.competition || "").toLowerCase())}"
+      tabindex="0"
     >
       <header class="dh-match-card__header">
         <div>
@@ -376,6 +418,7 @@ function renderMatchCard(match, index) {
         ${renderTimelineStep("Suivi", ["tracked","resulted","archived"].includes(workflowState))}
       </div>
 
+      ${renderAnalysisDetails(match, state, confidence)}
       ${renderHistory(storedWorkflow, match)}
 
       <footer class="dh-match-card__footer">
@@ -386,6 +429,22 @@ function renderMatchCard(match, index) {
         }
       </footer>
     </article>
+  `;
+}
+
+function renderAnalysisDetails(match, state, confidence) {
+  const edge = Number(match?.edge);
+  const implied = Number(match?.odds) > 0 ? (1 / Number(match.odds)) : null;
+  return `
+    <section class="dh-details" data-dh-details hidden>
+      <div class="dh-details__grid">
+        <div><span>Probabilité modèle</span><strong>${toPercent(match?.probability)}%</strong></div>
+        <div><span>Probabilité implicite</span><strong>${implied === null ? "-" : `${toPercent(implied)}%`}</strong></div>
+        <div><span>Edge calculé</span><strong>${Number.isFinite(edge) ? `${(edge * 100).toFixed(1)}%` : "-"}</strong></div>
+        <div><span>Confiance visuelle</span><strong>${confidence}%</strong></div>
+      </div>
+      <p>${safe(state.note)}. Cet indicateur détaille les données déjà produites par le moteur sans modifier sa décision.</p>
+    </section>
   `;
 }
 
@@ -401,6 +460,7 @@ function renderContextActions(workflowState) {
       <button type="button" class="sl-button sl-button-secondary" data-dh-action="${primary[0]}">
         ${primary[1]}
       </button>
+      <button type="button" class="sl-button sl-button-ghost" data-dh-action="details" aria-expanded="false">Détails</button>
       ${primary[0] !== "history" ? `<button type="button" class="sl-button sl-button-ghost" data-dh-action="history" aria-expanded="false">Historique</button>` : ""}
       ${workflowState !== "archived" ? `<button type="button" class="sl-button sl-button-ghost" data-dh-action="archive">Archiver</button>` : ""}
     </div>
@@ -505,25 +565,19 @@ function renderNoBet(state) {
 
 function buildStats(matches, meta) {
   const total = matches.length;
-  const analyzed = matches.filter(hasAnalysis).length;
-  const decided = matches.filter(hasDecision).length;
-  const value = matches.filter(match => getMatchState(match).isValue).length;
-  const pending = matches.filter(match => getMatchState(match).isPending).length;
-  const tracked = 0;
-  const progress = total > 0
-    ? Math.round((decided / total) * 100)
-    : 0;
+  const states = matches.map(match => deriveDrawHunterWorkflowState(match, getDrawHunterMatchWorkflow(match?.id)));
+  const analyzedStates = ["analyzed", "decided", "value", "tracked", "resulted", "archived"];
+  const decidedStates = ["decided", "value", "tracked", "resulted", "archived"];
+  const analyzed = states.filter(state => analyzedStates.includes(state)).length;
+  const decided = states.filter(state => decidedStates.includes(state)).length;
+  const value = states.filter(state => state === "value").length;
+  const pending = states.filter(state => ["new", "pending"].includes(state)).length;
+  const tracked = states.filter(state => ["tracked", "resulted"].includes(state)).length;
+  const resulted = states.filter(state => state === "resulted").length;
+  const archived = states.filter(state => state === "archived").length;
+  const progress = total > 0 ? Math.round((decided / total) * 100) : 0;
 
-  return {
-    total,
-    analyzed,
-    decided,
-    value,
-    pending,
-    tracked,
-    progress,
-    hidden: toFiniteNumber(meta?.hiddenTotal, 0)
-  };
+  return { total, analyzed, decided, value, pending, tracked, resulted, archived, progress, hidden: toFiniteNumber(meta?.hiddenTotal, 0) };
 }
 
 function getMatchState(match, workflowState = null) {

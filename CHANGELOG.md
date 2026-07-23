@@ -55,3 +55,14 @@
 - filtres Premium ;
 - restauration du contexte ;
 - moteurs métier inchangés.
+
+
+## V6.4.2 — Sprint 5.3 / Clôture Pack 5
+- recherche instantanée et tris multicritères ;
+- densité Confort / Compact ;
+- détails repliables et navigation clavier ;
+- contexte complet restauré ;
+- KPI de workflow corrigés ;
+- optimisation du rendu et compatibilité renforcée ;
+- Pack 5 officiellement clôturé ;
+- moteurs métier inchangés.
