@@ -1,4 +1,4 @@
-# SportLab V7.0.1 — Sprint 7.1.1A Cloud Sync Infrastructure
+# SportLab V7.0.2 — Sprint 7.1.1B Cloud Sync Infrastructure
 
 Cette livraison ajoute une infrastructure Cloudflare autonome et déployable : Worker API, base D1, authentification mono-utilisateur, appareils, synchronisation incrémentale et gestion explicite des conflits.
 

@@ -159,3 +159,8 @@
 
 ### Important
 - Le cloud n’est pas encore la source de vérité du client. Le branchement et la migration locale seront réalisés au Sprint 7.1.1B.
+
+## 7.0.2 — Sprint 7.1.1B Cloud Integration
+- Cloudflare D1 devient la source de vérité des données SportLab.
+- Ajout Sync Engine, file hors ligne, migration initiale, push/pull, statut Cloud et connexion multi-appareils.
+- Ajout des routes backend backup/restore.
