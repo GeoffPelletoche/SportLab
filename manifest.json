@@ -1,7 +1,7 @@
 {
   "project": "SportLab",
-  "version": "7.0.0",
-  "pack": "Sprint 7.1 — Core Foundation",
+  "version": "7.0.1",
+  "pack": "Sprint 7.1.1A — Cloud Sync Infrastructure",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
     "Pack 2 — Design System Premium"
@@ -61,7 +61,7 @@
     "docs/PACK4.1_DESKTOP_COCKPIT.md",
     "docs/PACK4.1_VALIDATION.md"
   ],
-  "revision": "sprint7.1-core-foundation",
+  "revision": "sprint7.1.1a-cloud-sync-infrastructure",
   "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
   "dashboard_primary_action": "Smart module routing",
   "sprint5_1_files": [
@@ -150,5 +150,21 @@
     "modules/frenchflair/index.js",
     "docs/SPRINT7.1_CORE_FOUNDATION.md",
     "docs/SPRINT7.1_VALIDATION.md"
+  ],
+  "cloud_sync_status": "infrastructure_ready_not_connected",
+  "sprint7_1_1a_files": [
+    "cloudflare-worker/src/index.js",
+    "cloudflare-worker/src/router.js",
+    "cloudflare-worker/src/auth.js",
+    "cloudflare-worker/src/cors.js",
+    "cloudflare-worker/src/db.js",
+    "cloudflare-worker/src/http.js",
+    "cloudflare-worker/migrations/0001_initial.sql",
+    "cloudflare-worker/wrangler.jsonc",
+    "cloudflare-worker/package.json",
+    "cloudflare-worker/test/worker.test.js",
+    "docs/SPRINT7.1.1A_CLOUD_SYNC_FOUNDATION.md",
+    "docs/SPRINT7.1.1A_CLOUDFLARE_DEPLOYMENT.md",
+    "docs/SPRINT7.1.1A_VALIDATION.md"
   ]
 }

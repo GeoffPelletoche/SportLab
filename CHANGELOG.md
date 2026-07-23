@@ -138,3 +138,24 @@
 - API Rugby.
 - Calcul VALUE.
 - Settlement engine.
+
+## 7.0.1 — Sprint 7.1.1A Cloud Sync Infrastructure
+
+### Ajouté
+- API Cloudflare Worker indépendante de l’application.
+- Schéma Cloudflare D1 versionné.
+- Bootstrap mono-utilisateur protégé par secret.
+- Jetons Bearer persistés uniquement sous forme de hash.
+- Registre des appareils.
+- Push optimiste, pull incrémental et snapshot complet.
+- CORS limité aux origines explicitement autorisées.
+- Documentation de déploiement dash.cloudflare.com et Wrangler.
+- Tests de fumée du Worker.
+
+### Préservé
+- Runtime SportLab V7 Core.
+- Moteurs DrawHunter et FrenchFlair.
+- Données locales existantes.
+
+### Important
+- Le cloud n’est pas encore la source de vérité du client. Le branchement et la migration locale seront réalisés au Sprint 7.1.1B.

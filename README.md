@@ -1,21 +1,17 @@
-# SportLab V7.0.0 — Sprint 7.1 Core Foundation
+# SportLab V7.0.1 — Sprint 7.1.1A Cloud Sync Infrastructure
 
-SportLab V7 introduit un noyau modulaire, un bus d’événements, un stockage versionné, des réglages partagés, des services UI et un registre de modules, tout en conservant intégralement le runtime métier V6.5.3.
+Cette livraison ajoute une infrastructure Cloudflare autonome et déployable : Worker API, base D1, authentification mono-utilisateur, appareils, synchronisation incrémentale et gestion explicite des conflits.
 
-Projet complet consolidant DrawHunter Premium et FrenchFlair Premium avant SportLab V7 Core.
+## État de la migration
 
-## FrenchFlair — finalisation Pack 6
+- SportLab V7 Core reste pleinement opérationnel.
+- Les moteurs DrawHunter, FrenchFlair, VALUE, ROI et settlement sont inchangés.
+- Le runtime client utilise encore ses stores V7/V6.5.3.
+- Le cloud n’est pas encore branché à l’application : cette étape appartient au Sprint 7.1.1B.
 
-- Recherche instantanée par équipe ou compétition.
-- Tri avancé : date, confiance, total modèle, sigma, VALUE et workflow.
-- Densités Confort / Compact.
-- KPIs enrichis et filtres persistants.
-- Workflow fluide sans rechargement complet.
-- Interface mobile-first conservée.
-- Moteurs Rugby, calcul VALUE, API et settlement inchangés.
+## Dossiers principaux
 
-Documentation :
-- `docs/SPRINT6.4_CLOTURE_PACK6.md`
-- `docs/SPRINT6.4_VALIDATION.md`
-
-Le Pack 6 est officiellement clôturé dans cette version.
+- `cloudflare-worker/` : projet Worker + D1 prêt à déployer.
+- `docs/SPRINT7.1.1A_CLOUDFLARE_DEPLOYMENT.md` : procédure dashboard/CLI.
+- `docs/SPRINT7.1.1A_CLOUD_SYNC_FOUNDATION.md` : architecture et contrat de synchronisation.
+- `docs/SPRINT7.1.1A_VALIDATION.md` : contrôles effectués.
