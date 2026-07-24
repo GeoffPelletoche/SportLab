@@ -1,3 +1,12 @@
+# SportLab V7.1.2C — Cloud Recovery & Conflict Center
+
+- Ajout du Recovery Center et de sa navigation dédiée.
+- Snapshots locaux de sécurité et restauration.
+- Comparaison Local / Cloud non destructive.
+- Sauvegarde forcée Local vers Cloud et restauration Cloud vers Local.
+- Fusion intelligente LWW, journal Recovery et historique des conflits.
+- Tests automatisés du Recovery Center.
+
 # Changelog
 
 ## V7.1.2A — Sync Engine V2

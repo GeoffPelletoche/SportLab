@@ -76,6 +76,13 @@ export function renderNavigation(activePage = "home") {
         })}
 
         ${renderNavigationItem({
+          page: "recovery",
+          icon: "🛟",
+          label: "Recovery",
+          activePage
+        })}
+
+        ${renderNavigationItem({
           page: "diagnostics",
           icon: "🩺",
           label: "Diagnostics",

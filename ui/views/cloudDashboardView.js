@@ -2,7 +2,7 @@
  * SPORTLAB V7.1.2B — CLOUD DASHBOARD
  * Vue utilisateur du Sync Engine V2. Aucune logique métier.
  */
-export function renderCloudDashboard({ cloud = {}, storageSummary = {} } = {}) {
+export function renderCloudDashboard({ cloud = {}, storageSummary = {}, recovery = {} } = {}) {
   const state = resolveState(cloud);
   const queue = cloud.queue || {};
   const diff = cloud.diff || {};
@@ -43,6 +43,7 @@ export function renderCloudDashboard({ cloud = {}, storageSummary = {} } = {}) {
           ${renderRow("Push cumulés", formatInteger(cloud.totalPushes))}
           ${renderRow("Pull cumulés", formatInteger(cloud.totalPulls))}
           ${renderRow("Conflits cumulés", formatInteger(cloud.totalConflicts))}
+          ${renderRow("Snapshots Recovery", formatInteger(recovery.snapshots?.length))}
         </article>
 
         <article class="sl-card cloud-dashboard-card">
@@ -65,6 +66,7 @@ export function renderCloudDashboard({ cloud = {}, storageSummary = {} } = {}) {
         <div class="cloud-dashboard-actions">
           <button type="button" class="sl-button sl-button-primary" onclick="runSportLabCloudSync()" ${cloud.syncing ? "disabled" : ""}>${cloud.syncing ? "Synchronisation…" : "Synchroniser maintenant"}</button>
           <button type="button" class="sl-button" onclick="openSportLabCloudSettings()">Paramètres cloud</button>
+          <button type="button" class="sl-button" onclick="navigateSportLab('recovery')">Recovery Center</button>
           <button type="button" class="sl-button" onclick="navigateSportLab('diagnostics')">Diagnostics</button>
         </div>
       </section>

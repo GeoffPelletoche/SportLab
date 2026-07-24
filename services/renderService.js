@@ -33,6 +33,7 @@ import {
 } from "../ui/views/diagnosticsView.js";
 
 import { renderCloudDashboard } from "../ui/views/cloudDashboardView.js";
+import { renderRecoveryCenter } from "../ui/views/recoveryCenterView.js";
 
 /**
  * SPORTLAB V6.3.1
@@ -85,10 +86,14 @@ export function renderApplication(app, data = {}) {
       data.diagnostic
     );
 
+  const cloudState = window.SportLabCore?.cloud?.status?.() || {};
+  const recoveryState = window.SportLabCore?.recovery?.state?.() || {};
   const cloudHtml = renderCloudDashboard({
-    cloud: window.SportLabCore?.cloud?.status?.() || {},
-    storageSummary: buildCloudStorageSummary()
+    cloud: cloudState,
+    storageSummary: buildCloudStorageSummary(),
+    recovery: recoveryState
   });
+  const recoveryHtml = renderRecoveryCenter({ recovery: recoveryState, cloud: cloudState });
 
   app.innerHTML =
     renderDashboard({
@@ -101,6 +106,7 @@ export function renderApplication(app, data = {}) {
       portfolioHtml,
       diagnosticsHtml,
       cloudHtml,
+      recoveryHtml,
       dashboard:
 
       data.dashboard || {},

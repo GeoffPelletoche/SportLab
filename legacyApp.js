@@ -849,3 +849,31 @@ window.addEventListener("sportlab:cloud-config", () => {
 });
 window.addEventListener("online", () => { if (currentPage === "cloud") init(); });
 window.addEventListener("offline", () => { if (currentPage === "cloud") init(); });
+
+// SPORTLAB V7.1.2C — Recovery & Conflict Center
+async function refreshRecoveryCenter() { await init(); }
+window.previewSportLabRecovery = async function() {
+  try { await window.SportLabCore?.recovery?.preview?.(); } catch (error) { alert(`Comparaison impossible : ${error.message}`); }
+  await refreshRecoveryCenter();
+};
+window.restoreSportLabCloudToLocal = async function() {
+  if (!confirm("Cette opération remplacera les données locales après création d’un snapshot de sécurité. Continuer ?")) return;
+  try { await window.SportLabCore?.recovery?.restoreCloudToLocal?.(); } catch (error) { alert(`Restauration impossible : ${error.message}`); }
+  await refreshRecoveryCenter();
+};
+window.forceSportLabLocalToCloud = async function() {
+  if (!confirm("Cette opération sauvegardera volontairement la version locale dans le cloud. Continuer ?")) return;
+  try { await window.SportLabCore?.recovery?.forceLocalToCloud?.(); } catch (error) { alert(`Sauvegarde impossible : ${error.message}`); }
+  await refreshRecoveryCenter();
+};
+window.mergeSportLabCloudData = async function() {
+  if (!confirm("Lancer la fusion intelligente Local / Cloud avec la stratégie LWW ?")) return;
+  try { await window.SportLabCore?.recovery?.smartMerge?.(); } catch (error) { alert(`Fusion impossible : ${error.message}`); }
+  await refreshRecoveryCenter();
+};
+window.restoreSportLabSnapshot = async function(snapshotId) {
+  if (!confirm("Restaurer ce snapshot local ? Un snapshot de sécurité sera créé avant l’opération.")) return;
+  try { window.SportLabCore?.recovery?.restoreSnapshot?.(snapshotId); } catch (error) { alert(`Rollback impossible : ${error.message}`); }
+  await refreshRecoveryCenter();
+};
+window.addEventListener("sportlab:recovery-updated", () => { if (currentPage === "recovery" || currentPage === "cloud") init(); });

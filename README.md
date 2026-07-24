@@ -1,6 +1,6 @@
 # SportLab
 
-**Version : 7.1.2B — Cloud Dashboard** V7.1.2A — Sync Engine V2
+**Version : 7.1.2C — Cloud Dashboard** V7.1.2A — Sync Engine V2
 
 Projet complet SportLab intégrant le Sprint 7.1.2A.
 
@@ -40,3 +40,8 @@ Le frontend reste déployable via GitHub Pages. Le Worker peut être redéployé
 
 ## Cloud Dashboard
 La page Cloud présente le statut du Sync Engine V2, la file hors ligne, les dernières opérations et les commandes utilisateur. Les détails techniques restent dans Diagnostics.
+
+
+## Cloud Recovery & Conflict Center
+
+La page **Recovery** permet de comparer Local/Cloud, restaurer le cloud, sauvegarder le local, lancer une fusion intelligente et restaurer les snapshots locaux. Voir `docs/SPRINT7.1.2C_CLOUD_RECOVERY_CONFLICT_CENTER.md`.
