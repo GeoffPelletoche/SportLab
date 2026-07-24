@@ -1,3 +1,4 @@
+import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import {
   deriveFrenchFlairWorkflowState,
   getFrenchFlairMatchWorkflow,
@@ -201,7 +202,8 @@ function renderMatches(matches) {
 function renderMatchCard(match, index) {
   const predictionAvailable = match.predictionStatus === "OK";
   const trend = match.recommendedTrend === "OVER" ? "OVER" : "UNDER";
-  const confidence = Number(match.confidence) || 0;
+  const scoring = scoreAnalysis(match, "frenchflair");
+  const confidence = scoring.confidence;
   const total = formatNumber(match.predictedTotalPoints);
   const sigma = formatNumber(match.sigma);
   const id = safeAttribute(match.id);
@@ -266,6 +268,7 @@ function renderMatchCard(match, index) {
           ${renderMetric("Zone probable", `${formatNumber(match.predictedRangeLow)} – ${formatNumber(match.predictedRangeHigh)}`, "points")}
           ${renderMetric("Sigma", sigma, "dispersion")}
           ${renderMetric("Confiance", `${confidence}%`, confidenceLabel(confidence))}
+          ${renderMetric("Score unifié", `${scoring.unifiedScore}/100`, "qualité statistique")}
         </section>
 
         <div class="ff-confidence-line">
@@ -361,7 +364,7 @@ function computePageStats(matches, meta) {
   const available = matches.filter(match => match.predictionStatus === "OK");
   const over = available.filter(match => match.recommendedTrend === "OVER").length;
   const under = available.filter(match => match.recommendedTrend !== "OVER").length;
-  const avgConfidence = Math.round(average(available.map(match => match.confidence)));
+  const avgConfidence = Math.round(average(available.map(match => scoreAnalysis(match, "frenchflair").confidence)));
   const avgTotal = average(available.map(match => match.predictedTotalPoints));
   const avgSigma = average(available.map(match => match.sigma));
   const total = matches.length || Number(meta?.visibleTotal || meta?.total || 0);

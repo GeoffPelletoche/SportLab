@@ -34,6 +34,10 @@ import {
 
 import { renderCloudDashboard } from "../ui/views/cloudDashboardView.js";
 import { renderRecoveryCenter } from "../ui/views/recoveryCenterView.js";
+import { renderModelPerformance } from "../ui/views/modelPerformanceView.js";
+import { createPerformanceRepository } from "../core/performance/performanceRepository.js";
+import { buildModelPerformance } from "../core/performance/modelPerformanceEngine.js";
+import { capturePredictionDataset } from "../core/learning/learningDatasetBuilder.js";
 
 /**
  * SPORTLAB V6.3.1
@@ -48,6 +52,16 @@ import { renderRecoveryCenter } from "../ui/views/recoveryCenterView.js";
 export function renderApplication(app, data = {}) {
   const activePage =
     data.currentPage || "home";
+
+  const learningDataset = capturePredictionDataset({
+    drawhunter: data.drawhunterPayload?.matches || [],
+    frenchflair: data.frenchflairPayload?.matches || []
+  });
+  const performanceRepository = createPerformanceRepository();
+  const modelPerformanceHtml = renderModelPerformance({
+    performance: buildModelPerformance(performanceRepository.collectFromStorage()),
+    learningCount: learningDataset.length
+  });
 
   const navigationHtml =
     renderNavigation(activePage);
@@ -107,6 +121,7 @@ export function renderApplication(app, data = {}) {
       diagnosticsHtml,
       cloudHtml,
       recoveryHtml,
+      modelPerformanceHtml,
       dashboard:
 
       data.dashboard || {},

@@ -45,3 +45,7 @@ La page Cloud présente le statut du Sync Engine V2, la file hors ligne, les der
 ## Cloud Recovery & Conflict Center
 
 La page **Recovery** permet de comparer Local/Cloud, restaurer le cloud, sauvegarder le local, lancer une fusion intelligente et restaurer les snapshots locaux. Voir `docs/SPRINT7.1.2C_CLOUD_RECOVERY_CONFLICT_CENTER.md`.
+
+## Sprint 7.2.0
+
+SportLab inclut désormais un scoring commun DrawHunter/FrenchFlair, une confiance 0–100, une page de performances des modèles et une collecte passive versionnée pour préparer un futur apprentissage supervisé. Voir `docs/SPRINT7.2.0_UNIFIED_SCORING_MODEL_PERFORMANCE.md`.

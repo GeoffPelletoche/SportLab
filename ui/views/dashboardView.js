@@ -21,6 +21,7 @@ export function renderDashboard({
   diagnosticsHtml = "",
   cloudHtml = "",
   recoveryHtml = "",
+  modelPerformanceHtml = "",
 
   dashboard = {},
   drawhunterPayload = {},
@@ -36,6 +37,7 @@ export function renderDashboard({
     diagnosticsHtml,
     cloudHtml,
     recoveryHtml,
+    modelPerformanceHtml,
     dashboard,
     drawhunterPayload,
     frenchflairPayload
@@ -60,6 +62,7 @@ function renderActivePage({
   diagnosticsHtml,
   cloudHtml,
   recoveryHtml,
+  modelPerformanceHtml,
   dashboard,
   drawhunterPayload,
   frenchflairPayload
@@ -85,6 +88,9 @@ function renderActivePage({
 
     case "recovery":
       return renderStandardPage("", "", recoveryHtml, true);
+
+    case "performance":
+      return renderStandardPage("", "", modelPerformanceHtml, true);
 
     case "diagnostics":
       return renderStandardPage("🩺", "Diagnostics", diagnosticsHtml);

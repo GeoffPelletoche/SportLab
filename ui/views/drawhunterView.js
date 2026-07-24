@@ -1,3 +1,4 @@
+import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow,
@@ -332,7 +333,8 @@ function renderMatchCard(match, index) {
   const state = getMatchState(match, workflowState);
   const probability = toPercent(match?.probability);
   const value = toPercent(match?.value);
-  const confidence = getConfidence(match);
+  const scoring = scoreAnalysis(match, "drawhunter");
+  const confidence = scoring.confidence;
   const matchId = safeDomId(match?.id ?? index);
 
   return `
@@ -408,6 +410,7 @@ function renderMatchCard(match, index) {
       <div class="dh-card-kpis">
         ${renderCardKpi("Cote saisie", formatOdds(match?.odds), "Marché nul")}
         ${renderCardKpi("Value", `${value}%`, valueTone(match?.value))}
+        ${renderCardKpi("Score unifié", `${scoring.unifiedScore}/100`, "Qualité statistique")}
         ${renderCardKpi("Décision", state.shortLabel, state.note)}
       </div>
 

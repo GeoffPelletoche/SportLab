@@ -190,3 +190,14 @@
 - Ajout des commandes de synchronisation manuelle et d'accès aux paramètres cloud.
 - Conservation de la séparation entre informations utilisateur et diagnostics techniques.
 - Aucun changement du settlement engine ni des moteurs métier.
+
+## 7.2.0 — Unified Scoring & Model Performance
+
+- Ajout d'un moteur de scoring unifié pour DrawHunter et FrenchFlair.
+- Ajout d'un indice de confiance normalisé de 0 à 100.
+- Ajout du score unifié dans les cartes d'analyse.
+- Nouvelle page Performances des modèles.
+- Suivi du taux de réussite, du ROI réel, du profit et de la calibration.
+- Collecte passive de snapshots versionnés pour un futur apprentissage supervisé.
+- Aucun classement prioritaire, aucune explication automatique et aucun nouveau seuil Value.
+- Aucun auto-apprentissage actif.

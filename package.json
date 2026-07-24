@@ -1,11 +1,11 @@
 {
   "name": "sportlab-platform",
-  "version": "7.1.2-c",
+  "version": "7.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check core/sync/syncEngine.js && node --check core/sync/queueManager.js && node --check core/sync/diffEngine.js && node --check core/sync/conflictResolver.js && node --check core/sync/recoveryManager.js && node --check core/sync/syncScheduler.js && node --check core/sync/syncEvents.js && node --check core/sync/syncPanel.js && node --check core/app/bootstrap.js && node --check ui/views/cloudDashboardView.js && node --check ui/views/recoveryCenterView.js && node --check services/renderService.js && node --check legacyApp.js",
+    "check": "node --check core/scoring/scoringSchema.js && node --check core/scoring/confidenceEngine.js && node --check core/scoring/unifiedScoringEngine.js && node --check core/performance/calibrationEngine.js && node --check core/performance/modelPerformanceEngine.js && node --check core/performance/performanceRepository.js && node --check core/learning/modelVersioning.js && node --check core/learning/predictionSnapshot.js && node --check core/learning/learningDatasetBuilder.js && node --check core/sync/syncEngine.js && node --check core/sync/recoveryManager.js && node --check core/app/bootstrap.js && node --check core/app/router.js && node --check ui/views/modelPerformanceView.js && node --check ui/views/drawhunterView.js && node --check ui/views/frenchflairView.js && node --check services/renderService.js && node --check legacyApp.js",
     "validate": "npm run check && npm test"
   }
 }
