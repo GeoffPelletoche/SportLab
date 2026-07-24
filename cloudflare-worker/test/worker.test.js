@@ -8,7 +8,7 @@ test('GET /health exposes version and no-store', async () => {
   assert.equal(response.headers.get('cache-control'), 'no-store');
   const body = await response.json();
   assert.equal(body.ok, true);
-  assert.equal(body.version, '7.0.1');
+  assert.equal(body.version, '7.1.2A');
 });
 
 test('OPTIONS returns CORS headers for an allowed origin', async () => {

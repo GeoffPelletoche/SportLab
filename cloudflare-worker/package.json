@@ -1,6 +1,6 @@
 {
   "name": "sportlab-cloud-sync-worker",
-  "version": "7.0.1",
+  "version": "7.1.2",
   "private": true,
   "type": "module",
   "scripts": {
