@@ -19,6 +19,7 @@ export function renderDashboard({
   portfolioHtml = "",
   betsHtml = "",
   diagnosticsHtml = "",
+  cloudHtml = "",
 
   dashboard = {},
   drawhunterPayload = {},
@@ -32,6 +33,7 @@ export function renderDashboard({
     portfolioHtml,
     betsHtml,
     diagnosticsHtml,
+    cloudHtml,
     dashboard,
     drawhunterPayload,
     frenchflairPayload
@@ -54,6 +56,7 @@ function renderActivePage({
   portfolioHtml,
   betsHtml,
   diagnosticsHtml,
+  cloudHtml,
   dashboard,
   drawhunterPayload,
   frenchflairPayload
@@ -73,6 +76,9 @@ function renderActivePage({
 
     case "portfolio":
       return renderStandardPage("💼", "Portfolio", portfolioHtml);
+
+    case "cloud":
+      return renderStandardPage("", "", cloudHtml, true);
 
     case "diagnostics":
       return renderStandardPage("🩺", "Diagnostics", diagnosticsHtml);

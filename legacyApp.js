@@ -826,3 +826,26 @@ export function getLegacyRuntimeState() {
   };
 }
 
+
+// SPORTLAB V7.1.2B — Commandes du Cloud Dashboard
+window.runSportLabCloudSync = async function() {
+  const button = document.querySelector(".cloud-dashboard-actions .sl-button-primary");
+  if (button) { button.disabled = true; button.textContent = "Synchronisation…"; }
+  try {
+    await window.SportLabCore?.cloud?.syncNow?.({ reason: "manual" });
+  } catch (error) {
+    console.error("[Cloud Dashboard] Synchronisation impossible", error);
+  } finally {
+    await init();
+  }
+};
+
+window.openSportLabCloudSettings = function() {
+  document.getElementById("sportlab-cloud-button")?.click();
+};
+
+window.addEventListener("sportlab:cloud-config", () => {
+  if (currentPage === "cloud") init();
+});
+window.addEventListener("online", () => { if (currentPage === "cloud") init(); });
+window.addEventListener("offline", () => { if (currentPage === "cloud") init(); });

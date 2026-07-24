@@ -174,3 +174,10 @@
 - Cloudflare D1 devient la source de vérité des données SportLab.
 - Ajout Sync Engine, file hors ligne, migration initiale, push/pull, statut Cloud et connexion multi-appareils.
 - Ajout des routes backend backup/restore.
+
+## 7.1.2B — Cloud Dashboard
+- Ajout d'une page Cloud dédiée dans la navigation.
+- Visualisation de l'état du Sync Engine V2, de la file, des push/pull et des conflits.
+- Ajout des commandes de synchronisation manuelle et d'accès aux paramètres cloud.
+- Conservation de la séparation entre informations utilisateur et diagnostics techniques.
+- Aucun changement du settlement engine ni des moteurs métier.

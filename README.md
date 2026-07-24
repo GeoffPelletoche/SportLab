@@ -1,4 +1,6 @@
-# SportLab V7.1.2A — Sync Engine V2
+# SportLab
+
+**Version : 7.1.2B — Cloud Dashboard** V7.1.2A — Sync Engine V2
 
 Projet complet SportLab intégrant le Sprint 7.1.2A.
 
@@ -34,3 +36,7 @@ npm test
 ## Déploiement
 
 Le frontend reste déployable via GitHub Pages. Le Worker peut être redéployé avec Wrangler ; aucun nouveau schéma D1 n'est requis pour ce sprint.
+
+
+## Cloud Dashboard
+La page Cloud présente le statut du Sync Engine V2, la file hors ligne, les dernières opérations et les commandes utilisateur. Les détails techniques restent dans Diagnostics.
