@@ -2376,4 +2376,5 @@ body.sportlab-navigation-open {
   .sportlab-menu-item {
     transition: none;
   }
-}
+}/* SPORTLAB 7.2.0 — Model Performance */
+.model-performance{display:grid;gap:1rem}.mp-hero{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:1.4rem}.mp-hero h1{margin:.35rem 0}.mp-dataset{min-width:180px;text-align:center;padding:1rem;border:1px solid var(--sl-border,#d9e0e8);border-radius:16px}.mp-dataset strong{display:block;font-size:2rem}.mp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.mp-card{padding:1.2rem;border:1px solid var(--sl-border,#d9e0e8);border-radius:18px;background:var(--sl-surface,#fff)}.mp-card header{display:flex;justify-content:space-between;gap:1rem}.mp-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin:1rem 0}.mp-kpis div{padding:.75rem;border-radius:12px;background:rgba(127,127,127,.08)}.mp-kpis small,.mp-kpis b{display:block}.mp-calibration>div{display:grid;grid-template-columns:110px 1fr 45px;align-items:center;gap:.5rem;margin:.45rem 0}.mp-calibration progress{width:100%}.mp-note{padding:1rem}.mp-empty{opacity:.7}@media(max-width:800px){.mp-hero{align-items:stretch;flex-direction:column}.mp-grid{grid-template-columns:1fr}.mp-kpis{grid-template-columns:repeat(2,1fr)}}
