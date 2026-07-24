@@ -13,6 +13,7 @@ import { drawHunterModule } from "../../modules/drawhunter/index.js";
 import { frenchFlairModule } from "../../modules/frenchflair/index.js";
 import { createSyncEngine } from "../sync/syncEngine.js";
 import { createSyncPanel } from "../sync/syncPanel.js";
+import { createRecoveryManager } from "../sync/recoveryManager.js";
 
 export async function bootstrapSportLabV7({ startLegacyApplication }) {
   const logger = createLogger({ namespace: "SportLab V7 Core", level: "info", eventBus });
@@ -23,9 +24,10 @@ export async function bootstrapSportLabV7({ startLegacyApplication }) {
   const router = createRouter({ eventBus });
   const notifications = createNotificationService();
   const syncEngine = createSyncEngine({ eventBus, logger, notifications });
+  const recoveryManager = createRecoveryManager({ syncEngine, eventBus, logger, notifications });
   const context = Object.freeze({
-    version: "7.1.2B", eventBus, logger, storage: localStorageService,
-    settingsStore, themeService, notifications, syncEngine,
+    version: "7.1.2C", eventBus, logger, storage: localStorageService,
+    settingsStore, themeService, notifications, syncEngine, recoveryManager,
     dialogs: createDialogService(), moduleRegistry, lifecycle, router
   });
 
@@ -43,6 +45,7 @@ export async function bootstrapSportLabV7({ startLegacyApplication }) {
   window.SportLabCore = Object.freeze({
     version: context.version,
     cloud: Object.freeze({ status: syncEngine.getStatus, syncNow: syncEngine.syncNow, connect: syncEngine.connect, disconnect: syncEngine.disconnect, markDirty: syncEngine.markDirty }),
+    recovery: Object.freeze({ state: recoveryManager.getState, preview: recoveryManager.preview, restoreCloudToLocal: recoveryManager.restoreCloudToLocal, forceLocalToCloud: recoveryManager.forceLocalToCloud, smartMerge: recoveryManager.smartMerge, restoreSnapshot: recoveryManager.restoreSnapshot, createSnapshot: recoveryManager.createSnapshot }),
     modules: moduleRegistry.list().map(({ id, label, sport, capabilities }) => ({ id, label, sport, capabilities })),
     settings: () => settingsStore.getState(),
     setTheme: themeService.setTheme,

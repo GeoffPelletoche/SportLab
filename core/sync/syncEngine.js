@@ -81,7 +81,7 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
         queueManager.acknowledgeKeys(resolution.recordsToApply.map(item => `${item.namespace}:${item.key || item.record_key}`));
         if (resolution.localToRetry.length) queueManager.enqueue(resolution.localToRetry);
         conflictCount += conflicts.length;
-        emitEvent(SYNC_EVENTS.CONFLICT, { count: conflicts.length, decisions: resolution.decisions });
+        emitEvent(SYNC_EVENTS.CONFLICT, { count: conflicts.length, conflicts, decisions: resolution.decisions });
       }
       emitEvent(SYNC_EVENTS.PUSH, { phase: "complete", accepted: acceptedCount, conflicts: conflictCount });
     }
