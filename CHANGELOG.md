@@ -1,5 +1,15 @@
 # Changelog
 
+## V7.1.2A — Sync Engine V2
+
+- Queue hors ligne persistante V2 avec déduplication, retry et backoff exponentiel.
+- Diff Engine et synchronisation automatique multi-déclencheurs.
+- Verrou de synchronisation avec second passage garanti.
+- Push par lots et acquittement granulaire.
+- Résolution Last-Write-Wins centralisée avec événements de conflit.
+- Diagnostics et événements Sync V2.
+- Version frontend/Worker harmonisée.
+
 ## 7.0.0 — Sprint 7.1 Core Foundation
 
 - Nouveau bootstrap V7 placé avant le runtime historique.

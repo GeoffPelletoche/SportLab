@@ -1,17 +1,36 @@
-# SportLab V7.0.2 — Sprint 7.1.1B Cloud Sync Infrastructure
+# SportLab V7.1.2A — Sync Engine V2
 
-Cette livraison ajoute une infrastructure Cloudflare autonome et déployable : Worker API, base D1, authentification mono-utilisateur, appareils, synchronisation incrémentale et gestion explicite des conflits.
+Projet complet SportLab intégrant le Sprint 7.1.2A.
 
-## État de la migration
+## Nouveautés principales
 
-- SportLab V7 Core reste pleinement opérationnel.
-- Les moteurs DrawHunter, FrenchFlair, VALUE, ROI et settlement sont inchangés.
-- Le runtime client utilise encore ses stores V7/V6.5.3.
-- Le cloud n’est pas encore branché à l’application : cette étape appartient au Sprint 7.1.1B.
+- synchronisation automatique au démarrage, après modification, au retour en ligne et périodiquement ;
+- file hors ligne persistante V2 avec déduplication, tentatives et backoff exponentiel ;
+- synchronisation différentielle des seules clés localStorage modifiées ;
+- reprise automatique lorsqu'une demande survient pendant une synchronisation active ;
+- push par lots de 250 éléments, compatible avec le contrat Worker ;
+- résolution de conflits Last-Write-Wins centralisée et journalisée ;
+- événements `sync:*` pour découpler les modules du backend ;
+- diagnostics enrichis dans `SportLabCore.cloud.status()` ;
+- nettoyage complet des listeners lors de l'arrêt du moteur.
 
-## Dossiers principaux
+## Validation locale
 
-- `cloudflare-worker/` : projet Worker + D1 prêt à déployer.
-- `docs/SPRINT7.1.1A_CLOUDFLARE_DEPLOYMENT.md` : procédure dashboard/CLI.
-- `docs/SPRINT7.1.1A_CLOUD_SYNC_FOUNDATION.md` : architecture et contrat de synchronisation.
-- `docs/SPRINT7.1.1A_VALIDATION.md` : contrôles effectués.
+À la racine :
+
+```powershell
+npm run validate
+```
+
+Pour le Worker :
+
+```powershell
+cd cloudflare-worker
+npm install
+npm run check
+npm test
+```
+
+## Déploiement
+
+Le frontend reste déployable via GitHub Pages. Le Worker peut être redéployé avec Wrangler ; aucun nouveau schéma D1 n'est requis pour ce sprint.

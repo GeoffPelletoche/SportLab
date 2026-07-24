@@ -1,0 +1,11 @@
+{
+  "name": "sportlab-platform",
+  "version": "7.1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check core/sync/syncEngine.js && node --check core/sync/queueManager.js && node --check core/sync/diffEngine.js && node --check core/sync/conflictResolver.js && node --check core/sync/syncScheduler.js && node --check core/sync/syncEvents.js && node --check core/sync/syncPanel.js && node --check core/app/bootstrap.js",
+    "validate": "npm run check && npm test"
+  }
+}
