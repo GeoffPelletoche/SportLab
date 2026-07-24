@@ -1,4 +1,4 @@
-export function createRouter({ eventBus, routes = ["home", "journal", "bets", "portfolio", "diagnostics"] } = {}) {
+export function createRouter({ eventBus, routes = ["home", "journal", "bets", "portfolio", "cloud", "diagnostics"] } = {}) {
   const allowed = new Set(routes);
   let current = "home";
   function navigate(route, { replace = false } = {}) {
