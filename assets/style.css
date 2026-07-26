@@ -1500,8 +1500,10 @@ section.card:has(.journal-page) {
    * sur la dernière ligne.
    */
   .sportlab-nav button:last-child {
-    margin: 0 ;
-  }
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: calc(50% - 6px);
+}
 }
 /* =========================================================
    SPORTLAB V6.3.4 — DASHBOARD PREMIUM
