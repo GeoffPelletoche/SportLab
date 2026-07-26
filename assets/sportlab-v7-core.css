@@ -75,6 +75,11 @@
   background: rgba(127, 29, 29, 0.78);
 }
 
+.sl-cloud-button {
+  width: auto !important;
+  grid-column: auto !important;
+  margin: 0 !important;
+}
 
 /* =========================================================
    SPORTLAB V7.1.2B — CLOUD DASHBOARD
