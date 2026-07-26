@@ -1500,7 +1500,7 @@ section.card:has(.journal-page) {
    * sur la dernière ligne.
    */
   .sportlab-nav button:last-child {
-    width: auto;
+    margin: 0 ;
   }
 }
 /* =========================================================
