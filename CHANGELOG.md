@@ -201,3 +201,15 @@
 - Collecte passive de snapshots versionnés pour un futur apprentissage supervisé.
 - Aucun classement prioritaire, aucune explication automatique et aucun nouveau seuil Value.
 - Aucun auto-apprentissage actif.
+
+## 8.0.0 — Recency Weighted Multi-Season
+
+- moteur temporel commun DrawHunter/FrenchFlair ;
+- historique glissant de 30 matchs ;
+- pondération exponentielle par ancienneté avec plancher ;
+- moyenne et sigma rugby pondérés ;
+- récupération rugby multi-saisons ;
+- historique football par équipe ;
+- probabilité de nul DrawHunter issue des données réelles ;
+- Worker API Bridge 3.8.0 ;
+- tests V8 dédiés.

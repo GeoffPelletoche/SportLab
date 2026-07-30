@@ -8,7 +8,7 @@ test("unified scoring returns bounded confidence and score", () => {
   const result = scoreAnalysis({ id: 1, predictionStatus: "OK", probability: 0.34, home: "A", away: "B", competition: "L1" }, "drawhunter");
   assert.ok(result.confidence >= 0 && result.confidence <= 100);
   assert.ok(result.unifiedScore >= 0 && result.unifiedScore <= 100);
-  assert.equal(result.modelVersion, "DH-7.2.0");
+  assert.equal(result.modelVersion, "DH-8.0.0");
 });
 
 test("model performance separates modules and computes real ROI", () => {
