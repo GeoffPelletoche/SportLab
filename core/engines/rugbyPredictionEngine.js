@@ -1,273 +1,86 @@
-/**
- * SPORTLAB V3 — RUGBY PREDICTION ENGINE
- * Sprint 4A.6
- *
- * Ajout :
- * - Indice de confiance SportLab
- */
+import {
+  effectiveSampleSize,
+  prepareWeightedHistory,
+  weightedMean,
+  weightedStdDev
+} from "./temporalWeightingEngine.js";
 
+/** SPORTLAB V8 — RUGBY PREDICTION ENGINE */
 export function computeTeamStats(history = []) {
   const games = sanitizeGames(history);
-
-  if (games.length === 0) return emptyStats();
-
+  if (!games.length) return emptyStats();
   const homeGames = games.filter(game => game.isHome);
   const awayGames = games.filter(game => !game.isHome);
-
+  const statsFor = subset => {
+    const weights = subset.map(g => g.temporalWeight);
+    return {
+      averageFor: round(weightedMean(subset.map(g => g.pointsFor), weights)),
+      averageAgainst: round(weightedMean(subset.map(g => g.pointsAgainst), weights))
+    };
+  };
+  const all = statsFor(games), home = statsFor(homeGames), away = statsFor(awayGames);
+  const weights = games.map(g => g.temporalWeight);
   return {
     games: games.length,
-
-    averageFor: round(avg(games.map(g => g.pointsFor))),
-    averageAgainst: round(avg(games.map(g => g.pointsAgainst))),
-
+    effectiveGames: round(effectiveSampleSize(games)),
+    oldestMatchDate: games.at(-1)?.date || null,
+    newestMatchDate: games[0]?.date || null,
+    averageFor: all.averageFor,
+    averageAgainst: all.averageAgainst,
     homeGames: homeGames.length,
-    homeAverageFor: round(avg(homeGames.map(g => g.pointsFor))),
-    homeAverageAgainst: round(avg(homeGames.map(g => g.pointsAgainst))),
-
+    homeAverageFor: home.averageFor,
+    homeAverageAgainst: home.averageAgainst,
     awayGames: awayGames.length,
-    awayAverageFor: round(avg(awayGames.map(g => g.pointsFor))),
-    awayAverageAgainst: round(avg(awayGames.map(g => g.pointsAgainst))),
-
-    attackSigma: round(stdDev(games.map(g => g.pointsFor))),
-    defenseSigma: round(stdDev(games.map(g => g.pointsAgainst))),
-
-    totalAverage: round(avg(games.map(g => g.pointsFor + g.pointsAgainst))),
-    totalSigma: round(stdDev(games.map(g => g.pointsFor + g.pointsAgainst)))
+    awayAverageFor: away.averageFor,
+    awayAverageAgainst: away.averageAgainst,
+    attackSigma: round(weightedStdDev(games.map(g => g.pointsFor), weights)),
+    defenseSigma: round(weightedStdDev(games.map(g => g.pointsAgainst), weights)),
+    totalAverage: round(weightedMean(games.map(g => g.pointsFor + g.pointsAgainst), weights)),
+    totalSigma: round(weightedStdDev(games.map(g => g.pointsFor + g.pointsAgainst), weights))
   };
 }
 
 export function predictRugbyMatch(match) {
   const homeStats = computeTeamStats(match.homeHistory || []);
   const awayStats = computeTeamStats(match.awayHistory || []);
-
-  const predictionStatus =
-    homeStats.games > 0 && awayStats.games > 0
-      ? "OK"
-      : "INSUFFICIENT_HISTORY";
-
+  const predictionStatus = homeStats.games >= 3 && awayStats.games >= 3 ? "OK" : "INSUFFICIENT_HISTORY";
   const baselinePoints = computeBaselinePoints(homeStats, awayStats);
-
-  const homeAttack = chooseHomeAttack(homeStats);
-  const homeDefense = chooseHomeDefense(homeStats);
-
-  const awayAttack = chooseAwayAttack(awayStats);
-  const awayDefense = chooseAwayDefense(awayStats);
-
+  const homeAttack = homeStats.homeGames >= 3 ? homeStats.homeAverageFor : homeStats.averageFor;
+  const homeDefense = homeStats.homeGames >= 3 ? homeStats.homeAverageAgainst : homeStats.averageAgainst;
+  const awayAttack = awayStats.awayGames >= 3 ? awayStats.awayAverageFor : awayStats.averageFor;
+  const awayDefense = awayStats.awayGames >= 3 ? awayStats.awayAverageAgainst : awayStats.averageAgainst;
   const homeAttackIndex = safeRatio(homeAttack, baselinePoints);
   const awayAttackIndex = safeRatio(awayAttack, baselinePoints);
-
   const homeDefenseWeaknessIndex = safeRatio(homeDefense, baselinePoints);
   const awayDefenseWeaknessIndex = safeRatio(awayDefense, baselinePoints);
-
-  const modelHomePoints =
-    baselinePoints * homeAttackIndex * awayDefenseWeaknessIndex;
-
-  const modelAwayPoints =
-    baselinePoints * awayAttackIndex * homeDefenseWeaknessIndex;
-
-  const simpleHomePoints = (homeAttack + awayDefense) / 2;
-  const simpleAwayPoints = (awayAttack + homeDefense) / 2;
-
-  const predictedHomePoints = round(blend(modelHomePoints, simpleHomePoints));
-  const predictedAwayPoints = round(blend(modelAwayPoints, simpleAwayPoints));
+  const modelHome = baselinePoints * homeAttackIndex * awayDefenseWeaknessIndex;
+  const modelAway = baselinePoints * awayAttackIndex * homeDefenseWeaknessIndex;
+  const predictedHomePoints = round(modelHome * 0.65 + ((homeAttack + awayDefense) / 2) * 0.35);
+  const predictedAwayPoints = round(modelAway * 0.65 + ((awayAttack + homeDefense) / 2) * 0.35);
   const predictedTotalPoints = round(predictedHomePoints + predictedAwayPoints);
-const historicalReferenceTotal = round(
-  avg(
-    [
-      homeStats.totalAverage,
-      awayStats.totalAverage
-    ].filter(value => value > 0)
-  )
-);
-
-const recommendedTrend =
-  predictedTotalPoints >= historicalReferenceTotal
-    ? "OVER"
-    : "UNDER";
-
-  const sigma = round(avg([
-    homeStats.totalSigma,
-    awayStats.totalSigma
-  ].filter(v => v > 0)));
-
-  const confidence = computeConfidence({
-    homeStats,
-    awayStats,
-    sigma,
-    predictedTotalPoints,
-    predictionStatus
-  });
-
-  return {
-    ...match,
-
-    homeStats,
-    awayStats,
-
-    baselinePoints: round(baselinePoints),
-
-    homeAttackIndex: round(homeAttackIndex),
-    awayAttackIndex: round(awayAttackIndex),
-    homeDefenseWeaknessIndex: round(homeDefenseWeaknessIndex),
-    awayDefenseWeaknessIndex: round(awayDefenseWeaknessIndex),
-
-    predictedHomePoints,
-    predictedAwayPoints,
-    predictedTotalPoints,
-    
-    historicalReferenceTotal,
-    recommendedTrend,
-    
-    sigma,
-    predictedRangeLow: round(predictedTotalPoints - sigma),
-    predictedRangeHigh: round(predictedTotalPoints + sigma),
-
-    confidence,
-
-    predictionStatus
-  };
+  const historicalReferenceTotal = round(avg([homeStats.totalAverage, awayStats.totalAverage].filter(v => v > 0)));
+  const recommendedTrend = predictedTotalPoints >= historicalReferenceTotal ? "OVER" : "UNDER";
+  const sigma = round(avg([homeStats.totalSigma, awayStats.totalSigma].filter(v => v > 0)));
+  const confidence = computeConfidence(homeStats, awayStats, sigma, predictedTotalPoints, predictionStatus);
+  return { ...match, homeStats, awayStats, baselinePoints: round(baselinePoints), homeAttackIndex: round(homeAttackIndex), awayAttackIndex: round(awayAttackIndex), homeDefenseWeaknessIndex: round(homeDefenseWeaknessIndex), awayDefenseWeaknessIndex: round(awayDefenseWeaknessIndex), predictedHomePoints, predictedAwayPoints, predictedTotalPoints, historicalReferenceTotal, recommendedTrend, sigma, predictedRangeLow: round(predictedTotalPoints - sigma), predictedRangeHigh: round(predictedTotalPoints + sigma), confidence, predictionStatus, weightingModel: "RECENCY_EXPONENTIAL_V8", historyTarget: 30 };
 }
-
-function computeConfidence({ homeStats, awayStats, sigma, predictedTotalPoints, predictionStatus }) {
-  if (predictionStatus !== "OK") return 0;
-
-  const totalGames = homeStats.games + awayStats.games;
-
-  const sampleScore = clamp(totalGames / 20, 0, 1) * 25;
-
-  const sigmaRatio = predictedTotalPoints > 0
-    ? sigma / predictedTotalPoints
-    : 1;
-
-  const stabilityScore = clamp(1 - sigmaRatio, 0, 1) * 40;
-
-  const homeBalance = homeStats.homeGames > 0 ? 1 : 0.65;
-  const awayBalance = awayStats.awayGames > 0 ? 1 : 0.65;
-  const contextScore = ((homeBalance + awayBalance) / 2) * 20;
-
-  const attackStability = avg([
-    normalizeStability(homeStats.attackSigma),
-    normalizeStability(awayStats.attackSigma)
-  ]);
-
-  const defenseStability = avg([
-    normalizeStability(homeStats.defenseSigma),
-    normalizeStability(awayStats.defenseSigma)
-  ]);
-
-  const consistencyScore = avg([attackStability, defenseStability]) * 15;
-
-  return Math.round(
-    clamp(
-      sampleScore + stabilityScore + contextScore + consistencyScore,
-      35,
-      92
-    )
-  );
+function computeConfidence(home, away, sigma, total, status) {
+  if (status !== "OK") return 0;
+  const effective = home.effectiveGames + away.effectiveGames;
+  const sample = clamp(effective / 35, 0, 1) * 30;
+  const stability = clamp(1 - (total > 0 ? sigma / total : 1), 0, 1) * 40;
+  const context = ((home.homeGames >= 3 ? 1 : .65) + (away.awayGames >= 3 ? 1 : .65)) / 2 * 20;
+  const recency = Math.min(home.games, away.games) >= 10 ? 10 : Math.min(home.games, away.games);
+  return Math.round(clamp(sample + stability + context + recency, 35, 94));
 }
-
-function normalizeStability(sigma) {
-  if (!sigma || sigma <= 0) return 0.5;
-  return clamp(1 - sigma / 20, 0, 1);
-}
-
-function computeBaselinePoints(homeStats, awayStats) {
-  const values = [
-    homeStats.averageFor,
-    homeStats.averageAgainst,
-    awayStats.averageFor,
-    awayStats.averageAgainst
-  ].filter(v => v > 0);
-
-  return values.length ? avg(values) : 25;
-}
-
-function chooseHomeAttack(stats) {
-  return stats.homeGames > 0 ? stats.homeAverageFor : stats.averageFor;
-}
-
-function chooseHomeDefense(stats) {
-  return stats.homeGames > 0 ? stats.homeAverageAgainst : stats.averageAgainst;
-}
-
-function chooseAwayAttack(stats) {
-  return stats.awayGames > 0 ? stats.awayAverageFor : stats.averageFor;
-}
-
-function chooseAwayDefense(stats) {
-  return stats.awayGames > 0 ? stats.awayAverageAgainst : stats.averageAgainst;
-}
-
-function blend(adjusted, simple) {
-  return adjusted * 0.65 + simple * 0.35;
-}
-
-function safeRatio(value, baseline) {
-  if (!baseline || baseline <= 0) return 1;
-  if (!value || value <= 0) return 1;
-
-  return clamp(value / baseline, 0.65, 1.45);
-}
-
 function sanitizeGames(history) {
-  return history.filter(game =>
-    game &&
-    game.status === "FT" &&
-    Number.isFinite(Number(game.pointsFor)) &&
-    Number.isFinite(Number(game.pointsAgainst))
-  ).map(game => ({
-    ...game,
-    pointsFor: Number(game.pointsFor),
-    pointsAgainst: Number(game.pointsAgainst),
-    isHome: Boolean(game.isHome)
-  }));
+  return prepareWeightedHistory(history, { maxMatches: 30, decay: 0.97, minimumWeight: 0.4 })
+    .filter(game => ["FT","AET","AP","FINISHED","MATCH FINISHED"].includes(String(game.status || "").toUpperCase()) && Number.isFinite(Number(game.pointsFor)) && Number.isFinite(Number(game.pointsAgainst)))
+    .map(game => ({ ...game, pointsFor: Number(game.pointsFor), pointsAgainst: Number(game.pointsAgainst), isHome: Boolean(game.isHome) }));
 }
-
-function emptyStats() {
-  return {
-    games: 0,
-
-    averageFor: 0,
-    averageAgainst: 0,
-
-    homeGames: 0,
-    homeAverageFor: 0,
-    homeAverageAgainst: 0,
-
-    awayGames: 0,
-    awayAverageFor: 0,
-    awayAverageAgainst: 0,
-
-    attackSigma: 0,
-    defenseSigma: 0,
-
-    totalAverage: 0,
-    totalSigma: 0
-  };
-}
-
-function avg(values) {
-  const clean = values.filter(v => Number.isFinite(Number(v)));
-  if (clean.length === 0) return 0;
-
-  return clean.reduce((sum, value) => sum + Number(value), 0) / clean.length;
-}
-
-function stdDev(values) {
-  const clean = values.map(Number).filter(v => Number.isFinite(v));
-  if (clean.length < 2) return 0;
-
-  const mean = avg(clean);
-  const variance =
-    clean.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) / clean.length;
-
-  return Math.sqrt(variance);
-}
-
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function round(value) {
-  return Math.round(value * 10) / 10;
-}
+function emptyStats(){return {games:0,effectiveGames:0,oldestMatchDate:null,newestMatchDate:null,averageFor:0,averageAgainst:0,homeGames:0,homeAverageFor:0,homeAverageAgainst:0,awayGames:0,awayAverageFor:0,awayAverageAgainst:0,attackSigma:0,defenseSigma:0,totalAverage:0,totalSigma:0};}
+function computeBaselinePoints(h,a){const v=[h.averageFor,h.averageAgainst,a.averageFor,a.averageAgainst].filter(x=>x>0);return v.length?avg(v):25;}
+function safeRatio(v,b){return !b||b<=0||!v||v<=0?1:clamp(v/b,.65,1.45);}
+function avg(v){return v.length?v.reduce((a,b)=>a+Number(b),0)/v.length:0;}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+function round(v){return Math.round((Number(v)||0)*10)/10;}

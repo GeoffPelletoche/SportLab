@@ -1,7 +1,7 @@
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
 
-const HISTORY_LIMIT = 10;
+const HISTORY_LIMIT = 30;
 
 export async function fetchUpcomingRugbyFixtures() {
   const range = getDateRange(CONFIG.analysisWindowDays);
@@ -68,8 +68,8 @@ async function enrichFixturesWithHistory(fixtures) {
 
   for (const fixture of fixtures) {
     const [homeHistory, awayHistory] = await Promise.all([
-      fetchTeamHistory(fixture.homeId, fixture.season),
-      fetchTeamHistory(fixture.awayId, fixture.season)
+      fetchTeamHistory(fixture.homeId, fixture.leagueId, fixture.season),
+      fetchTeamHistory(fixture.awayId, fixture.leagueId, fixture.season)
     ]);
 
     enriched.push({
@@ -82,12 +82,13 @@ async function enrichFixturesWithHistory(fixtures) {
   return enriched;
 }
 
-async function fetchTeamHistory(teamId, season) {
+async function fetchTeamHistory(teamId, leagueId, season) {
   if (!teamId || !season) return [];
 
   try {
     const data = await fetchFromWorker("/rugby/team-games", {
       team: teamId,
+      league: leagueId,
       season,
       limit: HISTORY_LIMIT
     });

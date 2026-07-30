@@ -26,7 +26,7 @@ export async function bootstrapSportLabV7({ startLegacyApplication }) {
   const syncEngine = createSyncEngine({ eventBus, logger, notifications });
   const recoveryManager = createRecoveryManager({ syncEngine, eventBus, logger, notifications });
   const context = Object.freeze({
-    version: "7.2.0", eventBus, logger, storage: localStorageService,
+    version: "8.0.0", eventBus, logger, storage: localStorageService,
     settingsStore, themeService, notifications, syncEngine, recoveryManager,
     dialogs: createDialogService(), moduleRegistry, lifecycle, router
   });
