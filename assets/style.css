@@ -1499,10 +1499,9 @@ section.card:has(.journal-page) {
    * Le bouton Diagnostics occupe toute la largeur
    * sur la dernière ligne.
    */
-  
-.sportlab-nav button:last-child {
-  grid-column: 1 / -1;
-}
+  .sportlab-nav button:last-child {
+    grid-column: 1 / -1;
+  }
 }
 /* =========================================================
    SPORTLAB V6.3.4 — DASHBOARD PREMIUM
