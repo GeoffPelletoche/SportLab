@@ -35,7 +35,7 @@ function renderHero(stats, meta) {
       <div class="ff-hero__ambient" aria-hidden="true"></div>
       <div class="ff-hero__compact-row">
         <div class="ff-hero__identity">
-          <span class="ff-eyebrow">🏉 FRENCHFLAIR · RUGBY TOTALS</span>
+          <span class="ff-eyebrow"><img src="assets/images/rugby.png?v=8.0.1" alt="" class="ff-eyebrow__icon"> FRENCHFLAIR · RUGBY TOTALS</span>
           <h1>Over / Under</h1>
           <p>Décider vite à partir du total modèle, du sigma et de la VALUE.</p>
         </div>
