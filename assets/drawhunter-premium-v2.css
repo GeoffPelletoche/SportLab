@@ -936,3 +936,12 @@
 .dh-match-card:focus-visible{outline:2px solid var(--dh-accent);outline-offset:3px}.dh-density--compact .dh-matchup{padding-top:13px;padding-bottom:13px}.dh-density--compact .dh-model-focus{padding-top:12px;padding-bottom:12px}.dh-density--compact .dh-card-kpis,.dh-density--compact .dh-card-timeline{display:none}.dh-density--compact .dh-match-grid{gap:10px}.dh-density--compact .dh-match-card__footer{padding-top:12px}
 @media(max-width:900px){.dh-toolbar{grid-template-columns:1fr 1fr}.dh-density{grid-column:1/-1}.dh-details__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.dh-toolbar{grid-template-columns:1fr}.dh-density{grid-column:auto}.dh-details{margin-left:16px;margin-right:16px}.dh-details__grid{grid-template-columns:1fr 1fr}.dh-context-actions{grid-template-columns:1fr 1fr}.dh-context-actions .sl-button:first-child{grid-column:1/-1}}
+
+
+/* SPORTLAB V8.0.1 — Icône DrawHunter personnalisée */
+.dh-hero__icon-img {
+  display:block;
+  width:28px;
+  height:28px;
+  object-fit:contain;
+}

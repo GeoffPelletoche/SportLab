@@ -487,3 +487,11 @@
     animation:none;
   }
 }
+
+
+/* SPORTLAB V8.0.1 — Images des modules */
+.dashboard-v2-module-icon-img {
+  width:38px;
+  height:38px;
+  object-fit:contain;
+}
