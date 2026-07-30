@@ -67,13 +67,3 @@
 .ff-premium[data-ff-density="compact"] .ff-match-card{padding:12px 14px}.ff-premium[data-ff-density="compact"] .ff-match-card__teams{margin:11px 0}.ff-premium[data-ff-density="compact"] .ff-indicator-grid,.ff-premium[data-ff-density="compact"] .ff-confidence-line,.ff-premium[data-ff-density="compact"] .ff-details{display:none}.ff-premium[data-ff-density="compact"] .ff-model-board{padding:9px 11px}.ff-premium[data-ff-density="compact"] .ff-workflow-timeline{padding-top:6px}
 @media(max-width:1100px){.ff-kpi-rail--compact{grid-template-columns:repeat(3,1fr)}.ff-control-center__top{grid-template-columns:1fr 1fr}.ff-density-control,.ff-reset-controls{width:100%}}
 @media(max-width:760px){.ff-kpi-rail--compact{grid-template-columns:repeat(2,1fr)}.ff-control-center{top:4px;padding:9px}.ff-control-center__top{grid-template-columns:1fr}.ff-search-field input,.ff-sort-field select{min-height:44px}.ff-density-control{width:100%}.ff-density-control button{flex:1}.ff-control-center .ff-workflow-filters{align-items:flex-start}.ff-control-summary{text-align:left}.ff-reset-controls{display:none}}
-
-
-/* SPORTLAB V8.0.1 — Icône FrenchFlair personnalisée */
-.ff-eyebrow__icon {
-  display:block;
-  width:28px;
-  height:28px;
-  object-fit:contain;
-  flex:0 0 auto;
-}
