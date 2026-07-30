@@ -69,10 +69,10 @@ function renderActivePage({
 }) {
   switch (activePage) {
     case "drawhunter":
-      return renderStandardPage(renderSportIcon("football", "DrawHunter"), "DrawHunter", drawhunterHtml);
+      return renderStandardPage("⚽", "DrawHunter", drawhunterHtml);
 
     case "frenchflair":
-      return renderStandardPage(renderSportIcon("rugby", "FrenchFlair"), "FrenchFlair", frenchflairHtml);
+      return renderStandardPage("🏉", "FrenchFlair", frenchflairHtml);
 
     case "journal":
       return renderStandardPage("", "", journalHtml, true);
@@ -108,24 +108,9 @@ function renderActivePage({
 function renderStandardPage(icon, title, html, contentOnly = false) {
   return `
     <section class="card sl-card sl-page-section">
-      ${contentOnly ? "" : `<h2 class="sl-page-title-with-icon">${icon}<span>${escapeHtml(title)}</span></h2>`}
+      ${contentOnly ? "" : `<h2>${icon} ${escapeHtml(title)}</h2>`}
       ${html}
     </section>
-  `;
-}
-
-function renderSportIcon(sport, label, extraClass = "") {
-  const safeSport = sport === "rugby" ? "rugby" : "football";
-  const className = ["sportlab-sport-icon", extraClass]
-    .filter(Boolean)
-    .join(" ");
-
-  return `
-    <img
-      src="assets/images/${safeSport}.png?v=8.0.1"
-      alt="${escapeAttribute(label)}"
-      class="${className}"
-    >
   `;
 }
 
@@ -441,7 +426,7 @@ function renderModuleSection({
       <div class="sl-grid sl-grid-2">
         ${renderModuleCard({
           type: "drawhunter",
-          icon: renderSportIcon("football", "DrawHunter", "dashboard-v2-module-icon-img"),
+          icon: "⚽",
           title: "DrawHunter",
           description: "Analyse du match nul · Double chance si pertinente",
           stats: drawhunterStats,
@@ -451,7 +436,7 @@ function renderModuleSection({
 
         ${renderModuleCard({
           type: "frenchflair",
-          icon: renderSportIcon("rugby", "FrenchFlair", "dashboard-v2-module-icon-img"),
+          icon: "🏉",
           title: "FrenchFlair",
           description: "Totaux Over / Under rugby",
           stats: frenchflairStats,

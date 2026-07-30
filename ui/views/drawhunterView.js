@@ -47,7 +47,7 @@ function renderHero(stats, meta) {
     <header class="dh-hero sl-panel">
       <div class="dh-hero__content">
         <div class="dh-hero__eyebrow">
-          <span class="dh-hero__icon" aria-hidden="true"><img src="assets/images/football.png?v=8.0.1" alt="" class="dh-hero__icon-img"></span>
+          <span class="dh-hero__icon" aria-hidden="true">⚽</span>
           <span>Atelier d’analyse</span>
         </div>
 

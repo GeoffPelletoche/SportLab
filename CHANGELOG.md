@@ -1,10 +1,3 @@
-# 8.0.1 — Icônes sport personnalisées
-
-- Remplacement des emojis rugby et football dans les cartes du dashboard.
-- Remplacement des emojis dans les titres des pages FrenchFlair et DrawHunter.
-- Utilisation des images originales `assets/images/rugby.png` et `assets/images/football.png`.
-- Ajout des styles responsive associés, sans modification de la logique métier.
-
 # SportLab V7.1.2C — Cloud Recovery & Conflict Center
 
 - Ajout du Recovery Center et de sa navigation dédiée.
