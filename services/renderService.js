@@ -55,7 +55,8 @@ export function renderApplication(app, data = {}) {
 
   const learningDataset = capturePredictionDataset({
     drawhunter: data.drawhunterPayload?.matches || [],
-    frenchflair: data.frenchflairPayload?.matches || []
+    frenchflair: data.frenchflairPayload?.matches || [],
+    analyses: data.analyses || []
   });
   const performanceRepository = createPerformanceRepository();
   const modelPerformanceHtml = renderModelPerformance({
@@ -96,9 +97,12 @@ export function renderApplication(app, data = {}) {
     });
 
   const diagnosticsHtml =
-    renderDiagnostics(
-      data.diagnostic
-    );
+    renderDiagnostics({
+      settlement: data.diagnostic,
+      drawhunterMeta: data.drawhunterPayload?.meta || {},
+      frenchflairMeta: data.frenchflairPayload?.meta || {},
+      learningDataset
+    });
 
   const cloudState = window.SportLabCore?.cloud?.status?.() || {};
   const recoveryState = window.SportLabCore?.recovery?.state?.() || {};
