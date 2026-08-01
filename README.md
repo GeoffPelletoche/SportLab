@@ -1,13 +1,8 @@
 # SportLab
 
-**Version : 8.0.1 — Navigation et fiabilité des données**
+**Version : 7.1.2C — Cloud Dashboard** V7.1.2A — Sync Engine V2
 
 Projet complet SportLab intégrant le Sprint 7.1.2A.
-
-## Correctif V8.0.1
-
-Cette version allège les pages FrenchFlair et DrawHunter en supprimant le grand bloc de recherche/tri/filtres. Elle sécurise aussi les historiques grâce à une reprise locale de la dernière réponse valide et remplace les anciens diagnostics de règlement par une vue complète des données métier.
-
 
 ## Nouveautés principales
 

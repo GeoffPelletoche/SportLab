@@ -11,6 +11,7 @@ import {
 import {
   runAutomaticSettlement
 } from "./services/settlementService.js";
+import { evaluatePendingPredictions } from "./core/performance/predictionEvaluationEngine.js";
 
 import { saveAnalysis, getAnalysisForMatch } from "./core/stores/analysisStore.js";
 
@@ -59,6 +60,17 @@ frenchflairPayload = appData.frenchflairPayload;
     });
 
     initializeUi();
+
+    try {
+      const predictionEvaluation = await evaluatePendingPredictions();
+      console.log("[PredictionEvaluation]", predictionEvaluation);
+      if (predictionEvaluation.evaluated > 0) {
+        renderApplication(app, { ...appData, currentPage });
+        initializeUi();
+      }
+    } catch (error) {
+      console.warn("[PredictionEvaluation] Échec", error);
+    }
 
     try {
       const settlement = await runAutomaticSettlement();
