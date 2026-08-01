@@ -1,91 +1,14 @@
-function formatDate(value) {
-  if (!value) return "Jamais";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString("fr-FR");
+function n(value){ return Number(value || 0).toLocaleString("fr-FR"); }
+function moduleCard(label, meta = {}) {
+  const log = Array.isArray(meta.syncLog) ? meta.syncLog : [];
+  const h = meta.historyDiagnostics || {};
+  const ok = log.filter(x => x.status === "OK").length;
+  const errors = log.filter(x => x.status === "ERROR").length;
+  return `<article class="sl-panel"><h2>${label}</h2><p>Rencontres chargées : <strong>${n(meta.total)}</strong></p><p>Compétitions OK : <strong>${ok}</strong></p><p>Compétitions en erreur : <strong>${errors}</strong></p><p>Historiques demandés : <strong>${n(h.requested)}</strong></p><p>Historiques API valides : <strong>${n(h.apiSuccess)}</strong></p><p>Reprises depuis le cache local : <strong>${n(h.cacheFallback)}</strong></p><p>Réponses historiques vides : <strong>${n(h.emptyResponses)}</strong></p><p>Erreurs historiques : <strong>${n(h.errors)}</strong></p><p>Matchs historiques exploités : <strong>${n(h.gamesLoaded)}</strong></p></article>`;
 }
-
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-export function renderDiagnostics(diagnostic) {
-  if (!diagnostic) {
-    return `<div class="diagnostics-page sl-page sl-stack"><p>Aucun diagnostic disponible.</p></div>`;
-  }
-
-  const draw = diagnostic.modules?.drawhunter || {};
-  const rugby = diagnostic.modules?.frenchflair || {};
-  const settlement = diagnostic.settlement || null;
-
-  return `
-    <div class="diagnostics-page sl-page sl-stack">
-      <section class="sl-panel">
-        <h2>État réel des données</h2>
-        <p>Contrôle effectué le <strong>${escapeHtml(formatDate(diagnostic.checkedAt))}</strong>.</p>
-        <p>Réseau : <strong>${diagnostic.location?.online ? "En ligne" : "Hors ligne"}</strong></p>
-      </section>
-
-      ${renderModule("DrawHunter", draw)}
-      ${renderModule("FrenchFlair", rugby)}
-
-      <section class="sl-panel">
-        <h2>Règlement des paris</h2>
-        ${renderSettlement(settlement)}
-        <button type="button" id="run-settlement-diagnostic">🔄 Contrôler le règlement</button>
-      </section>
-
-      <details class="sl-panel">
-        <summary>Rapport technique complet</summary>
-        <pre id="settlement-debug">${escapeHtml(JSON.stringify(diagnostic, null, 2))}</pre>
-      </details>
-    </div>
-  `;
-}
-
-function renderModule(label, module) {
-  const history = module.history || {};
-  const healthy = !module.error && Number(module.syncErrors || 0) === 0;
-
-  return `
-    <section class="sl-panel diagnostics-module">
-      <h2>${escapeHtml(label)}</h2>
-      <p>Synchronisation : <strong>${healthy ? "Opérationnelle" : "Partielle"}</strong></p>
-      <p>Dernière synchronisation : <strong>${escapeHtml(formatDate(module.syncedAt))}</strong></p>
-      <p>Rencontres chargées : <strong>${Number(module.matches || 0)}</strong></p>
-      <p>Analyses disponibles : <strong>${Number(module.analyzable || 0)}</strong></p>
-      <p>Sans historique suffisant : <strong>${Number(module.withoutAnalysis || 0)}</strong></p>
-      <p>Compétitions OK / erreurs : <strong>${Number(module.syncOk || 0)} / ${Number(module.syncErrors || 0)}</strong></p>
-      <hr>
-      <p>Historiques demandés : <strong>${Number(history.requested || 0)}</strong></p>
-      <p>Historiques reçus par API : <strong>${Number(history.apiSuccess || 0)}</strong></p>
-      <p>Reprises depuis le cache local : <strong>${Number(history.cacheFallback || 0)}</strong></p>
-      <p>Historiques vides : <strong>${Number(history.empty || 0)}</strong></p>
-      <p>Erreurs historiques : <strong>${Number(history.errors || 0)}</strong></p>
-      <p>Matchs historiques exploités : <strong>${Number(history.matchesLoaded || 0)}</strong></p>
-      ${module.errorMessage ? `<p class="sl-text-danger">${escapeHtml(module.errorMessage)}</p>` : ""}
-    </section>
-  `;
-}
-
-function renderSettlement(settlement) {
-  if (!settlement) {
-    return "<p>Aucun contrôle de règlement enregistré. Les compteurs restent naturellement à zéro tant qu’aucun pari n’est à régler.</p>";
-  }
-
-  const reports = Array.isArray(settlement.reports) ? settlement.reports : [];
-  const betsBefore = Array.isArray(settlement.betsBefore) ? settlement.betsBefore : [];
-  const settled = reports.filter(report => report?.status === "SETTLED").length;
-  const errors = reports.filter(report => report?.status === "ERROR").length;
-
-  return `
-    <p>Paris contrôlés : <strong>${betsBefore.length}</strong></p>
-    <p>Rapports : <strong>${reports.length}</strong></p>
-    <p>Paris réglés : <strong>${settled}</strong></p>
-    <p>Erreurs : <strong>${errors}</strong></p>
-  `;
+export function renderDiagnostics({ settlement = null, drawhunterMeta = {}, frenchflairMeta = {}, learningDataset = [] } = {}) {
+  const evaluated = learningDataset.filter(item => item?.evaluatedAt).length;
+  const pending = learningDataset.filter(item => !item?.evaluatedAt).length;
+  const reports = Array.isArray(settlement?.reports) ? settlement.reports : [];
+  return `<section class="diagnostics-page sl-page sl-stack"><header class="sl-panel"><span class="sl-label">SportLab V9</span><h1>Diagnostics opérationnels</h1><p>Ces compteurs mesurent maintenant les flux API, les historiques et l’évaluation des modèles.</p></header><div class="sl-grid sl-grid-2">${moduleCard("⚽ DrawHunter", drawhunterMeta)}${moduleCard("🏉 FrenchFlair", frenchflairMeta)}</div><article class="sl-panel"><h2>Évaluation des prédictions</h2><p>Snapshots enregistrés : <strong>${n(learningDataset.length)}</strong></p><p>Prédictions évaluées : <strong>${n(evaluated)}</strong></p><p>Prédictions en attente : <strong>${n(pending)}</strong></p><p>Cette évaluation inclut les décisions NO VALUE et les rencontres sans pari placé.</p></article><article class="sl-panel"><h2>Règlement des paris</h2><p>Rapports : <strong>${n(reports.length)}</strong></p><p>Paris réglés : <strong>${n(reports.filter(r=>r?.status==="SETTLED").length)}</strong></p><p>Erreurs : <strong>${n(reports.filter(r=>r?.status==="ERROR").length)}</strong></p><button type="button" id="run-settlement-diagnostic">🔄 Relancer le diagnostic</button></article></section>`;
 }
