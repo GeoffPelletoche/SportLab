@@ -31,26 +31,32 @@ export async function fetchUpcomingRugbyFixtures() {
 async function enrichFixturesWithHistory(fixtures, diagnostics, memo) {
   return Promise.all(fixtures.map(async fixture => {
     const [homeHistory, awayHistory] = await Promise.all([
-      fetchTeamHistory(fixture.homeId, fixture.leagueId, fixture.season, diagnostics, memo),
-      fetchTeamHistory(fixture.awayId, fixture.leagueId, fixture.season, diagnostics, memo)
+      fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, diagnostics, memo),
+      fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, diagnostics, memo)
     ]);
     return { ...fixture, homeHistory, awayHistory };
   }));
 }
 
-async function fetchTeamHistory(teamId, leagueId, season, diagnostics, memo) {
+async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics, memo) {
   if (!teamId || !season) return [];
-  const memoKey = `${teamId}:${leagueId}:${season}`;
+  const memoKey = `${teamId}:${teamName || "unknown"}:${leagueId}:${season}`;
   if (memo.has(memoKey)) return memo.get(memoKey);
   const promise = (async () => {
     diagnostics.requested += 1;
     try {
-      const data = await fetchFromWorker("/rugby/team-games", { team: teamId, league: leagueId, season, limit: HISTORY_LIMIT });
+      const data = await fetchFromWorker("/rugby/team-games", {
+        team: teamId,
+        teamName,
+        league: leagueId,
+        season,
+        limit: HISTORY_LIMIT
+      });
       const history = Array.isArray(data?.response) ? data.response : [];
       if (history.length) {
         diagnostics.apiSuccess += 1;
         diagnostics.gamesLoaded += history.length;
-        writeHistoryCache("rugby", `${teamId}:${leagueId || "all"}`, history);
+        writeHistoryCache("rugby", `${teamId}:${teamName || "unknown"}:${leagueId || "all"}`, history);
         return history;
       }
       diagnostics.emptyResponses += 1;
@@ -58,7 +64,7 @@ async function fetchTeamHistory(teamId, leagueId, season, diagnostics, memo) {
       diagnostics.errors += 1;
       console.warn("Rugby history error:", teamId, error);
     }
-    const cached = readHistoryCache("rugby", `${teamId}:${leagueId || "all"}`);
+    const cached = readHistoryCache("rugby", `${teamId}:${teamName || "unknown"}:${leagueId || "all"}`);
     if (cached.length) {
       diagnostics.cacheFallback += 1;
       diagnostics.gamesLoaded += cached.length;
