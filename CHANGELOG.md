@@ -1,3 +1,14 @@
+# SportLab V8.0.1 — Navigation et fiabilité des données
+
+- Suppression du bloc Recherche / Tri / Densité / Filtres dans FrenchFlair.
+- Suppression du bloc Recherche / Tri / Densité / Filtres dans DrawHunter.
+- Ajout d’un cache local « dernière donnée historique valide » par équipe.
+- Reprise automatique des historiques locaux si API-Sports ou le Worker répond temporairement vide.
+- Deux tentatives réseau avec délai court et délai maximal par requête.
+- Mémorisation des appels identiques pendant un même chargement.
+- Diagnostics métier réels : matchs, analyses disponibles, historiques API, reprises cache et erreurs.
+- Conservation séparée du diagnostic de règlement des paris.
+
 # SportLab V7.1.2C — Cloud Recovery & Conflict Center
 
 - Ajout du Recovery Center et de sa navigation dédiée.
