@@ -162,8 +162,6 @@ function renderWorkspace(matches, meta, stats) {
         ${matches.length === 0
           ? renderEmpty(meta)
           : `
-            ${renderWorkspaceToolbar()}
-            ${renderFilters(matches)}
             <div class="dh-match-grid" data-dh-grid>${matches.map(renderMatchCard).join("")}</div>
           `
         }

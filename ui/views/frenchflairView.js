@@ -96,7 +96,6 @@ function renderMainLayout(matches, stats, meta) {
         </div>
       </div>
 
-      ${renderWorkflowFilters(matches)}
       ${meta?.error ? renderError(meta) : ""}
       ${matches.length === 0 ? renderEmpty() : renderMatches(matches)}
 
