@@ -17,7 +17,8 @@ import {
 } from "./statisticsService.js";
 
 import {
-  getSettlementDiagnostic
+  getSettlementDiagnostic,
+  buildApplicationDiagnostic
 } from "./diagnosticService.js";
 
 import {
@@ -49,9 +50,6 @@ export async function loadApplicationData() {
   const statistics =
     getAdvancedStatistics();
 
-  const diagnostic =
-    getSettlementDiagnostic();
-
   /*
    * Les modules sportifs chargent des données
    * distantes : ils sont donc asynchrones.
@@ -63,6 +61,12 @@ export async function loadApplicationData() {
     getDrawHunterPayload(),
     getFrenchFlairPayload()
   ]);
+
+  const diagnostic = buildApplicationDiagnostic({
+    drawhunterPayload,
+    frenchflairPayload,
+    settlement: getSettlementDiagnostic()
+  });
 
   return {
     dashboard,
