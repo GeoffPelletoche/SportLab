@@ -1,53 +1,20 @@
-const PREFIX = "sportlab.v8.history";
-const MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30;
+const PREFIX = "sportlab.v9.history";
+const MAX_AGE_MS = 1000 * 60 * 60 * 24 * 21;
 
-function storageAvailable() {
+export function readHistoryCache(sport, teamId) {
   try {
-    return typeof localStorage !== "undefined";
-  } catch {
-    return false;
-  }
+    const item = JSON.parse(localStorage.getItem(keyOf(sport, teamId)) || "null");
+    if (!item || !Array.isArray(item.history) || !item.history.length) return [];
+    if (Date.now() - Number(item.savedAt || 0) > MAX_AGE_MS) return [];
+    return item.history;
+  } catch { return []; }
 }
 
-function buildKey(sport, teamId, leagueId = "all") {
-  return `${PREFIX}:${sport}:${leagueId || "all"}:${teamId}`;
-}
-
-export function readHistoryCache(sport, teamId, leagueId = "all") {
-  if (!storageAvailable() || !teamId) return [];
-
+export function writeHistoryCache(sport, teamId, history) {
+  if (!teamId || !Array.isArray(history) || !history.length) return;
   try {
-    const raw = localStorage.getItem(buildKey(sport, teamId, leagueId));
-    if (!raw) return [];
-
-    const payload = JSON.parse(raw);
-    const savedAt = Number(payload?.savedAt || 0);
-    const matches = Array.isArray(payload?.matches) ? payload.matches : [];
-
-    if (!savedAt || Date.now() - savedAt > MAX_AGE_MS || matches.length === 0) {
-      return [];
-    }
-
-    return matches;
-  } catch {
-    return [];
-  }
+    localStorage.setItem(keyOf(sport, teamId), JSON.stringify({ savedAt: Date.now(), history }));
+  } catch (error) { console.warn("[HistoryCache] Écriture impossible", error); }
 }
 
-export function writeHistoryCache(sport, teamId, leagueId = "all", matches = []) {
-  if (!storageAvailable() || !teamId || !Array.isArray(matches) || matches.length === 0) {
-    return;
-  }
-
-  try {
-    localStorage.setItem(
-      buildKey(sport, teamId, leagueId),
-      JSON.stringify({
-        savedAt: Date.now(),
-        matches
-      })
-    );
-  } catch (error) {
-    console.warn("[HistoryCache] Écriture impossible :", error);
-  }
-}
+function keyOf(sport, teamId) { return `${PREFIX}.${sport}.${teamId}`; }
