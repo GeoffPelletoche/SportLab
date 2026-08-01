@@ -1,0 +1,21 @@
+/* Responsive */
+@media(max-width:900px){
+  .sl-grid-3,.sl-grid-4,.sl-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  .sl-app-root{
+    width:min(calc(100% - (var(--sl-layout-inline-mobile) * 2)),var(--sl-layout-max));
+  }
+  .sl-grid-2,.sl-grid-3,.sl-grid-4,.sl-kpi-grid{grid-template-columns:1fr}
+  .sl-page-header,.sl-section-header{align-items:stretch;flex-direction:column}
+  .sl-hero{padding:20px}
+  .sl-button-mobile-full{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
