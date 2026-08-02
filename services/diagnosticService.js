@@ -1,3 +1,4 @@
+import { getBetStoreHealth } from "../core/stores/betsStore.js";
 const STORAGE_KEY = "sportlab_settlement_debug";
 
 export function getSettlementDiagnostic() {
@@ -16,6 +17,7 @@ export function buildApplicationDiagnostic({
   settlement = null
 } = {}) {
   return {
+      betStore: getBetStoreHealth(),
     checkedAt: new Date().toISOString(),
     location: {
       origin: window.location.origin,

@@ -178,18 +178,39 @@ function isValueDecision(value) {
 function mergeAnalysesAndBets() {
     const analyses = getSafeArray(getAnalyses());
     const bets = getSafeArray(getAllBets());
+    const matchedBetIds = new Set();
 
-    return analyses.map(analysis => {
+    const analysisEntries = analyses.map(analysis => {
         const bet = findMatchingBet(
             analysis,
             bets
         );
+
+        if (bet?.id) {
+            matchedBetIds.add(String(bet.id));
+        }
 
         return createJournalEntry(
             analysis,
             bet
         );
     });
+
+    /*
+     * DrawHunter peut enregistrer un pari directement depuis sa carte,
+     * sans créer au préalable une entrée analysisStore. Ces paris ne
+     * doivent jamais disparaître du Journal : le Bet Store est la source
+     * officielle des mises et chaque pari non apparié devient donc une
+     * entrée autonome.
+     */
+    const orphanBetEntries = bets
+        .filter(bet => !bet?.id || !matchedBetIds.has(String(bet.id)))
+        .map(createJournalEntryFromBet);
+
+    return [
+        ...analysisEntries,
+        ...orphanBetEntries
+    ];
 }
 
 /**
@@ -341,6 +362,45 @@ function createJournalEntry(analysis, bet) {
 
         profit:
             calculateBetProfit(bet)
+    };
+}
+
+function createJournalEntryFromBet(bet = {}) {
+    const parsedTeams = splitMatchLabel(bet?.match);
+    const placed = bet?.placed === true;
+
+    return {
+        id: bet?.analysisId || bet?.id || createFallbackId(bet),
+        matchId: bet?.matchId ?? "",
+        betId: bet?.id ?? "",
+        sport: normalizeText(bet?.sport),
+        source: normalizeText(bet?.source),
+        competition: normalizeText(bet?.competition),
+        match: normalizeText(bet?.match) || buildMatchLabel(parsedTeams.home, parsedTeams.away),
+        homeTeam: parsedTeams.home,
+        awayTeam: parsedTeams.away,
+        market: normalizeText(bet?.market),
+        selection: normalizeText(bet?.selection),
+        probability: toNumber(bet?.probability),
+        value: toNumber(bet?.value ?? bet?.edge),
+        edge: toNumber(bet?.edge),
+        confidence: toNumber(bet?.confidence),
+        decision: normalizeDecision(bet?.decision),
+        date: normalizeDate(bet?.matchDate ?? bet?.createdAt),
+        placed,
+        stake: toNumber(bet?.stake),
+        odds: toNumber(bet?.odds),
+        result: placed ? normalizeResult(bet?.result) : "",
+        profit: calculateBetProfit(bet)
+    };
+}
+
+function splitMatchLabel(value) {
+    const label = normalizeText(value);
+    const parts = label.split(/\s+(?:vs|v|-)\s+/i);
+    return {
+        home: normalizeText(parts[0]),
+        away: normalizeText(parts.slice(1).join(" vs "))
     };
 }
 
