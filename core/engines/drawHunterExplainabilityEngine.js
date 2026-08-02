@@ -1,66 +1,129 @@
 /**
- * SPORTLAB V11.1 — EXPLAINABLE AI DRAWHUNTER
+ * SPORTLAB V11.1.1 — EXPLAINABLE AI DRAWHUNTER
  *
- * Ce moteur explique les indicateurs déjà calculés par DrawHunter.
- * Il ne modifie ni la probabilité, ni la confiance, ni la décision.
+ * Ce moteur explique uniquement les indicateurs déjà présents dans
+ * l'analyse DrawHunter affichée. Il ne déclenche aucun appel API et ne
+ * recalc​​ule pas l'historique.
+ *
+ * Compatibilité :
+ * - analyses V11 complètes ;
+ * - analyses déjà calculées avant V11, même si predictionStatus n'a pas
+ *   été conservé ;
+ * - indicateurs partiels pouvant être reconstruits depuis homeStats et
+ *   awayStats.
  */
 export function explainDrawHunterPrediction(match = {}, bookmakerOdds = null) {
-  const probability = toFinite(match.probability);
-  const fairOdds = probability > 0 ? 1 / probability : null;
-  const homeStats = match.homeStats || {};
-  const awayStats = match.awayStats || {};
-  const enoughHistory = String(match.predictionStatus || "").toUpperCase() === "OK";
+  const probability = firstFinite(
+    match.probability,
+    match.drawProbability,
+    match.modelProbability
+  );
 
-  if (!enoughHistory) {
+  const fairOdds = probability > 0
+    ? 1 / probability
+    : firstFinite(match.fairOdds, match.modelOdds);
+
+  const homeStats = isObject(match.homeStats) ? match.homeStats : {};
+  const awayStats = isObject(match.awayStats) ? match.awayStats : {};
+
+  const drawProfile = resolveAverageIndicator(
+    match.drawProfile,
+    homeStats.drawRate,
+    awayStats.drawRate
+  );
+
+  const lowScoringProfile = resolveAverageIndicator(
+    match.lowScoringProfile,
+    homeStats.lowScoringRate,
+    awayStats.lowScoringRate
+  );
+
+  const balance = resolveBalance(match.balance, homeStats, awayStats);
+
+  const homeGames = firstFinite(homeStats.games, match.homeHistoryGames);
+  const awayGames = firstFinite(awayStats.games, match.awayHistoryGames);
+  const homeEffective = firstFinite(homeStats.effectiveGames, homeGames);
+  const awayEffective = firstFinite(awayStats.effectiveGames, awayGames);
+  const effectiveGames = homeEffective + awayEffective;
+  const minimumGames = Math.min(homeGames, awayGames);
+
+  /*
+   * Ne pas dépendre uniquement de predictionStatus : cette propriété
+   * pouvait ne pas être persistée dans certaines analyses antérieures,
+   * alors que la probabilité et les statistiques calculées étaient bien
+   * disponibles.
+   */
+  const hasModelEstimate = probability > 0;
+  const hasComputedIndicators = [drawProfile, lowScoringProfile, balance]
+    .some(value => Number.isFinite(value));
+  const hasTeamStats = homeGames > 0 || awayGames > 0 || effectiveGames > 0;
+  const statusExplicitlyValid = String(match.predictionStatus || "")
+    .toUpperCase() === "OK";
+
+  const available = statusExplicitlyValid || (
+    hasModelEstimate && (hasComputedIndicators || hasTeamStats)
+  );
+
+  if (!available) {
     return {
       available: false,
-      summary: "Explication indisponible : l’historique est insuffisant pour interpréter le modèle.",
+      summary: "Explication indisponible : aucun indicateur déjà calculé n’est présent pour cette rencontre.",
       factors: []
     };
   }
 
-  const drawProfile = clamp(toFinite(match.drawProfile), 0, 1);
-  const lowScoringProfile = clamp(toFinite(match.lowScoringProfile), 0, 1);
-  const balance = clamp(toFinite(match.balance), 0, 1);
-  const effectiveGames = toFinite(homeStats.effectiveGames) + toFinite(awayStats.effectiveGames);
-  const minimumGames = Math.min(toFinite(homeStats.games), toFinite(awayStats.games));
+  const safeDrawProfile = clamp(toFinite(drawProfile), 0, 1);
+  const safeLowScoringProfile = clamp(toFinite(lowScoringProfile), 0, 1);
+  const safeBalance = clamp(toFinite(balance), 0, 1);
 
   const factors = [
     createFactor({
       key: "draw-profile",
       label: "Tendance récente au match nul",
-      value: drawProfile,
-      stars: scale(drawProfile, 0.16, 0.38),
-      tone: drawProfile >= 0.27 ? "positive" : drawProfile >= 0.20 ? "neutral" : "caution",
-      detail: `${percent(drawProfile)} de nuls pondérés sur les historiques des deux équipes.`
+      value: safeDrawProfile,
+      stars: scale(safeDrawProfile, 0.16, 0.38),
+      tone: safeDrawProfile >= 0.27 ? "positive" : safeDrawProfile >= 0.20 ? "neutral" : "caution",
+      detail: Number.isFinite(drawProfile)
+        ? `${percent(safeDrawProfile)} de nuls pondérés sur les historiques déjà calculés des deux équipes.`
+        : "Le taux de nuls détaillé n’a pas été conservé, mais la probabilité globale du modèle reste disponible."
     }),
     createFactor({
       key: "low-scoring",
       label: "Profil de matchs serrés",
-      value: lowScoringProfile,
-      stars: scale(lowScoringProfile, 0.35, 0.75),
-      tone: lowScoringProfile >= 0.58 ? "positive" : lowScoringProfile >= 0.45 ? "neutral" : "caution",
-      detail: `${percent(lowScoringProfile)} des matchs pondérés se terminent avec deux buts ou moins.`
+      value: safeLowScoringProfile,
+      stars: scale(safeLowScoringProfile, 0.35, 0.75),
+      tone: safeLowScoringProfile >= 0.58 ? "positive" : safeLowScoringProfile >= 0.45 ? "neutral" : "caution",
+      detail: Number.isFinite(lowScoringProfile)
+        ? `${percent(safeLowScoringProfile)} des matchs pondérés se terminent avec deux buts ou moins.`
+        : "Le profil de score détaillé n’a pas été conservé dans cette analyse."
     }),
     createFactor({
       key: "balance",
       label: "Équilibre attaque / défense",
-      value: balance,
-      stars: scale(balance, 0.35, 0.90),
-      tone: balance >= 0.68 ? "positive" : balance >= 0.50 ? "neutral" : "caution",
-      detail: balance >= 0.68
-        ? "Les niveaux offensifs et défensifs récents sont proches."
-        : balance >= 0.50
-          ? "L’écart de niveau reste modéré."
-          : "Un écart de niveau réduit la probabilité d’un nul."
+      value: safeBalance,
+      stars: scale(safeBalance, 0.35, 0.90),
+      tone: safeBalance >= 0.68 ? "positive" : safeBalance >= 0.50 ? "neutral" : "caution",
+      detail: Number.isFinite(balance)
+        ? safeBalance >= 0.68
+          ? "Les niveaux offensifs et défensifs récents sont proches."
+          : safeBalance >= 0.50
+            ? "L’écart de niveau reste modéré."
+            : "Un écart de niveau réduit la probabilité d’un nul."
+        : "Le détail attaque / défense n’a pas été conservé dans cette analyse."
     }),
     createFactor({
       key: "sample",
       label: "Fiabilité de l’échantillon",
       value: effectiveGames,
       stars: scale(effectiveGames, 12, 42),
-      tone: effectiveGames >= 28 && minimumGames >= 10 ? "positive" : effectiveGames >= 18 ? "neutral" : "caution",
-      detail: `${round(effectiveGames, 1)} matchs effectifs pondérés, avec au moins ${Math.round(minimumGames)} matchs par équipe.`
+      tone: effectiveGames >= 28 && minimumGames >= 10
+        ? "positive"
+        : effectiveGames >= 18
+          ? "neutral"
+          : "caution",
+      detail: effectiveGames > 0
+        ? `${round(effectiveGames, 1)} matchs effectifs pondérés, avec au moins ${Math.round(minimumGames)} matchs par équipe.`
+        : `Confiance du modèle : ${Math.round(firstFinite(match.confidence, 0))}/100.`
     }),
     createBookmakerFactor(bookmakerOdds, fairOdds)
   ];
@@ -72,7 +135,7 @@ export function explainDrawHunterPrediction(match = {}, bookmakerOdds = null) {
     available: true,
     fairOdds: fairOdds ? round(fairOdds, 2) : null,
     summary: positiveCount >= 3
-      ? "Plusieurs indicateurs convergent en faveur d’un match nul."
+      ? "Plusieurs indicateurs déjà calculés convergent en faveur d’un match nul."
       : cautionCount >= 3
         ? "Le modèle détecte peu de signaux favorables au match nul."
         : "Les indicateurs sont partagés : la cote bookmaker reste déterminante.",
@@ -84,6 +147,35 @@ export function explainBookmakerPrice(probability, bookmakerOdds) {
   const numericProbability = toFinite(probability);
   const fairOdds = numericProbability > 0 ? 1 / numericProbability : null;
   return createBookmakerFactor(bookmakerOdds, fairOdds);
+}
+
+function resolveAverageIndicator(explicitValue, homeValue, awayValue) {
+  const explicit = optionalFinite(explicitValue);
+  if (explicit !== null) return explicit;
+
+  const values = [optionalFinite(homeValue), optionalFinite(awayValue)]
+    .filter(value => value !== null);
+
+  if (!values.length) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function resolveBalance(explicitValue, homeStats, awayStats) {
+  const explicit = optionalFinite(explicitValue);
+  if (explicit !== null) return explicit;
+
+  const homeAttack = optionalFinite(homeStats.averageGoalsFor);
+  const awayAttack = optionalFinite(awayStats.averageGoalsFor);
+  const homeDefense = optionalFinite(homeStats.averageGoalsAgainst);
+  const awayDefense = optionalFinite(awayStats.averageGoalsAgainst);
+
+  if ([homeAttack, awayAttack, homeDefense, awayDefense].some(value => value === null)) {
+    return null;
+  }
+
+  const attackGap = Math.abs(homeAttack - awayAttack);
+  const defenseGap = Math.abs(homeDefense - awayDefense);
+  return 1 - clamp((attackGap + defenseGap) / 4, 0, 1);
 }
 
 function createBookmakerFactor(bookmakerOdds, fairOdds) {
@@ -136,9 +228,27 @@ function signedPercent(value) {
   return `${number >= 0 ? "+" : ""}${number.toFixed(1)}%`;
 }
 
+function optionalFinite(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function firstFinite(...values) {
+  for (const value of values) {
+    const number = optionalFinite(value);
+    if (number !== null) return number;
+  }
+  return 0;
+}
+
 function toFinite(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : 0;
+}
+
+function isObject(value) {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function clamp(value, minimum, maximum) {
