@@ -1,6 +1,7 @@
 import { showToast } from "./sportlabUi.js";
 import { computeValue } from "../../core/engines/valueEngine.js";
 import { CONFIG } from "../../core/config/config.js";
+import { explainBookmakerPrice } from "../../core/engines/drawHunterExplainabilityEngine.js";
 
 import {
   getDrawHunterContext,
@@ -111,6 +112,25 @@ function updateValuationDisplay(card, valuation) {
     if (strong) strong.textContent = "Aucun pari recommandé";
     if (paragraph) paragraph.textContent = decisionNote;
   }
+}
+
+function updateBookmakerExplanation(card, valuation) {
+  const factorElement = card?.querySelector('[data-dh-explain-factor="bookmaker-price"]');
+  if (!factorElement) return;
+
+  const probability = Number(card?.dataset.dhProbabilityRaw);
+  const factor = explainBookmakerPrice(probability, valuation?.odds || null);
+  const stars = Math.max(0, Math.min(5, Number(factor.stars) || 0));
+
+  factorElement.className = `dh-explain-factor dh-explain-factor--${factor.tone}`;
+  const starElement = factorElement.querySelector(".dh-explain-stars");
+  const detailElement = factorElement.querySelector("p");
+
+  if (starElement) {
+    starElement.textContent = `${"★".repeat(stars)}${"☆".repeat(5 - stars)}`;
+    starElement.setAttribute("aria-label", `Influence ${stars} sur 5`);
+  }
+  if (detailElement) detailElement.textContent = factor.detail;
 }
 
 
@@ -224,6 +244,7 @@ export function initDrawHunterWorkflow() {
 
     const valuation = getValuation(card);
     updateValuationDisplay(card, valuation);
+    updateBookmakerExplanation(card, valuation);
 
     saveDrawHunterMatchWorkflow(matchId, {
       bookmakerOdds: valuation?.odds || null,

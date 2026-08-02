@@ -1,6 +1,7 @@
 import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import { computeValue } from "../../core/engines/valueEngine.js";
 import { CONFIG } from "../../core/config/config.js";
+import { explainDrawHunterPrediction } from "../../core/engines/drawHunterExplainabilityEngine.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow,
@@ -465,6 +466,7 @@ function renderMatchCard(match, index) {
         ${renderTimelineStep("Résultat", ["resulted","archived"].includes(workflowState))}
       </div>
 
+      ${renderExplainability(analyzedMatch)}
       ${renderAnalysisDetails(analyzedMatch, state, confidence)}
       ${renderHistory(storedWorkflow, match)}
 
@@ -479,6 +481,69 @@ function renderMatchCard(match, index) {
       </footer>
     </article>
   `;
+}
+
+
+function renderExplainability(match) {
+  const explanation = explainDrawHunterPrediction(match, match?.odds);
+
+  if (!explanation.available) {
+    return `
+      <section class="dh-explain dh-explain--unavailable" aria-label="Explication de la prédiction">
+        <div class="dh-explain__heading">
+          <div>
+            <p class="dh-section-eyebrow">Explainable AI</p>
+            <h3>Pourquoi cette estimation ?</h3>
+          </div>
+        </div>
+        <p class="dh-explain__summary">${safe(explanation.summary)}</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="dh-explain" aria-label="Explication de la prédiction">
+      <div class="dh-explain__heading">
+        <div>
+          <p class="dh-section-eyebrow">Explainable AI</p>
+          <h3>Pourquoi cette estimation ?</h3>
+        </div>
+        <span class="dh-explain__fair-odds">Cote juste ${formatOdds(explanation.fairOdds)}</span>
+      </div>
+
+      <p class="dh-explain__summary">${safe(explanation.summary)}</p>
+
+      <div class="dh-explain__factors">
+        ${explanation.factors.map(renderExplanationFactor).join("")}
+      </div>
+
+      <small class="dh-explain__notice">
+        Ces explications décrivent les données déjà utilisées par le modèle. Elles ne changent pas la prédiction.
+      </small>
+    </section>
+  `;
+}
+
+function renderExplanationFactor(factor) {
+  return `
+    <article
+      class="dh-explain-factor dh-explain-factor--${safe(factor.tone)}"
+      data-dh-explain-factor="${safe(factor.key)}"
+    >
+      <div class="dh-explain-factor__top">
+        <strong>${safe(factor.label)}</strong>
+        <span class="dh-explain-stars" aria-label="Influence ${factor.stars} sur 5">
+          ${renderStars(factor.stars)}
+        </span>
+      </div>
+      <p>${safe(factor.detail)}</p>
+    </article>
+  `;
+}
+
+function renderStars(count) {
+  const safeCount = Math.max(0, Math.min(5, Number(count) || 0));
+  return `${"★".repeat(safeCount)}${"☆".repeat(5 - safeCount)}`;
 }
 
 function renderAnalysisDetails(match, state, confidence) {
