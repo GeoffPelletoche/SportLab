@@ -1,3 +1,9 @@
+## 11.1.2 — Unified Bet Store
+
+- Correction du Journal qui ignorait les paris DrawHunter sans entrée analysisStore.
+- Source unique `sportlab_bets_v3`, migration et déduplication automatiques.
+- Mises en attente et nombre de paris calculés depuis le même store que DrawHunter et FrenchFlair.
+
 ## V11.1.0 — Explainable AI DrawHunter
 
 - Explications du modèle uniquement dans DrawHunter.
