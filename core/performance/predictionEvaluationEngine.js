@@ -4,6 +4,7 @@ import { createPerformanceRepository } from "./performanceRepository.js";
 import { saveDrawHunterMatchWorkflow } from "../stores/drawHunterWorkflowStore.js";
 import { saveFrenchFlairMatchWorkflow } from "../stores/frenchFlairWorkflowStore.js";
 import { getAnalysisForMatch, saveAnalysis } from "../stores/analysisStore.js";
+import { recordPassiveLearning } from "../learning/passiveLearningEngine.js";
 
 const DATASET_KEY = "sportlab.v7.learning.dataset";
 
@@ -26,6 +27,7 @@ export async function evaluatePendingPredictions(storage = globalThis.localStora
       const evaluatedAt = new Date().toISOString();
       Object.assign(snapshot, evaluation, { evaluatedAt, finalGame: game });
       persistLifecycleEvaluation(snapshot, evaluation, game, evaluatedAt);
+      recordPassiveLearning(snapshot, evaluation, game, evaluatedAt, storage);
       const evaluationId = `${snapshot.id}:${snapshot.modelVersion}`;
       if (!recordKeys.has(evaluationId)) {
         records.push({

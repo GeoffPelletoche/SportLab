@@ -2,12 +2,12 @@ export const SYNCED_KEYS = Object.freeze([
   "sportlab_analyses_v1", "sportlab_bets_v3",
   "sportlab_drawhunter_workflow_v1", "sportlab_drawhunter_context_v1",
   "sportlab_frenchflair_workflow_v1", "sportlab_frenchflair_context_v1",
-  "sportlab.v7.settings"
+  "sportlab.v7.settings", "sportlab_learning_v1"
 ]);
 const META_KEY = "sportlab.v7.cloud.meta";
 function meta() { try { return JSON.parse(localStorage.getItem(META_KEY)) || {}; } catch { return {}; } }
 function saveMeta(value) { localStorage.setItem(META_KEY, JSON.stringify(value)); }
-function namespaceFor(key) { return key === "sportlab.v7.settings" ? "settings" : key.includes("drawhunter") ? "drawhunter" : key.includes("frenchflair") ? "frenchflair" : key.includes("bets") ? "bets" : "analyses"; }
+function namespaceFor(key) { return key === "sportlab.v7.settings" ? "settings" : key.includes("drawhunter") ? "drawhunter" : key.includes("frenchflair") ? "frenchflair" : key.includes("bets") ? "bets" : key.includes("learning") ? "learning" : "analyses"; }
 function recordKeyFor(key) { return key; }
 function hash(value) { let h = 2166136261; for (let i = 0; i < value.length; i += 1) { h ^= value.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); }
 export function collectLocalChanges() {
