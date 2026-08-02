@@ -1,5 +1,21 @@
 # Changelog
 
+## 10.1.2
+
+- Suppression de la cote DrawHunter simulée à 3,10.
+- Ajout de la saisie manuelle de la cote bookmaker du match nul.
+- Recalcul instantané de la probabilité implicite, de la value, de l’edge et de la décision.
+- Persistance de la cote et du calcul dans le workflow de la rencontre.
+- Affichage automatique du formulaire de pari uniquement lorsqu’une VALUE est détectée.
+- Validation obligatoire d’une cote supérieure à 1,00 avant de terminer l’analyse.
+
+## 10.1.1
+
+- DrawHunter reste ouvert après « Terminer l’analyse ».
+- Passage automatique à la prochaine analyse disponible.
+- Message de confirmation avec le nombre d’analyses restantes.
+- Aucun rechargement complet de la page lors du changement de statut.
+
 ## 10.1.0
 
 - Stabilisation du pipeline DrawHunter.

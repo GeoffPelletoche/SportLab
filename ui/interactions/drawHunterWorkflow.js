@@ -1,3 +1,7 @@
+import { showToast } from "./sportlabUi.js";
+import { computeValue } from "../../core/engines/valueEngine.js";
+import { CONFIG } from "../../core/config/config.js";
+
 import {
   getDrawHunterContext,
   saveDrawHunterContext,
@@ -5,6 +9,142 @@ import {
 } from "../../core/stores/drawHunterWorkflowStore.js";
 
 const PRIORITY = { pending: 0, new: 1, awaiting_result: 2, resulted: 3, archived: 4 };
+
+function formatPercent(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? `${(number * 100).toFixed(1)}%` : "-";
+}
+
+function formatOdds(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 1 ? number.toFixed(2) : "-";
+}
+
+function getValuation(card) {
+  const input = card?.querySelector("[data-dh-bookmaker-odds]");
+  const odds = Number(input?.value);
+  const probability = Number(card?.dataset.dhProbabilityRaw);
+
+  if (!Number.isFinite(odds) || odds <= 1 || !Number.isFinite(probability) || probability <= 0) {
+    return null;
+  }
+
+  return {
+    odds,
+    ...computeValue({
+      probability,
+      odds,
+      minValue: CONFIG.drawhunter.minValue
+    })
+  };
+}
+
+function updateValuationDisplay(card, valuation) {
+  if (!card) return;
+
+  const oddsKpi = card.querySelector('[data-dh-kpi="odds"]');
+  const valueKpi = card.querySelector('[data-dh-kpi="value"]');
+  const decisionKpi = card.querySelector('[data-dh-kpi="decision"]');
+
+  if (!valuation) {
+    if (oddsKpi) {
+      oddsKpi.querySelector("strong").textContent = "-";
+      oddsKpi.querySelector("small").textContent = "Marché nul";
+    }
+    if (valueKpi) {
+      valueKpi.querySelector("strong").textContent = "-";
+      valueKpi.querySelector("small").textContent = "En attente de la cote";
+    }
+    if (decisionKpi) {
+      decisionKpi.querySelector("strong").textContent = "En attente";
+      decisionKpi.querySelector("small").textContent = "Saisis la cote bookmaker";
+    }
+    card.dataset.dhValue = "0";
+    card.classList.remove("dh-match-card--value", "dh-match-card--pass");
+    card.classList.add("dh-match-card--pending");
+
+    const betContainer = card.querySelector("[data-dh-bet-container]");
+    const passContainer = card.querySelector("[data-dh-pass-container]");
+    if (betContainer) betContainer.hidden = true;
+    if (passContainer) {
+      passContainer.hidden = false;
+      const strong = passContainer.querySelector("strong");
+      const paragraph = passContainer.querySelector("p");
+      if (strong) strong.textContent = "Analyse à compléter";
+      if (paragraph) paragraph.textContent = "Saisis la cote bookmaker pour calculer la value.";
+    }
+    return;
+  }
+
+  const isValue = String(valuation.decision).toUpperCase().includes("VALUE");
+  const decisionLabel = isValue ? "VALUE" : "Pas de pari";
+  const decisionNote = isValue ? "Edge positif détecté" : "Seuil de value non atteint";
+
+  if (oddsKpi) {
+    oddsKpi.querySelector("strong").textContent = formatOdds(valuation.odds);
+    oddsKpi.querySelector("small").textContent = "Marché nul";
+  }
+  if (valueKpi) {
+    valueKpi.querySelector("strong").textContent = formatPercent(valuation.value);
+    valueKpi.querySelector("small").textContent =
+      Number(valuation.value) > 0 ? "Edge positif" :
+      Number(valuation.value) === 0 ? "Neutre" : "Edge négatif";
+  }
+  if (decisionKpi) {
+    decisionKpi.querySelector("strong").textContent = decisionLabel;
+    decisionKpi.querySelector("small").textContent = decisionNote;
+  }
+
+  card.dataset.dhValue = String(Number(valuation.value) || 0);
+  card.classList.remove("dh-match-card--pending", "dh-match-card--value", "dh-match-card--pass");
+  card.classList.add(isValue ? "dh-match-card--value" : "dh-match-card--pass");
+
+  const betContainer = card.querySelector("[data-dh-bet-container]");
+  const passContainer = card.querySelector("[data-dh-pass-container]");
+
+  if (betContainer) betContainer.hidden = !isValue;
+  if (passContainer) passContainer.hidden = isValue;
+
+  if (passContainer && !isValue) {
+    const strong = passContainer.querySelector("strong");
+    const paragraph = passContainer.querySelector("p");
+    if (strong) strong.textContent = "Aucun pari recommandé";
+    if (paragraph) paragraph.textContent = decisionNote;
+  }
+}
+
+
+function updateDrawHunterCardState(card, status) {
+  if (!card) return;
+
+  card.dataset.workflowState = status;
+
+  const statusLabel = card.querySelector("[data-dh-status-label]");
+  if (statusLabel) {
+    statusLabel.textContent = status === "pending"
+      ? "À ANALYSER"
+      : status === "awaiting_result"
+        ? "EN ATTENTE"
+        : String(status).toUpperCase();
+  }
+
+  const primary = card.querySelector('[data-dh-action="start"], [data-dh-action="continue"], [data-dh-action="complete"]');
+  if (primary) {
+    if (status === "pending") {
+      primary.dataset.dhAction = "complete";
+      primary.textContent = "Terminer l’analyse";
+    } else if (status === "awaiting_result") {
+      primary.dataset.dhAction = "history";
+      primary.textContent = "Voir l’historique";
+      primary.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  const timelineSteps = [...card.querySelectorAll(".dh-timeline-step")];
+  if (status === "awaiting_result") {
+    timelineSteps.slice(0, 3).forEach(step => step.classList.add("dh-timeline-step--complete"));
+  }
+}
 
 export function initDrawHunterWorkflow() {
   const root = document.querySelector('[data-module="drawhunter"]');
@@ -74,6 +214,27 @@ export function initDrawHunterWorkflow() {
   sort?.addEventListener("change", () => { sortMode = sort.value; applyView(); });
   densityButtons.forEach(button => button.addEventListener("click", () => updateDensity(button.dataset.dhDensity)));
 
+  root.addEventListener("input", event => {
+    const input = event.target.closest("[data-dh-bookmaker-odds]");
+    if (!input) return;
+
+    const card = input.closest("[data-dh-card]");
+    const matchId = card?.dataset.matchId;
+    if (!card || !matchId) return;
+
+    const valuation = getValuation(card);
+    updateValuationDisplay(card, valuation);
+
+    saveDrawHunterMatchWorkflow(matchId, {
+      bookmakerOdds: valuation?.odds || null,
+      impliedProbability: valuation?.impliedProbability || 0,
+      value: valuation?.value || 0,
+      edge: valuation?.edge || 0,
+      decision: valuation?.decision || "À ANALYSER",
+      reason: valuation?.reason || "Cote bookmaker non renseignée"
+    });
+  });
+
   root.addEventListener("click", event => {
     const action = event.target.closest("[data-dh-action]");
     if (!action) return;
@@ -92,10 +253,70 @@ export function initDrawHunterWorkflow() {
       return;
     }
 
+    if (kind === "complete") {
+      const valuation = getValuation(card);
+
+      if (!valuation) {
+        const oddsInput = card.querySelector("[data-dh-bookmaker-odds]");
+        showToast({
+          title: "Cote bookmaker requise",
+          text: "Saisis une cote supérieure à 1.00 pour calculer la value avant de terminer l’analyse.",
+          tone: "warning",
+          icon: "!"
+        });
+        oddsInput?.focus();
+        return;
+      }
+
+      saveDrawHunterMatchWorkflow(matchId, {
+        bookmakerOdds: valuation.odds,
+        impliedProbability: valuation.impliedProbability,
+        value: valuation.value,
+        edge: valuation.edge,
+        decision: valuation.decision,
+        reason: valuation.reason
+      });
+    }
+
     const status = ({ start: "pending", continue: "pending", complete: "awaiting_result" })[kind];
     if (status) {
-      saveDrawHunterMatchWorkflow(matchId, { status, event: { type: status, label: status === "pending" ? "Analyse commencée" : "Analyse terminée · en attente du résultat" } });
-      location.reload();
+      saveDrawHunterMatchWorkflow(matchId, {
+        status,
+        event: {
+          type: status,
+          label: status === "pending"
+            ? "Analyse commencée"
+            : "Analyse terminée · en attente du résultat"
+        }
+      });
+
+      updateDrawHunterCardState(card, status);
+      applyView();
+
+      const remainingCards = cards.filter(candidate =>
+        candidate !== card &&
+        !candidate.hidden &&
+        ["new", "pending"].includes(String(candidate.dataset.workflowState || ""))
+      );
+
+      if (kind === "complete") {
+        showToast({
+          title: "Analyse enregistrée",
+          text: remainingCards.length > 0
+            ? `${remainingCards.length} analyse${remainingCards.length > 1 ? "s" : ""} DrawHunter restante${remainingCards.length > 1 ? "s" : ""}.`
+            : "Toutes les analyses DrawHunter sont terminées.",
+          tone: "success",
+          icon: "✓"
+        });
+
+        const nextCard = remainingCards[0];
+        if (nextCard) {
+          window.setTimeout(() => {
+            nextCard.scrollIntoView({ behavior: "smooth", block: "start" });
+            nextCard.focus({ preventScroll: true });
+          }, 80);
+        }
+      }
     }
   });
 

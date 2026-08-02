@@ -138,13 +138,27 @@ window.saveDrawHunterBet = function(index) {
     return;
   }
 
+  const bookmakerOdds = Number(
+    document.getElementById(`draw-odds-${match.id}`)?.value || 0
+  );
   const placed = document.getElementById(`draw-placed-${match.id}`)?.checked;
   const stake = Number(document.getElementById(`draw-stake-${match.id}`)?.value || 0);
+
+  if (!Number.isFinite(bookmakerOdds) || bookmakerOdds <= 1) {
+    alert("Saisis une cote bookmaker valide avant d’enregistrer.");
+    return;
+  }
 
   if (placed && stake <= 0) {
     alert("Saisis un montant misé valide.");
     return;
   }
+
+  const valuation = computeValue({
+    probability: match.probability,
+    odds: bookmakerOdds,
+    minValue: 0.01
+  });
 
   const saved = createBet({
   source: "DrawHunter",
@@ -157,17 +171,23 @@ window.saveDrawHunterBet = function(index) {
   match: `${match.home} vs ${match.away}`,
   market: "DRAW",
   line: null,
-  odds: match.odds,
+  odds: bookmakerOdds,
   probability: match.probability,
-  value: match.value,
-  edge: match.edge,
-  decision: match.decision,
+  value: valuation.value,
+  edge: valuation.edge,
+  decision: valuation.decision,
   placed,
   stake
 });
 
   saveDrawHunterMatchWorkflow(match.id, {
-    status: saved.placed ? "tracked" : (String(match.decision || "").toUpperCase().includes("VALUE") ? "value" : "decided"),
+    status: "awaiting_result",
+    bookmakerOdds,
+    impliedProbability: valuation.impliedProbability,
+    value: valuation.value,
+    edge: valuation.edge,
+    decision: valuation.decision,
+    reason: valuation.reason,
     placed: Boolean(saved.placed),
     stake: Number(saved.stake || 0),
     event: {

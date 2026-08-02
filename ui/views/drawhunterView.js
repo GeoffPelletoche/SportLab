@@ -1,4 +1,6 @@
 import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
+import { computeValue } from "../../core/engines/valueEngine.js";
+import { CONFIG } from "../../core/config/config.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow,
@@ -327,11 +329,32 @@ function renderEmpty(meta) {
 
 function renderMatchCard(match, index) {
   const storedWorkflow = getDrawHunterMatchWorkflow(match?.id);
-  const workflowState = deriveDrawHunterWorkflowState(match, storedWorkflow);
-  const state = getMatchState(match, workflowState);
-  const probability = toPercent(match?.probability);
-  const value = toPercent(match?.value);
-  const scoring = scoreAnalysis(match, "drawhunter");
+  const bookmakerOdds = toValidOdds(storedWorkflow?.bookmakerOdds);
+  const valuation = bookmakerOdds
+    ? computeValue({
+        probability: match?.probability,
+        odds: bookmakerOdds,
+        minValue: CONFIG.drawhunter.minValue
+      })
+    : {
+        impliedProbability: 0,
+        value: 0,
+        edge: 0,
+        decision: "À ANALYSER",
+        reason: "Saisis la cote proposée par ton bookmaker."
+      };
+
+  const analyzedMatch = {
+    ...match,
+    odds: bookmakerOdds,
+    ...valuation
+  };
+
+  const workflowState = deriveDrawHunterWorkflowState(analyzedMatch, storedWorkflow);
+  const state = getMatchState(analyzedMatch, workflowState);
+  const probability = toPercent(analyzedMatch?.probability);
+  const value = bookmakerOdds ? toPercent(analyzedMatch?.value) : "-";
+  const scoring = scoreAnalysis(analyzedMatch, "drawhunter");
   const confidence = scoring.confidence;
   const matchId = safeDomId(match?.id ?? index);
 
@@ -345,7 +368,8 @@ function renderMatchCard(match, index) {
       data-dh-search-text="${safe(`${match?.home || ""} ${match?.away || ""} ${match?.competition || ""}`.toLowerCase())}"
       data-dh-date="${safe(match?.date || "")}" 
       data-dh-probability="${Number(match?.probability) || 0}"
-      data-dh-value="${Number(match?.value) || 0}"
+      data-dh-value="${Number(analyzedMatch?.value) || 0}"
+      data-dh-probability-raw="${Number(analyzedMatch?.probability) || 0}"
       data-dh-competition="${safe(String(match?.competition || "").toLowerCase())}"
       tabindex="0"
     >
@@ -405,11 +429,33 @@ function renderMatchCard(match, index) {
         </div>
       </section>
 
+      <section class="dh-odds-entry" aria-label="Cote bookmaker">
+        <label for="draw-odds-${matchId}">
+          <span>Cote bookmaker du match nul</span>
+          <div class="dh-odds-entry__control">
+            <input
+              id="draw-odds-${matchId}"
+              type="number"
+              min="1.01"
+              step="0.01"
+              inputmode="decimal"
+              placeholder="Ex : 3.16"
+              value="${bookmakerOdds ? bookmakerOdds.toFixed(2) : ""}"
+              data-dh-bookmaker-odds
+              aria-describedby="draw-odds-help-${matchId}"
+            >
+          </div>
+          <small id="draw-odds-help-${matchId}">
+            Saisis la cote réelle proposée par ton bookmaker. La value est recalculée immédiatement.
+          </small>
+        </label>
+      </section>
+
       <div class="dh-card-kpis">
-        ${renderCardKpi("Cote saisie", formatOdds(match?.odds), "Marché nul")}
-        ${renderCardKpi("Value", `${value}%`, valueTone(match?.value))}
-        ${renderCardKpi("Score unifié", `${scoring.unifiedScore}/100`, "Qualité statistique")}
-        ${renderCardKpi("Décision", state.shortLabel, state.note)}
+        ${renderCardKpi("Cote bookmaker", bookmakerOdds ? formatOdds(bookmakerOdds) : "-", "Marché nul", "odds")}
+        ${renderCardKpi("Value", bookmakerOdds ? `${value}%` : "-", bookmakerOdds ? valueTone(analyzedMatch?.value) : "En attente de la cote", "value")}
+        ${renderCardKpi("Score unifié", `${scoring.unifiedScore}/100`, "Qualité statistique", "score")}
+        ${renderCardKpi("Décision", state.shortLabel, state.note, "decision")}
       </div>
 
       <div class="dh-card-timeline" aria-label="Étapes du match">
@@ -419,15 +465,17 @@ function renderMatchCard(match, index) {
         ${renderTimelineStep("Résultat", ["resulted","archived"].includes(workflowState))}
       </div>
 
-      ${renderAnalysisDetails(match, state, confidence)}
+      ${renderAnalysisDetails(analyzedMatch, state, confidence)}
       ${renderHistory(storedWorkflow, match)}
 
       <footer class="dh-match-card__footer">
         ${renderContextActions(workflowState)}
-        ${state.isValue
-          ? renderBetForm(index, matchId)
-          : renderNoBet(state)
-        }
+        <div data-dh-bet-container ${state.isValue ? "" : "hidden"}>
+          ${renderBetForm(index, matchId)}
+        </div>
+        <div data-dh-pass-container ${state.isValue ? "hidden" : ""}>
+          ${renderNoBet(state)}
+        </div>
       </footer>
     </article>
   `;
@@ -492,9 +540,9 @@ function renderHistory(workflow, match) {
   `;
 }
 
-function renderCardKpi(label, value, note) {
+function renderCardKpi(label, value, note, key = "") {
   return `
-    <div class="dh-card-kpi">
+    <div class="dh-card-kpi" ${key ? `data-dh-kpi="${key}"` : ""}>
       <span>${label}</span>
       <strong>${safe(value)}</strong>
       <small>${safe(note)}</small>
@@ -646,6 +694,11 @@ function getConfidence(match) {
 function toPercent(value) {
   const number = Number(value);
   return Number.isFinite(number) ? (number * 100).toFixed(1) : "0.0";
+}
+
+function toValidOdds(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 1 ? number : null;
 }
 
 function formatOdds(value) {

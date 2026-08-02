@@ -50,7 +50,7 @@ La page **Recovery** permet de comparer Local/Cloud, restaurer le cloud, sauvega
 
 SportLab inclut désormais un scoring commun DrawHunter/FrenchFlair, une confiance 0–100, une page de performances des modèles et une collecte passive versionnée pour préparer un futur apprentissage supervisé. Voir `docs/SPRINT7.2.0_UNIFIED_SCORING_MODEL_PERFORMANCE.md`.
 
-## SportLab V10.1.0
+## SportLab V10.1.1
 
 SportLab V8 utilise désormais un historique glissant multi-saisons de 30 matchs, pondéré selon l'ancienneté réelle des rencontres. Le même moteur temporel alimente FrenchFlair et DrawHunter. Voir `docs/SPORTLAB_V8_RECENCY_WEIGHTED_MULTI_SEASON.md`.
 
