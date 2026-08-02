@@ -63,3 +63,8 @@ Les analyses terminées passent automatiquement en attente du résultat. Après 
 ## V11.1 — Explainable AI DrawHunter
 
 DrawHunter explique désormais les principaux facteurs de sa probabilité de nul, sans modifier le modèle. FrenchFlair reste inchangé.
+
+
+## V11.2.0 — Passive Learning Engine
+
+SportLab enregistre désormais chaque prédiction évaluée dans un Learning Store synchronisé. Le moteur sépare la qualité de la prédiction de la qualité de la décision, consolide les statistiques par module, compétition et facteur, et affiche sa maturité dans les diagnostics. Il reste strictement passif : aucune prédiction ni aucun poids du modèle n’est modifié automatiquement.

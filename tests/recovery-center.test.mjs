@@ -41,7 +41,7 @@ test("Recovery Center compare Local et Cloud sans mutation", async () => {
   const recovery = manager(cloud);
   localStorage.setItem("sportlab_analyses_v1", JSON.stringify([{ id: 1 }]));
   const preview = await recovery.preview();
-  assert.equal(preview.comparison.changed, 7);
+  assert.equal(preview.comparison.changed, 8);
   assert.equal(preview.comparison.differences.find(item => item.key === "sportlab_analyses_v1").status, "different");
   assert.equal(JSON.parse(localStorage.getItem("sportlab_analyses_v1"))[0].id, 1);
 });

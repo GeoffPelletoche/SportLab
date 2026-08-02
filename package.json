@@ -1,11 +1,11 @@
 {
   "name": "sportlab-platform",
-  "version": "11.1.2",
+  "version": "11.2.0",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check core/scoring/scoringSchema.js && node --check core/scoring/confidenceEngine.js && node --check core/scoring/unifiedScoringEngine.js && node --check core/performance/calibrationEngine.js && node --check core/performance/modelPerformanceEngine.js && node --check core/performance/performanceRepository.js && node --check core/learning/modelVersioning.js && node --check core/learning/predictionSnapshot.js && node --check core/learning/learningDatasetBuilder.js && node --check core/sync/syncEngine.js && node --check core/sync/recoveryManager.js && node --check core/app/bootstrap.js && node --check core/app/router.js && node --check ui/views/modelPerformanceView.js && node --check ui/views/drawhunterView.js && node --check ui/interactions/drawHunterWorkflow.js && node --check ui/views/frenchflairView.js && node --check services/renderService.js && node --check legacyApp.js && node --check core/performance/predictionEvaluationEngine.js && node --check core/api/historyCache.js",
+    "check": "node --check core/scoring/scoringSchema.js && node --check core/scoring/confidenceEngine.js && node --check core/scoring/unifiedScoringEngine.js && node --check core/performance/calibrationEngine.js && node --check core/performance/modelPerformanceEngine.js && node --check core/performance/performanceRepository.js && node --check core/learning/modelVersioning.js && node --check core/learning/predictionSnapshot.js && node --check core/learning/learningDatasetBuilder.js && node --check core/learning/learningStore.js && node --check core/learning/passiveLearningEngine.js && node --check core/sync/syncEngine.js && node --check core/sync/recoveryManager.js && node --check core/app/bootstrap.js && node --check core/app/router.js && node --check ui/views/modelPerformanceView.js && node --check ui/views/drawhunterView.js && node --check ui/interactions/drawHunterWorkflow.js && node --check ui/views/frenchflairView.js && node --check services/renderService.js && node --check legacyApp.js && node --check core/performance/predictionEvaluationEngine.js && node --check core/api/historyCache.js",
     "validate": "npm run check && npm test"
   }
 }
