@@ -1,5 +1,4 @@
 import {
-  archiveFrenchFlairMatch,
   getFrenchFlairContext,
   saveFrenchFlairContext,
   saveFrenchFlairMatchWorkflow,
@@ -8,7 +7,7 @@ import {
 
 let activeScrollController = null;
 
-const STATUS_ORDER = ["new", "pending", "analyzed", "decided", "value", "tracked", "resulted", "archived"];
+const STATUS_ORDER = ["new", "pending", "awaiting_result", "resulted", "archived"];
 
 export function initFrenchFlairWorkflow() {
   activeScrollController?.abort();
@@ -94,7 +93,7 @@ export function initFrenchFlairWorkflow() {
     const label = card.querySelector("[data-ff-status-label]");
     if (label) label.textContent = statusLabel(nextState).toUpperCase();
     const note = card.querySelector(".ff-card-status span");
-    if (note) note.textContent = ({ new:"Rencontre nouvellement importée", pending:"Analyse en cours", analyzed:"Analyse terminée", decided:"Décision enregistrée", value:"VALUE détectée", tracked:"Pari enregistré", resulted:"Résultat disponible", archived:"Rencontre archivée" })[nextState] || "Workflow mis à jour";
+    if (note) note.textContent = ({ new:"Rencontre nouvellement importée", pending:"Analyse en cours", awaiting_result:"Analyse terminée · résultat attendu", resulted:"Prédiction évaluée", archived:"Présente dans l’historique" })[nextState] || "Workflow mis à jour";
   };
 
   root.addEventListener("click", event => {
@@ -115,17 +114,9 @@ export function initFrenchFlairWorkflow() {
       return;
     }
 
-    if (kind === "archive") {
-      if (!window.confirm("Archiver cette rencontre dans le workflow FrenchFlair ?")) return;
-      archiveFrenchFlairMatch(matchId);
-      updateCardState(card, "archived");
-      apply();
-      return;
-    }
-
-    const nextState = ({ start:"pending", continue:"pending", complete:"analyzed" })[kind];
+    const nextState = ({ start:"pending", continue:"pending", complete:"awaiting_result" })[kind];
     if (nextState) {
-      saveFrenchFlairMatchWorkflow(matchId, { status: nextState, event: { type:nextState, label:nextState === "pending" ? "Analyse commencée" : "Analyse terminée" } });
+      saveFrenchFlairMatchWorkflow(matchId, { status: nextState, event: { type:nextState, label:nextState === "pending" ? "Analyse commencée" : "Analyse terminée · en attente du résultat" } });
       updateCardState(card, nextState);
       apply();
     }

@@ -1,11 +1,10 @@
 import {
-  archiveDrawHunterMatch,
   getDrawHunterContext,
   saveDrawHunterContext,
   saveDrawHunterMatchWorkflow
 } from "../../core/stores/drawHunterWorkflowStore.js";
 
-const PRIORITY = { value: 0, pending: 1, new: 2, analyzed: 3, decided: 4, tracked: 5, resulted: 6, archived: 7 };
+const PRIORITY = { pending: 0, new: 1, awaiting_result: 2, resulted: 3, archived: 4 };
 
 export function initDrawHunterWorkflow() {
   const root = document.querySelector('[data-module="drawhunter"]');
@@ -93,19 +92,9 @@ export function initDrawHunterWorkflow() {
       return;
     }
 
-    if (kind === "archive") {
-      if (!confirm("Archiver cette rencontre dans le workflow DrawHunter ?")) return;
-      archiveDrawHunterMatch(matchId);
-      card.dataset.workflowState = "archived";
-      card.classList.add("dh-match-card--archived");
-      card.querySelector("[data-dh-status-label]").textContent = "ARCHIVÉ";
-      applyView();
-      return;
-    }
-
-    const status = ({ start: "pending", continue: "pending", complete: "analyzed" })[kind];
+    const status = ({ start: "pending", continue: "pending", complete: "awaiting_result" })[kind];
     if (status) {
-      saveDrawHunterMatchWorkflow(matchId, { status, event: { type: status, label: status === "pending" ? "Analyse commencée" : "Analyse terminée" } });
+      saveDrawHunterMatchWorkflow(matchId, { status, event: { type: status, label: status === "pending" ? "Analyse commencée" : "Analyse terminée · en attente du résultat" } });
       location.reload();
     }
   });
