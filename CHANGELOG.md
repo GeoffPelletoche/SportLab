@@ -1,3 +1,9 @@
+## V11.1.0 — Explainable AI DrawHunter
+
+- Explications du modèle uniquement dans DrawHunter.
+- Cinq facteurs interprétables, dont la comparaison cote bookmaker / cote juste.
+- Aucun changement du moteur de prédiction ou de FrenchFlair.
+
 # Changelog
 
 ## 10.1.2

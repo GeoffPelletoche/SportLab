@@ -1,4 +1,4 @@
-# SportLab
+# SportLab V11.1
 
 **Version : 7.1.2C — Cloud Dashboard** V7.1.2A — Sync Engine V2
 
@@ -58,3 +58,8 @@ SportLab V8 utilise désormais un historique glissant multi-saisons de 30 matchs
 ## V10 — Workflow automatique
 
 Les analyses terminées passent automatiquement en attente du résultat. Après récupération du score officiel, SportLab évalue la prédiction et la classe dans l’historique, y compris lorsqu’aucun pari n’a été placé.
+
+
+## V11.1 — Explainable AI DrawHunter
+
+DrawHunter explique désormais les principaux facteurs de sa probabilité de nul, sans modifier le modèle. FrenchFlair reste inchangé.

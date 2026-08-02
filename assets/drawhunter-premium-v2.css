@@ -1006,3 +1006,133 @@
     grid-template-columns: repeat(2,minmax(0,1fr));
   }
 }
+
+/* =========================================================
+   SPORTLAB V11.1 — EXPLAINABLE AI DRAWHUNTER
+   ========================================================= */
+.dh-explain {
+  margin: 0 20px 16px;
+  padding: 17px;
+  border: 1px solid rgba(79,140,255,.18);
+  border-radius: 16px;
+  background: linear-gradient(145deg,rgba(79,140,255,.075),rgba(255,255,255,.018));
+}
+
+.dh-explain__heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.dh-explain__heading h3 {
+  margin: 2px 0 0;
+  font-size: 1rem;
+}
+
+.dh-explain__fair-odds {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid rgba(79,140,255,.25);
+  border-radius: 999px;
+  background: rgba(79,140,255,.10);
+  color: #dbe7ff;
+  font-size: .68rem;
+  font-weight: 800;
+}
+
+.dh-explain__summary {
+  margin: 12px 0;
+  color: #d8e3f5;
+  font-size: .78rem;
+  line-height: 1.55;
+}
+
+.dh-explain__factors {
+  display: grid;
+  gap: 8px;
+}
+
+.dh-explain-factor {
+  padding: 11px 12px;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px;
+  background: rgba(7,13,25,.46);
+}
+
+.dh-explain-factor__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dh-explain-factor strong {
+  font-size: .75rem;
+}
+
+.dh-explain-factor p {
+  margin: 5px 0 0;
+  color: var(--dh-muted);
+  font-size: .67rem;
+  line-height: 1.48;
+}
+
+.dh-explain-stars {
+  flex: 0 0 auto;
+  color: #fbbf24;
+  font-size: .76rem;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+
+.dh-explain-factor--positive {
+  border-color: rgba(34,197,94,.20);
+}
+
+.dh-explain-factor--neutral {
+  border-color: rgba(79,140,255,.16);
+}
+
+.dh-explain-factor--caution {
+  border-color: rgba(245,158,11,.18);
+}
+
+.dh-explain-factor--pending {
+  border-style: dashed;
+  opacity: .86;
+}
+
+.dh-explain-factor--pending .dh-explain-stars {
+  color: var(--dh-muted);
+}
+
+.dh-explain__notice {
+  display: block;
+  margin-top: 12px;
+  color: var(--dh-muted);
+  font-size: .62rem;
+  line-height: 1.45;
+}
+
+.dh-explain--unavailable {
+  border-style: dashed;
+}
+
+@media (max-width: 620px) {
+  .dh-explain {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .dh-explain__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dh-explain-factor__top {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 5px;
+  }
+}
