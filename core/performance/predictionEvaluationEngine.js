@@ -1,6 +1,9 @@
 import { CONFIG } from "../config/config.js";
 import { readLearningDataset } from "../learning/learningDatasetBuilder.js";
 import { createPerformanceRepository } from "./performanceRepository.js";
+import { saveDrawHunterMatchWorkflow } from "../stores/drawHunterWorkflowStore.js";
+import { saveFrenchFlairMatchWorkflow } from "../stores/frenchFlairWorkflowStore.js";
+import { getAnalysisForMatch, saveAnalysis } from "../stores/analysisStore.js";
 
 const DATASET_KEY = "sportlab.v7.learning.dataset";
 
@@ -20,7 +23,9 @@ export async function evaluatePendingPredictions(storage = globalThis.localStora
       const game = await fetchResult(snapshot);
       if (!game?.isFinished) continue;
       const evaluation = evaluateSnapshot(snapshot, game);
-      Object.assign(snapshot, evaluation, { evaluatedAt: new Date().toISOString(), finalGame: game });
+      const evaluatedAt = new Date().toISOString();
+      Object.assign(snapshot, evaluation, { evaluatedAt, finalGame: game });
+      persistLifecycleEvaluation(snapshot, evaluation, game, evaluatedAt);
       const evaluationId = `${snapshot.id}:${snapshot.modelVersion}`;
       if (!recordKeys.has(evaluationId)) {
         records.push({
@@ -81,4 +86,56 @@ function evaluateSnapshot(snapshot, game) {
     predictionError:Number.isFinite(predicted) ? Math.abs(predicted-total) : null,
     decisionQuality: decision.includes("NO") ? (result === "LOST" ? "GOOD_PASS" : result === "WON" ? "MISSED_OPPORTUNITY" : "NEUTRAL_PASS") : (result === "WON" ? "GOOD_VALUE" : result === "LOST" ? "BAD_VALUE" : "PUSH")
   };
+}
+
+
+function persistLifecycleEvaluation(snapshot, evaluation, game, evaluatedAt) {
+  const saveWorkflow = snapshot.moduleId === "drawhunter"
+    ? saveDrawHunterMatchWorkflow
+    : saveFrenchFlairMatchWorkflow;
+
+  saveWorkflow(snapshot.matchId, {
+    status: "resulted",
+    evaluatedAt,
+    evaluation,
+    finalGame: game,
+    event: {
+      type: "resulted",
+      label: "Prédiction évaluée automatiquement",
+      note: decisionQualityLabel(evaluation.decisionQuality)
+    }
+  });
+
+  const analysis = getAnalysisForMatch(snapshot.matchId);
+  if (analysis) {
+    saveAnalysis({
+      ...analysis,
+      status: "resulted",
+      lifecycleStatus: "resulted",
+      evaluatedAt,
+      result: evaluation.result,
+      decisionQuality: evaluation.decisionQuality,
+      finalScore: formatFinalScore(game),
+      finalHomePoints: game.homePoints ?? game.homeGoals ?? null,
+      finalAwayPoints: game.awayPoints ?? game.awayGoals ?? null,
+      finalTotalPoints: game.totalPoints ?? null
+    });
+  }
+}
+
+function decisionQualityLabel(value) {
+  return ({
+    GOOD_PASS: "Bonne abstention : ne pas parier était justifié",
+    MISSED_OPPORTUNITY: "Opportunité manquée",
+    GOOD_VALUE: "Bonne sélection VALUE",
+    BAD_VALUE: "Sélection VALUE incorrecte",
+    NEUTRAL_PASS: "Décision neutre",
+    NOT_EVALUABLE: "Prédiction non évaluable"
+  })[value] || "Évaluation enregistrée";
+}
+
+function formatFinalScore(game = {}) {
+  const home = game.homePoints ?? game.homeGoals;
+  const away = game.awayPoints ?? game.awayGoals;
+  return Number.isFinite(Number(home)) && Number.isFinite(Number(away)) ? `${home}-${away}` : null;
 }

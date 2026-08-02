@@ -13,5 +13,12 @@ function summarize(moduleId, items) {
   const profit = settled.reduce((sum, item) => sum + (Number(item.profit ?? item.netProfit ?? item.pnl) || 0), 0);
   const roi = stakes > 0 ? profit / stakes * 100 : 0;
   const calibrationRecords = settled.map(item => ({ probability: Number(item.probability ?? item.modelProbability ?? item.drawProbability ?? item.overProbability), won: item.won }));
-  return { moduleId, predictions: items.length, evaluated: settled.length, wins, hitRate: settled.length ? wins / settled.length * 100 : 0, stakes, profit, roi, calibration: buildCalibration(calibrationRecords) };
+  const goodPasses = items.filter(item => item.decisionQuality === "GOOD_PASS").length;
+  const missedOpportunities = items.filter(item => item.decisionQuality === "MISSED_OPPORTUNITY").length;
+  const goodValues = items.filter(item => item.decisionQuality === "GOOD_VALUE").length;
+  const badValues = items.filter(item => item.decisionQuality === "BAD_VALUE").length;
+  const decisionsEvaluated = goodPasses + missedOpportunities + goodValues + badValues;
+  const goodDecisions = goodPasses + goodValues;
+  const decisionScore = decisionsEvaluated ? goodDecisions / decisionsEvaluated * 100 : 0;
+  return { moduleId, predictions: items.length, evaluated: settled.length, wins, hitRate: settled.length ? wins / settled.length * 100 : 0, stakes, profit, roi, calibration: buildCalibration(calibrationRecords), goodPasses, missedOpportunities, goodValues, badValues, decisionsEvaluated, decisionScore };
 }
