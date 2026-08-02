@@ -1,3 +1,13 @@
+# Changelog
+
+## 10.1.0
+
+- Stabilisation du pipeline DrawHunter.
+- Détection automatique de la saison football dans le Worker 3.10.0.
+- Distinction entre compétition sans match et erreur API.
+- Diagnostic détaillé par compétition avec code HTTP et cause probable.
+- Cache court pour les périodes sans rencontre.
+
 # 10.0.0
 
 - Cycle automatique des analyses : nouvelle, à analyser, attente du résultat, évaluée, historique.

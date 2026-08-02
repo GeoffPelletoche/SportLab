@@ -54,6 +54,7 @@ function buildModuleDiagnostic(payload) {
     errorMessage: meta.errorMessage || null,
     competitions: Number(meta.competitions || 0),
     syncOk: syncLog.filter(item => item?.status === "OK").length,
+    syncEmpty: syncLog.filter(item => item?.status === "EMPTY").length,
     syncErrors: syncLog.filter(item => item?.status === "ERROR").length,
     syncLog,
     history: {
