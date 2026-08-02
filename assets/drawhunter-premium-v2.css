@@ -936,3 +936,73 @@
 .dh-match-card:focus-visible{outline:2px solid var(--dh-accent);outline-offset:3px}.dh-density--compact .dh-matchup{padding-top:13px;padding-bottom:13px}.dh-density--compact .dh-model-focus{padding-top:12px;padding-bottom:12px}.dh-density--compact .dh-card-kpis,.dh-density--compact .dh-card-timeline{display:none}.dh-density--compact .dh-match-grid{gap:10px}.dh-density--compact .dh-match-card__footer{padding-top:12px}
 @media(max-width:900px){.dh-toolbar{grid-template-columns:1fr 1fr}.dh-density{grid-column:1/-1}.dh-details__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.dh-toolbar{grid-template-columns:1fr}.dh-density{grid-column:auto}.dh-details{margin-left:16px;margin-right:16px}.dh-details__grid{grid-template-columns:1fr 1fr}.dh-context-actions{grid-template-columns:1fr 1fr}.dh-context-actions .sl-button:first-child{grid-column:1/-1}}
+
+/* =========================================================
+   SPORTLAB V10.1.2 — COTE BOOKMAKER MANUELLE
+   ========================================================= */
+.dh-odds-entry {
+  padding: 16px 20px 0;
+}
+
+.dh-odds-entry label {
+  display: grid;
+  gap: 7px;
+  padding: 14px;
+  border: 1px solid rgba(79,140,255,.28);
+  border-radius: 14px;
+  background: rgba(79,140,255,.07);
+}
+
+.dh-odds-entry label > span {
+  font-size: .78rem;
+  font-weight: 800;
+  color: #dce8ff;
+}
+
+.dh-odds-entry__control {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 12px;
+  background: rgba(7,13,25,.78);
+}
+
+.dh-odds-entry input {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 12px;
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: transparent;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.dh-odds-entry input:focus {
+  box-shadow: inset 0 0 0 2px rgba(79,140,255,.7);
+}
+
+.dh-odds-entry small {
+  color: var(--dh-muted);
+  font-size: .68rem;
+  line-height: 1.45;
+}
+
+.dh-card-kpis {
+  grid-template-columns: repeat(4,minmax(0,1fr));
+}
+
+[data-dh-bet-container][hidden],
+[data-dh-pass-container][hidden] {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .dh-card-kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+}
