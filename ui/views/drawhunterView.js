@@ -414,9 +414,9 @@ function renderMatchCard(match, index) {
 
       <div class="dh-card-timeline" aria-label="Étapes du match">
         ${renderTimelineStep("Importé", true)}
-        ${renderTimelineStep("Analysé", ["analyzed","decided","value","tracked","resulted","archived"].includes(workflowState))}
-        ${renderTimelineStep("Décidé", ["decided","value","tracked","resulted","archived"].includes(workflowState))}
-        ${renderTimelineStep("Suivi", ["tracked","resulted","archived"].includes(workflowState))}
+        ${renderTimelineStep("Analysé", ["awaiting_result","resulted","archived"].includes(workflowState))}
+        ${renderTimelineStep("Décidé", ["awaiting_result","resulted","archived"].includes(workflowState))}
+        ${renderTimelineStep("Résultat", ["resulted","archived"].includes(workflowState))}
       </div>
 
       ${renderAnalysisDetails(match, state, confidence)}
@@ -454,16 +454,13 @@ function renderContextActions(workflowState) {
     ? ["start", "Commencer"]
     : workflowState === "pending"
       ? ["complete", "Terminer l’analyse"]
-      : ["history", "Voir l’historique"];
+      : ["history", workflowState === "resulted" ? "Voir l’évaluation" : "Voir l’historique"];
 
   return `
     <div class="dh-context-actions">
-      <button type="button" class="sl-button sl-button-secondary" data-dh-action="${primary[0]}">
-        ${primary[1]}
-      </button>
+      <button type="button" class="sl-button sl-button-secondary" data-dh-action="${primary[0]}">${primary[1]}</button>
       <button type="button" class="sl-button sl-button-ghost" data-dh-action="details" aria-expanded="false">Détails</button>
       ${primary[0] !== "history" ? `<button type="button" class="sl-button sl-button-ghost" data-dh-action="history" aria-expanded="false">Historique</button>` : ""}
-      ${workflowState !== "archived" ? `<button type="button" class="sl-button sl-button-ghost" data-dh-action="archive">Archiver</button>` : ""}
     </div>
   `;
 }

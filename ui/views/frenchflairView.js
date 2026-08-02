@@ -306,26 +306,25 @@ function renderMatchCard(match, index) {
 }
 
 function renderWorkflowTimeline(state) {
-  const order = ["new","pending","analyzed","decided","value","tracked","resulted","archived"];
+  const order = ["new","pending","awaiting_result","resulted","archived"];
   const index = order.indexOf(state);
   const done = key => index >= order.indexOf(key);
   return `<div class="ff-workflow-timeline" aria-label="Progression de l’analyse">
     <span class="${done("pending") ? "is-done" : ""}">Ouvert</span>
-    <i></i><span class="${done("analyzed") ? "is-done" : ""}">Analysé</span>
-    <i></i><span class="${done("decided") ? "is-done" : ""}">Décidé</span>
-    <i></i><span class="${done("tracked") ? "is-done" : ""}">Suivi</span>
+    <i></i><span class="${done("awaiting_result") ? "is-done" : ""}">Terminé</span>
+    <i></i><span class="${done("awaiting_result") ? "is-done" : ""}">En attente</span>
+    <i></i><span class="${done("resulted") ? "is-done" : ""}">Évalué</span>
   </div>`;
 }
 
 function renderWorkflowActions(state, id, predictionAvailable) {
-  const primary = state === "new" ? ["start","Commencer"] : state === "pending" ? ["continue","Continuer"] : ["history","Historique"];
+  const primary = state === "new" ? ["start","Commencer"] : state === "pending" ? ["continue","Continuer"] : ["history", state === "resulted" ? "Voir l’évaluation" : "Historique"];
   return `<div class="ff-workflow-actions__buttons">
-    ${predictionAvailable ? `<button type="button" class="sl-button sl-button-primary ff-analyse-button" onclick="analyzeFrenchFlairValue('${id}')"><span>Analyser la VALUE</span><span aria-hidden="true">→</span></button>` : ""}
+    ${predictionAvailable && ["new","pending"].includes(state) ? `<button type="button" class="sl-button sl-button-primary ff-analyse-button" onclick="analyzeFrenchFlairValue('${id}')"><span>Analyser la VALUE</span><span aria-hidden="true">→</span></button>` : ""}
     <button type="button" class="sl-button sl-button-secondary" data-ff-action="${primary[0]}">${primary[1]}</button>
-    ${state === "pending" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="complete">Terminer</button>` : ""}
+    ${state === "pending" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="complete">Terminer l’analyse</button>` : ""}
     <button type="button" class="sl-button sl-button-ghost" data-ff-action="details" aria-expanded="false">Détails</button>
     ${primary[0] !== "history" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="history" aria-expanded="false">Historique</button>` : ""}
-    ${state !== "archived" ? `<button type="button" class="sl-button sl-button-ghost" data-ff-action="archive">Archiver</button>` : ""}
   </div>`;
 }
 
@@ -336,7 +335,7 @@ function renderWorkflowHistory(workflow, match) {
 }
 
 function workflowStatusNote(state) {
-  return ({ new:"Rencontre nouvellement importée", pending:"Analyse en cours", analyzed:"Analyse terminée", decided:"Décision enregistrée", value:"VALUE détectée", tracked:"Pari enregistré", resulted:"Résultat disponible", archived:"Rencontre archivée" })[state] || "Ligne et cote à renseigner";
+  return ({ new:"Rencontre nouvellement importée", pending:"Analyse en cours", awaiting_result:"Analyse terminée · résultat attendu", resulted:"Prédiction évaluée", archived:"Présente dans l’historique" })[state] || "Ligne et cote à renseigner";
 }
 
 function renderMetric(label, value, note) {
