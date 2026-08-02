@@ -45,12 +45,17 @@ export async function fetchUpcomingFootballFixtures() {
         }
       );
       allFixtures.push(...enrichedFixtures);
+      const status = enrichedFixtures.length > 0 ? "OK" : "EMPTY";
       syncLog.push({
         competition: competition.name,
         leagueId: competition.id,
-        status: "OK",
+        status,
         source: data?.source || "unknown",
-        count: enrichedFixtures.length
+        count: enrichedFixtures.length,
+        season: data?.season ?? null,
+        message: status === "EMPTY"
+          ? "Aucune rencontre dans la fenêtre d’analyse."
+          : null
       });
     } catch (error) {
       syncLog.push({
@@ -59,7 +64,10 @@ export async function fetchUpcomingFootballFixtures() {
         status: "ERROR",
         source: "api",
         count: 0,
-        message: error.message
+        message: error.message,
+        code: error?.code || null,
+        httpStatus: error?.status || null,
+        detail: classifyFootballError(error)
       });
     }
   }
@@ -176,4 +184,26 @@ function normalizeTeamName(value) {
     .replace(/\b(rugby|football|club|union|team)\b/g, " ")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+
+function classifyFootballError(error) {
+  const status = Number(error?.status || 0);
+  const message = String(error?.message || "");
+  if (status === 401 || /key|token|unauthor/i.test(message)) {
+    return "Clé API Football refusée ou absente.";
+  }
+  if (status === 403 || /plan|subscription|access/i.test(message)) {
+    return "Abonnement API Football insuffisant pour cette ressource.";
+  }
+  if (status === 429 || /rate|quota|limit/i.test(message)) {
+    return "Quota ou limite de requêtes API Football atteint.";
+  }
+  if (/season/i.test(message)) {
+    return "Saison football introuvable ou non transmise.";
+  }
+  if (/abort|timeout/i.test(message)) {
+    return "Délai de réponse dépassé.";
+  }
+  return "Échec de la récupération des rencontres football.";
 }

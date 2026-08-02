@@ -23,7 +23,14 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
       });
       let payload = null;
       try { payload = await response.json(); } catch { throw new Error(`INVALID_JSON_${response.status}`); }
-      if (!response.ok) throw new Error(payload?.message || payload?.error || `API_ERROR_${response.status}`);
+      if (!response.ok) {
+        const error = new Error(payload?.message || payload?.error || `API_ERROR_${response.status}`);
+        error.status = response.status;
+        error.code = payload?.error || `API_ERROR_${response.status}`;
+        error.payload = payload;
+        error.url = url.toString();
+        throw error;
+      }
       return payload;
     } catch (error) {
       lastError = error;
