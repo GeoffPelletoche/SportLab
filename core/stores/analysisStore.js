@@ -40,6 +40,11 @@ export function saveAnalysis(analysis) {
     stake: Number(analysis.stake || 0),
 
     status: analysis.status || "draft",
+    lifecycleStatus: analysis.lifecycleStatus || analysis.status || "draft",
+    completedAt: analysis.completedAt || null,
+    evaluatedAt: analysis.evaluatedAt || null,
+    decisionQuality: analysis.decisionQuality || null,
+    finalScore: analysis.finalScore || null,
     result: analysis.result || "PENDING",
     notes: analysis.notes || "",
 

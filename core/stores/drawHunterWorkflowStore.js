@@ -46,13 +46,7 @@ export function saveDrawHunterMatchWorkflow(matchId, patch = {}) {
   return next;
 }
 
-export function archiveDrawHunterMatch(matchId) {
-  return saveDrawHunterMatchWorkflow(matchId, {
-    status: "archived",
-    archived: true,
-    event: { type: "archived", label: "Match archivé" }
-  });
-}
+
 
 export function getDrawHunterContext() {
   try {
@@ -70,29 +64,24 @@ export function saveDrawHunterContext(patch = {}) {
 
 export function deriveDrawHunterWorkflowState(match, stored = null) {
   if (stored?.status) return normalizeStatus(stored.status);
-  const decision = String(match?.decision || "").toUpperCase();
-  if (decision.includes("VALUE")) return "value";
-  if (decision && !decision.includes("ANALYS")) return "decided";
-  if (Number.isFinite(Number(match?.probability))) return "analyzed";
-  return "new";
+  if (match?.evaluatedAt || match?.result && match.result !== "PENDING") return "resulted";
+  return Number.isFinite(Number(match?.probability)) ? "pending" : "new";
 }
 
 export function statusLabel(status) {
-  return ({
-    new: "Nouveau",
-    pending: "À analyser",
-    analyzed: "Analyse terminée",
-    decided: "Décision prise",
-    value: "VALUE",
-    tracked: "Pari enregistré",
-    resulted: "Résultat",
-    archived: "Archivé"
-  })[normalizeStatus(status)] || "Nouveau";
+  return ({ new: "Nouveau", pending: "À analyser", awaiting_result: "En attente du résultat", resulted: "Évaluée", archived: "Historique" })[normalizeStatus(status)] || "Nouveau";
 }
 
 function normalizeStatus(status) {
-  const allowed = ["new", "pending", "analyzed", "decided", "value", "tracked", "resulted", "archived"];
-  const normalized = String(status || "new").toLowerCase();
+  const raw = String(status || "new").toLowerCase();
+  const legacy = {
+    analyzed: "awaiting_result",
+    decided: "awaiting_result",
+    value: "awaiting_result",
+    tracked: "awaiting_result"
+  };
+  const normalized = legacy[raw] || raw;
+  const allowed = ["new", "pending", "awaiting_result", "resulted", "archived"];
   return allowed.includes(normalized) ? normalized : "new";
 }
 
