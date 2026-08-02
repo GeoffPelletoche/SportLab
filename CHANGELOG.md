@@ -1,3 +1,12 @@
+# 10.0.0
+
+- Cycle automatique des analyses : nouvelle, à analyser, attente du résultat, évaluée, historique.
+- Suppression de l’action manuelle Archiver.
+- Évaluation automatique de toutes les prédictions, y compris NO VALUE sans pari.
+- Bonnes abstentions et opportunités manquées.
+- Indice de décision sur 100 dans les performances.
+- Migration transparente des anciens statuts.
+
 # Changelog
 
 ## 9.0.0
