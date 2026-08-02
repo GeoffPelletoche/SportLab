@@ -38,6 +38,7 @@ import { renderModelPerformance } from "../ui/views/modelPerformanceView.js";
 import { createPerformanceRepository } from "../core/performance/performanceRepository.js";
 import { buildModelPerformance } from "../core/performance/modelPerformanceEngine.js";
 import { capturePredictionDataset } from "../core/learning/learningDatasetBuilder.js";
+import { buildLearningSummary, getLearningRecords } from "../core/learning/learningStore.js";
 
 /**
  * SPORTLAB V6.3.1
@@ -101,7 +102,8 @@ export function renderApplication(app, data = {}) {
       settlement: data.diagnostic,
       drawhunterMeta: data.drawhunterPayload?.meta || {},
       frenchflairMeta: data.frenchflairPayload?.meta || {},
-      learningDataset
+      learningDataset,
+      learningSummary: buildLearningSummary(getLearningRecords())
     });
 
   const cloudState = window.SportLabCore?.cloud?.status?.() || {};

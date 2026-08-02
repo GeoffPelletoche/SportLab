@@ -71,7 +71,8 @@ export function renderDiagnostics({
   settlement = null,
   drawhunterMeta = {},
   frenchflairMeta = {},
-  learningDataset = []
+  learningDataset = [],
+  learningSummary = {}
 } = {}) {
   const evaluated = learningDataset.filter(item => item?.evaluatedAt).length;
   const pending = learningDataset.filter(item => !item?.evaluatedAt).length;
@@ -80,7 +81,7 @@ export function renderDiagnostics({
   return `
     <section class="diagnostics-page sl-page sl-stack">
       <header class="sl-panel">
-        <span class="sl-label">SportLab V10.1</span>
+        <span class="sl-label">SportLab V11.2</span>
         <h1>Diagnostics opérationnels</h1>
         <p>Chaque compétition est maintenant distinguée entre fonctionnement normal, période sans match et véritable erreur API.</p>
       </header>
@@ -96,6 +97,18 @@ export function renderDiagnostics({
         <p>Prédictions évaluées : <strong>${n(evaluated)}</strong></p>
         <p>Prédictions en attente : <strong>${n(pending)}</strong></p>
         <p>Cette évaluation inclut les décisions NO VALUE et les rencontres sans pari placé.</p>
+      </article>
+
+      <article class="sl-panel">
+        <h2>🧠 Passive Learning Engine</h2>
+        <p>État : <strong>Actif — observation uniquement</strong></p>
+        <p>Exemples enregistrés : <strong>${n(learningSummary.total)}</strong></p>
+        <p>Exemples évalués : <strong>${n(learningSummary.evaluated)}</strong></p>
+        <p>Précision des prédictions : <strong>${Number(learningSummary.predictionAccuracy || 0).toFixed(1)}%</strong></p>
+        <p>Qualité des décisions : <strong>${Number(learningSummary.decisionAccuracy || 0).toFixed(1)}%</strong></p>
+        <p>Niveau de maturité : <strong>${escapeHtml(learningSummary.maturity?.label || "Observation")}</strong></p>
+        <p class="sl-muted">${escapeHtml(learningSummary.maturity?.message || "Le moteur collecte les résultats sans modifier les prédictions.")}</p>
+        <p><strong>Aucun changement automatique du modèle n’est autorisé.</strong></p>
       </article>
 
       <article class="sl-panel">
