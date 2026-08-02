@@ -223,3 +223,10 @@
 - probabilité de nul DrawHunter issue des données réelles ;
 - Worker API Bridge 3.8.0 ;
 - tests V8 dédiés.
+
+
+## 9.0.2
+- Correction complète de la compatibilité frontend/Worker des historiques rugby et football.
+- Limitation de concurrence des appels historiques.
+- Recherche par identifiant ou nom et décodage HTML.
+- Worker 3.9.3 aligné dans le dépôt.
