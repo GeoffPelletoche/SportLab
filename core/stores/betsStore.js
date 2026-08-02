@@ -1,17 +1,40 @@
-const STORAGE_KEY = "sportlab_bets_v3";
+export const BETS_STORAGE_KEY = "sportlab_bets_v3";
+const STORAGE_KEY = BETS_STORAGE_KEY;
+const LEGACY_STORAGE_KEYS = ["sportlab_bets", "sportlab_bets_v1", "sportlab_bets_v2", "bets_v3"];
 
 /**
  * Lit tous les paris enregistrés.
  */
 export function getBets() {
   try {
-    const storedBets = JSON.parse(
+    const canonical = parseBetArray(
       localStorage.getItem(STORAGE_KEY)
     );
 
-    return Array.isArray(storedBets)
-      ? storedBets
-      : [];
+    const legacy = LEGACY_STORAGE_KEYS.flatMap(key =>
+      parseBetArray(localStorage.getItem(key))
+    );
+
+    const merged = deduplicateBets([
+      ...canonical,
+      ...legacy
+    ]).map(normalizeStoredBet);
+
+    /*
+     * Une seule source de vérité : toute donnée historique encore
+     * présente sous une ancienne clé est consolidée dans bets_v3.
+     */
+    if (
+      legacy.length > 0 ||
+      merged.length !== canonical.length
+    ) {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(merged)
+      );
+    }
+
+    return merged;
   } catch (error) {
     console.error(
       "[BetsStore] Impossible de lire les paris :",
@@ -61,6 +84,7 @@ export function saveBet(bet) {
   const cleanBet = {
     id: crypto.randomUUID(),
 
+    analysisId: bet.analysisId || null,
     source: bet.source || null,
     sport: bet.sport || null,
     competition: bet.competition || null,
@@ -94,7 +118,21 @@ export function saveBet(bet) {
     finalTotalPoints: null
   };
 
-  bets.push(cleanBet);
+  const existingIndex = bets.findIndex(item =>
+    isSameBetIdentity(item, cleanBet) &&
+    normalizeResult(item?.result) === "PENDING"
+  );
+
+  if (existingIndex >= 0) {
+    cleanBet.id = bets[existingIndex].id;
+    cleanBet.createdAt = bets[existingIndex].createdAt || cleanBet.createdAt;
+    bets[existingIndex] = {
+      ...bets[existingIndex],
+      ...cleanBet
+    };
+  } else {
+    bets.push(cleanBet);
+  }
 
   const saved = saveBets(bets);
 
@@ -290,6 +328,106 @@ export function clearBets() {
   dispatchBetsUpdated({
     type: "BETS_CLEARED"
   });
+}
+
+export function getBetStoreHealth() {
+  const bets = getBets();
+  const placed = bets.filter(bet => bet?.placed === true);
+  const pending = placed.filter(
+    bet => normalizeResult(bet?.result) === "PENDING"
+  );
+
+  return {
+    storageKey: STORAGE_KEY,
+    entries: bets.length,
+    placed: placed.length,
+    pending: pending.length,
+    pendingStake: pending.reduce(
+      (total, bet) => total + Math.max(Number(bet?.stake) || 0, 0),
+      0
+    ),
+    duplicates: countDuplicateBets(bets),
+    integrity: countDuplicateBets(bets) === 0 ? "OK" : "WARNING"
+  };
+}
+
+function parseBetArray(raw) {
+  if (!raw) return [];
+  try {
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeStoredBet(bet = {}) {
+  const placed = bet?.placed === true;
+  return {
+    ...bet,
+    id: bet.id || globalThis.crypto?.randomUUID?.() || `bet-${Date.now()}-${Math.random()}`,
+    analysisId: bet.analysisId || null,
+    matchId: bet.matchId ?? null,
+    placed,
+    stake: Number(bet.stake || 0),
+    odds: Number(bet.odds || 0),
+    probability: Number(bet.probability || 0),
+    value: Number(bet.value || 0),
+    edge: Number(bet.edge || 0),
+    result: normalizeResult(bet.result) || (placed ? "PENDING" : "NON_PLACED")
+  };
+}
+
+function normalizeResult(value) {
+  return String(value || "").trim().toUpperCase();
+}
+
+function betIdentity(bet = {}) {
+  return [
+    String(bet.source || "").toLowerCase(),
+    String(bet.matchId ?? ""),
+    String(bet.market || "").toLowerCase(),
+    String(bet.line ?? "")
+  ].join("|");
+}
+
+function isSameBetIdentity(first, second) {
+  const firstIdentity = betIdentity(first);
+  return firstIdentity !== "|||" && firstIdentity === betIdentity(second);
+}
+
+function deduplicateBets(bets) {
+  const byId = new Map();
+  const anonymous = [];
+
+  bets.forEach(bet => {
+    if (!bet || typeof bet !== "object") return;
+    if (bet.id) {
+      const previous = byId.get(String(bet.id));
+      if (!previous || Number(bet.updatedAt || bet.createdAt || 0) >= Number(previous.updatedAt || previous.createdAt || 0)) {
+        byId.set(String(bet.id), bet);
+      }
+    } else {
+      anonymous.push(bet);
+    }
+  });
+
+  const result = [...byId.values()];
+  anonymous.forEach(bet => {
+    if (!result.some(existing => isSameBetIdentity(existing, bet))) result.push(bet);
+  });
+  return result;
+}
+
+function countDuplicateBets(bets) {
+  const seen = new Set();
+  let duplicates = 0;
+  bets.forEach(bet => {
+    const key = bet.id ? `id:${bet.id}` : `identity:${betIdentity(bet)}`;
+    if (seen.has(key)) duplicates += 1;
+    else seen.add(key);
+  });
+  return duplicates;
 }
 
 function toNullableNumber(value) {
