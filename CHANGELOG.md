@@ -271,3 +271,7 @@
 - Limitation de concurrence des appels historiques.
 - Recherche par identifiant ou nom et décodage HTML.
 - Worker 3.9.3 aligné dans le dépôt.
+
+## V11.1.1 — Correctif Explainable AI DrawHunter
+- Le bloc d’explication utilise les indicateurs déjà calculés et ne dépend plus uniquement de predictionStatus.
+- Aucun appel API supplémentaire.
