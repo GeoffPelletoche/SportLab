@@ -68,3 +68,8 @@ DrawHunter explique désormais les principaux facteurs de sa probabilité de nul
 ## V11.2.0 — Passive Learning Engine
 
 SportLab enregistre désormais chaque prédiction évaluée dans un Learning Store synchronisé. Le moteur sépare la qualité de la prédiction de la qualité de la décision, consolide les statistiques par module, compétition et facteur, et affiche sa maturité dans les diagnostics. Il reste strictement passif : aucune prédiction ni aucun poids du modèle n’est modifié automatiquement.
+
+
+## V11.2.1 — Team Branding
+
+Les cartes DrawHunter et FrenchFlair affichent désormais les logos officiels API-Sports à gauche ou à droite du nom des équipes. Les images sont chargées paresseusement, mises en cache par le navigateur et masquées proprement si un logo n’est pas disponible. Aucun appel API supplémentaire ni changement du Worker n’est requis.
