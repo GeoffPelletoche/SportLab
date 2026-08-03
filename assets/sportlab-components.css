@@ -525,3 +525,52 @@ SPORTLAB UI — RESPONSIVE
     animation:none;
   }
 }
+
+/* =========================================================
+   SPORTLAB V11.2.1 — TEAM BRANDING
+   ========================================================= */
+.sl-team-logo {
+  width: 28px;
+  height: 28px;
+  max-width: 28px;
+  flex: 0 0 28px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .28));
+}
+
+.dh-team__identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dh-team__identity--away {
+  justify-content: flex-end;
+}
+
+.dh-team__identity strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.ff-team-logo {
+  width: 26px;
+  height: 26px;
+  max-width: 26px;
+  flex-basis: 26px;
+}
+
+@media (max-width: 520px) {
+  .sl-team-logo {
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    flex-basis: 24px;
+  }
+
+  .dh-team__identity {
+    gap: 7px;
+  }
+}

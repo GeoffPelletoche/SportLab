@@ -224,3 +224,10 @@
 - probabilité de nul DrawHunter issue des données réelles ;
 - Worker API Bridge 3.8.0 ;
 - tests V8 dédiés.
+
+
+## 11.2.1 — Team Branding
+- Logos officiels API-Sports pour les équipes de football et de rugby.
+- Intégration responsive dans les cartes DrawHunter et FrenchFlair.
+- Chargement différé et fallback silencieux si une image manque.
+- Aucun changement du moteur de prédiction ni du Worker.
