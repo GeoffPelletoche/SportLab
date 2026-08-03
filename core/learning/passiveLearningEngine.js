@@ -30,6 +30,7 @@ export function recordPassiveLearning(snapshot, evaluation, game, evaluatedAt, s
     result: evaluation.result,
     decisionQuality,
     predictionCorrect,
+    eventOccurred: inferEventOccurred(snapshot, evaluation),
     decisionCorrect,
     predictionError: evaluation.predictionError ?? null,
     finalScore: formatFinalScore(game),
@@ -46,6 +47,21 @@ function normalizeFactors(factors) {
     tone: factor.tone || null,
     stars: Number(factor.stars || 0)
   }));
+}
+function inferEventOccurred(snapshot = {}, evaluation = {}) {
+  if (typeof evaluation.eventOccurred === "boolean") return evaluation.eventOccurred;
+  const result = String(evaluation.result || "").toUpperCase();
+  if (["PUSH", "VOID", "NOT_EVALUABLE"].includes(result)) return null;
+  if (snapshot.moduleId === "drawhunter") {
+    const predictedDraw = Number(snapshot.probability || 0) >= 0.30;
+    if (result === "WON") return predictedDraw;
+    if (result === "LOST") return !predictedDraw;
+  }
+  if (snapshot.moduleId === "frenchflair") {
+    if (result === "WON") return true;
+    if (result === "LOST") return false;
+  }
+  return null;
 }
 function formatFinalScore(game = {}) {
   const home = game.homePoints ?? game.homeGoals;

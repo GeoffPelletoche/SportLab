@@ -74,6 +74,7 @@ function evaluateSnapshot(snapshot, game) {
     const won = predictedDraw === actualDraw;
     return {
       result: won ? "WON" : "LOST",
+      eventOccurred: actualDraw,
       decisionQuality: decision.includes("NO") ? (actualDraw ? "MISSED_OPPORTUNITY" : "GOOD_PASS") : (actualDraw ? "GOOD_VALUE" : "BAD_VALUE")
     };
   }
@@ -85,6 +86,7 @@ function evaluateSnapshot(snapshot, game) {
   const predicted = Number(snapshot.features?.predictedTotalPoints);
   return {
     result,
+    eventOccurred: result === "PUSH" ? null : result === "WON",
     predictionError:Number.isFinite(predicted) ? Math.abs(predicted-total) : null,
     decisionQuality: decision.includes("NO") ? (result === "LOST" ? "GOOD_PASS" : result === "WON" ? "MISSED_OPPORTUNITY" : "NEUTRAL_PASS") : (result === "WON" ? "GOOD_VALUE" : result === "LOST" ? "BAD_VALUE" : "PUSH")
   };

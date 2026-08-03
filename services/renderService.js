@@ -39,6 +39,8 @@ import { createPerformanceRepository } from "../core/performance/performanceRepo
 import { buildModelPerformance } from "../core/performance/modelPerformanceEngine.js";
 import { capturePredictionDataset } from "../core/learning/learningDatasetBuilder.js";
 import { buildLearningSummary, getLearningRecords } from "../core/learning/learningStore.js";
+import { buildCalibrationDashboard } from "../core/calibration/calibrationEngine.js";
+import { renderCalibration } from "../ui/views/calibrationView.js";
 
 /**
  * SPORTLAB V6.3.1
@@ -59,6 +61,10 @@ export function renderApplication(app, data = {}) {
     frenchflair: data.frenchflairPayload?.matches || [],
     analyses: data.analyses || []
   });
+  const learningRecords = getLearningRecords();
+  const calibrationDashboard = buildCalibrationDashboard(learningRecords);
+  const calibrationHtml = renderCalibration(calibrationDashboard);
+
   const performanceRepository = createPerformanceRepository();
   const modelPerformanceHtml = renderModelPerformance({
     performance: buildModelPerformance(performanceRepository.collectFromStorage()),
@@ -110,7 +116,8 @@ export function renderApplication(app, data = {}) {
       drawhunterMeta: data.drawhunterPayload?.meta || {},
       frenchflairMeta: data.frenchflairPayload?.meta || {},
       learningDataset,
-      learningSummary: buildLearningSummary(getLearningRecords())
+      learningSummary: buildLearningSummary(learningRecords),
+      calibration: calibrationDashboard
     });
 
   const cloudState = window.SportLabCore?.cloud?.status?.() || {};
@@ -135,6 +142,7 @@ export function renderApplication(app, data = {}) {
       cloudHtml,
       recoveryHtml,
       modelPerformanceHtml,
+      calibrationHtml,
       dashboard:
 
       data.dashboard || {},
