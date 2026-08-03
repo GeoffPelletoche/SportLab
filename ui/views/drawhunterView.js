@@ -2,6 +2,7 @@ import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import { computeValue } from "../../core/engines/valueEngine.js";
 import { CONFIG } from "../../core/config/config.js";
 import { explainDrawHunterPrediction } from "../../core/engines/drawHunterExplainabilityEngine.js";
+import { renderTeamLogo } from "../../core/ui/teamBranding.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow,
@@ -392,7 +393,10 @@ function renderMatchCard(match, index) {
       <div class="dh-matchup">
         <div class="dh-team">
           <span>Domicile</span>
-          <strong>${safe(match?.home || "Équipe domicile")}</strong>
+          <div class="dh-team__identity">
+            ${renderTeamLogo({ sport: "football", teamId: match?.homeId, teamName: match?.home, logo: match?.homeLogo })}
+            <strong>${safe(match?.home || "Équipe domicile")}</strong>
+          </div>
         </div>
 
         <div class="dh-matchup__center">
@@ -402,7 +406,10 @@ function renderMatchCard(match, index) {
 
         <div class="dh-team dh-team--away">
           <span>Extérieur</span>
-          <strong>${safe(match?.away || "Équipe extérieure")}</strong>
+          <div class="dh-team__identity dh-team__identity--away">
+            <strong>${safe(match?.away || "Équipe extérieure")}</strong>
+            ${renderTeamLogo({ sport: "football", teamId: match?.awayId, teamName: match?.away, logo: match?.awayLogo })}
+          </div>
         </div>
       </div>
 

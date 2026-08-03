@@ -1,4 +1,5 @@
 import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
+import { renderTeamLogo } from "../../core/ui/teamBranding.js";
 import {
   deriveFrenchFlairWorkflowState,
   getFrenchFlairMatchWorkflow,
@@ -239,13 +240,13 @@ function renderMatchCard(match, index) {
 
       <section class="ff-match-card__teams" aria-label="${safeAttribute(match.home)} contre ${safeAttribute(match.away)}">
         <div class="ff-team">
-          <span>${teamFlag(match.home)}</span>
+          ${renderTeamLogo({ sport: "rugby", teamId: match.homeId, teamName: match.home, logo: match.homeLogo, className: "sl-team-logo ff-team-logo" })}
           <div><small>DOMICILE</small><strong>${safe(translateTeamName(match.home || "Équipe inconnue"))}</strong></div>
         </div>
         <div class="ff-versus"><span>VS</span><i></i></div>
         <div class="ff-team ff-team--away">
           <div><small>EXTÉRIEUR</small><strong>${safe(translateTeamName(match.away || "Équipe inconnue"))}</strong></div>
-          <span>${teamFlag(match.away)}</span>
+          ${renderTeamLogo({ sport: "rugby", teamId: match.awayId, teamName: match.away, logo: match.awayLogo, className: "sl-team-logo ff-team-logo" })}
         </div>
       </section>
 
