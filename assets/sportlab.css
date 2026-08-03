@@ -463,3 +463,42 @@ MIGRATED VIEW COMPATIBILITY — BASED ON CURRENT SPORTLAB.CSS
   .journal-team-matchup,.bet-team-matchup{grid-template-columns:1fr;justify-items:center;text-align:center}
   .journal-team,.bet-team,.journal-team-away,.bet-team-away{justify-content:center;text-align:center;max-width:100%}
 }
+
+/* =========================================================
+   SPORTLAB V11.3 — CALIBRATION ENGINE
+========================================================= */
+.calibration-hero { display:flex; justify-content:space-between; gap:24px; align-items:flex-start; }
+.calibration-hero h1 { margin:.35rem 0 .5rem; }
+.calibration-hero-meta { min-width:220px; display:grid; gap:4px; padding:16px; border-radius:16px; background:var(--sl-surface-soft, rgba(255,255,255,.05)); }
+.calibration-hero-meta small,.calibration-hero-meta span { color:var(--sl-text-muted, #94a3b8); }
+.calibration-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+.calibration-summary-card header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.calibration-summary-card header div { display:grid; }
+.calibration-summary-card header small { color:var(--sl-text-muted,#94a3b8); }
+.calibration-summary-card header strong { font-size:2rem; line-height:1.1; }
+.calibration-card-icon { font-size:1.65rem; }
+.calibration-grade { display:inline-flex; align-items:center; width:max-content; padding:5px 10px; border-radius:999px; font-size:.82rem; font-weight:700; }
+.calibration-grade-success { background:rgba(34,197,94,.14); color:#86efac; }
+.calibration-grade-warning { background:rgba(234,179,8,.14); color:#fde047; }
+.calibration-grade-caution { background:rgba(249,115,22,.14); color:#fdba74; }
+.calibration-grade-danger { background:rgba(239,68,68,.14); color:#fca5a5; }
+.calibration-grade-neutral { background:rgba(148,163,184,.14); color:#cbd5e1; }
+.calibration-metrics { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0 0; }
+.calibration-metrics div { padding:10px; border-radius:12px; background:rgba(255,255,255,.035); }
+.calibration-metrics dt { color:var(--sl-text-muted,#94a3b8); font-size:.76rem; }
+.calibration-metrics dd { margin:3px 0 0; font-weight:800; }
+.calibration-table-wrap { overflow-x:auto; }
+.calibration-table { width:100%; border-collapse:collapse; min-width:620px; }
+.calibration-table th,.calibration-table td { padding:12px 10px; text-align:left; border-bottom:1px solid rgba(148,163,184,.14); }
+.calibration-table th { color:var(--sl-text-muted,#94a3b8); font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+.calibration-gap-good { color:#86efac; font-weight:700; }
+.calibration-gap-watch { color:#fdba74; font-weight:700; }
+.calibration-section-title > div { display:flex; gap:12px; align-items:flex-start; }
+.calibration-section-title h2 { margin:0; }
+.calibration-section-title p { margin:.25rem 0 1rem; color:var(--sl-text-muted,#94a3b8); }
+.calibration-method-note p:last-child { margin-bottom:0; }
+@media (max-width:860px) {
+  .calibration-summary-grid { grid-template-columns:1fr; }
+  .calibration-hero { flex-direction:column; }
+  .calibration-hero-meta { width:100%; min-width:0; }
+}
