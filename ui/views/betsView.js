@@ -1,3 +1,5 @@
+import { renderTeamLogo } from "../../core/ui/teamBranding.js";
+
 function formatResultBadge(bet) {
   switch (bet.result) {
     case "WON":
@@ -20,7 +22,8 @@ function formatResultBadge(bet) {
   }
 }
 
-function renderBet(bet) {
+function renderBet(bet, teamBrandingLookup = new Map()) {
+  const branding = resolveBetBranding(bet, teamBrandingLookup);
   const stake = Number(bet.stake || 0);
   const odds = Number(bet.odds || 0);
 
@@ -41,7 +44,7 @@ function renderBet(bet) {
   return `
     <section class="card bet-card">
 
-      <h3>${bet.match}</h3>
+      ${renderBetMatchup(bet, branding)}
 
       <p>
         <strong>${bet.source}</strong>
@@ -123,7 +126,7 @@ function renderBet(bet) {
   `;
 }
 
-export function renderBets(bets = []) {
+export function renderBets(bets = [], teamBrandingLookup = new Map()) {
   const placedBets = bets.filter(
     bet => bet.placed === true
   );
@@ -149,6 +152,69 @@ export function renderBets(bets = []) {
 
     <pre id="settlement-debug"></pre>
 
-    ${sorted.map(renderBet).join("")}
+    ${sorted.map(bet => renderBet(bet, teamBrandingLookup)).join("")}
   `;
+}
+
+
+function renderBetMatchup(bet = {}, branding = {}) {
+  const parsed = splitMatchLabel(bet.match);
+  const home = bet.home || bet.homeTeam || branding.home || parsed.home;
+  const away = bet.away || bet.awayTeam || branding.away || parsed.away;
+
+  return `
+    <div class="bet-team-matchup">
+      <span class="bet-team">
+        ${renderTeamLogo({
+          sport: bet.sport || branding.sport,
+          teamId: bet.homeId ?? branding.homeId,
+          teamName: home,
+          logo: bet.homeLogo || branding.homeLogo,
+          className: "sl-team-logo bet-team-logo"
+        })}
+        <strong>${escapeHtml(home || "Équipe domicile")}</strong>
+      </span>
+      <span class="bet-team-separator">vs</span>
+      <span class="bet-team bet-team-away">
+        ${renderTeamLogo({
+          sport: bet.sport || branding.sport,
+          teamId: bet.awayId ?? branding.awayId,
+          teamName: away,
+          logo: bet.awayLogo || branding.awayLogo,
+          className: "sl-team-logo bet-team-logo"
+        })}
+        <strong>${escapeHtml(away || "Équipe extérieure")}</strong>
+      </span>
+    </div>
+  `;
+}
+
+function resolveBetBranding(bet = {}, lookup = new Map()) {
+  const current = lookup?.get?.(String(bet.matchId ?? "")) || {};
+  return {
+    sport: bet.sport || current.sport || "",
+    homeId: bet.homeId ?? current.homeId ?? null,
+    awayId: bet.awayId ?? current.awayId ?? null,
+    homeLogo: bet.homeLogo || current.homeLogo || "",
+    awayLogo: bet.awayLogo || current.awayLogo || "",
+    home: bet.home || bet.homeTeam || current.home || "",
+    away: bet.away || bet.awayTeam || current.away || ""
+  };
+}
+
+function splitMatchLabel(value) {
+  const parts = String(value || "").split(/\s+(?:vs|v|-)\s+/i);
+  return {
+    home: String(parts[0] || "").trim(),
+    away: String(parts.slice(1).join(" vs ") || "").trim()
+  };
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }

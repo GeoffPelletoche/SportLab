@@ -1,3 +1,5 @@
+import { renderTeamLogo } from "../../core/ui/teamBranding.js";
+
 // ui/views/journalView.js
 
 /**
@@ -9,7 +11,7 @@
  * afficher les données préparées par journalService.
  */
 
-export function renderJournal(journal = {}) {
+export function renderJournal(journal = {}, teamBrandingLookup = new Map()) {
     const {
         entries = [],
         options = {},
@@ -51,7 +53,7 @@ export function renderJournal(journal = {}) {
                     entries.length === 0
                         ? renderEmptyState()
                         : entries
-                            .map(renderJournalCard)
+                            .map(entry => renderJournalCard(entry, teamBrandingLookup))
                             .join("")
                 }
 
@@ -547,7 +549,8 @@ function renderSortSelect(selected = "date-desc") {
    CARTES DU JOURNAL
    ========================================================= */
 
-function renderJournalCard(entry = {}) {
+function renderJournalCard(entry = {}, teamBrandingLookup = new Map()) {
+    const branding = resolveEntryBranding(entry, teamBrandingLookup);
     const result =
         normalizeResult(entry.result);
 
@@ -584,12 +587,7 @@ function renderJournalCard(entry = {}) {
 
                     </div>
 
-                    <h3>
-                        ${escapeHtml(
-                            entry.match ||
-                            "Match non renseigné"
-                        )}
-                    </h3>
+                    ${renderJournalMatchup(entry, branding)}
 
                     <p class="sl-muted">
                         ${formatDate(entry.date)}
@@ -698,6 +696,54 @@ function renderJournalCard(entry = {}) {
 
         </article>
     `;
+}
+
+function renderJournalMatchup(entry = {}, branding = {}) {
+    const home = entry.homeTeam || branding.home || "";
+    const away = entry.awayTeam || branding.away || "";
+
+    if (!home && !away) {
+        return `<h3>${escapeHtml(entry.match || "Match non renseigné")}</h3>`;
+    }
+
+    return `
+        <div class="journal-team-matchup" aria-label="${escapeHtml(entry.match || `${home} contre ${away}`)}">
+            <span class="journal-team journal-team-home">
+                ${renderTeamLogo({
+                    sport: branding.sport || entry.sport,
+                    teamId: entry.homeId ?? branding.homeId,
+                    teamName: home,
+                    logo: entry.homeLogo || branding.homeLogo,
+                    className: "sl-team-logo journal-team-logo"
+                })}
+                <strong>${escapeHtml(home || "Équipe domicile")}</strong>
+            </span>
+            <span class="journal-team-separator">vs</span>
+            <span class="journal-team journal-team-away">
+                ${renderTeamLogo({
+                    sport: branding.sport || entry.sport,
+                    teamId: entry.awayId ?? branding.awayId,
+                    teamName: away,
+                    logo: entry.awayLogo || branding.awayLogo,
+                    className: "sl-team-logo journal-team-logo"
+                })}
+                <strong>${escapeHtml(away || "Équipe extérieure")}</strong>
+            </span>
+        </div>
+    `;
+}
+
+function resolveEntryBranding(entry = {}, lookup = new Map()) {
+    const current = lookup?.get?.(String(entry.matchId ?? "")) || {};
+    return {
+        sport: entry.sport || current.sport || "",
+        homeId: entry.homeId ?? current.homeId ?? null,
+        awayId: entry.awayId ?? current.awayId ?? null,
+        homeLogo: entry.homeLogo || current.homeLogo || "",
+        awayLogo: entry.awayLogo || current.awayLogo || "",
+        home: entry.homeTeam || current.home || "",
+        away: entry.awayTeam || current.away || ""
+    };
 }
 
 function renderMetric(
