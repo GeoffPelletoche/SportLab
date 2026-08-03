@@ -171,6 +171,10 @@ function normalizeAnalysis(analysis = {}) {
 
     home,
     away,
+    homeId: analysis.homeId ?? null,
+    awayId: analysis.awayId ?? null,
+    homeLogo: normalizeNullableText(analysis.homeLogo),
+    awayLogo: normalizeNullableText(analysis.awayLogo),
 
     /*
      * Alias utilisés par journalService.

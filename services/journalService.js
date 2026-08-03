@@ -314,6 +314,11 @@ function createJournalEntry(analysis, bet) {
 
         awayTeam,
 
+        homeId: analysis?.homeId ?? bet?.homeId ?? null,
+        awayId: analysis?.awayId ?? bet?.awayId ?? null,
+        homeLogo: analysis?.homeLogo || bet?.homeLogo || "",
+        awayLogo: analysis?.awayLogo || bet?.awayLogo || "",
+
         market:
             normalizeText(analysis?.market),
 
@@ -377,8 +382,12 @@ function createJournalEntryFromBet(bet = {}) {
         source: normalizeText(bet?.source),
         competition: normalizeText(bet?.competition),
         match: normalizeText(bet?.match) || buildMatchLabel(parsedTeams.home, parsedTeams.away),
-        homeTeam: parsedTeams.home,
-        awayTeam: parsedTeams.away,
+        homeTeam: normalizeText(bet?.home || bet?.homeTeam) || parsedTeams.home,
+        awayTeam: normalizeText(bet?.away || bet?.awayTeam) || parsedTeams.away,
+        homeId: bet?.homeId ?? null,
+        awayId: bet?.awayId ?? null,
+        homeLogo: normalizeText(bet?.homeLogo),
+        awayLogo: normalizeText(bet?.awayLogo),
         market: normalizeText(bet?.market),
         selection: normalizeText(bet?.selection),
         probability: toNumber(bet?.probability),

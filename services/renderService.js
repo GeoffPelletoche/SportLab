@@ -78,14 +78,21 @@ export function renderApplication(app, data = {}) {
       data.frenchflairPayload
     );
 
+  const teamBrandingLookup = buildTeamBrandingLookup({
+    drawhunter: data.drawhunterPayload?.matches || [],
+    frenchflair: data.frenchflairPayload?.matches || []
+  });
+
   const journalHtml =
     renderJournal(
-      data.journal
+      data.journal,
+      teamBrandingLookup
     );
 
   const betsHtml =
     renderBets(
-      data.dashboard?.bets || []
+      data.dashboard?.bets || [],
+      teamBrandingLookup
     );
 
   const portfolioHtml =
@@ -159,4 +166,27 @@ function buildCloudStorageSummary() {
     if (normalized.includes("frenchflair")) counts.frenchflair += count;
   }
   return counts;
+}
+
+
+function buildTeamBrandingLookup({ drawhunter = [], frenchflair = [] } = {}) {
+  const lookup = new Map();
+
+  const register = (match, sport) => {
+    if (!match || match.id === undefined || match.id === null) return;
+    lookup.set(String(match.id), {
+      sport,
+      homeId: match.homeId ?? null,
+      awayId: match.awayId ?? null,
+      homeLogo: match.homeLogo || "",
+      awayLogo: match.awayLogo || "",
+      home: match.home || "",
+      away: match.away || ""
+    });
+  };
+
+  drawhunter.forEach(match => register(match, "football"));
+  frenchflair.forEach(match => register(match, "rugby"));
+
+  return lookup;
 }

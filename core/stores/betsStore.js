@@ -93,6 +93,12 @@ export function saveBet(bet) {
     matchDate: bet.matchDate || null,
 
     match: bet.match || null,
+    home: bet.home || bet.homeTeam || null,
+    away: bet.away || bet.awayTeam || null,
+    homeId: bet.homeId ?? null,
+    awayId: bet.awayId ?? null,
+    homeLogo: bet.homeLogo || null,
+    awayLogo: bet.awayLogo || null,
     market: bet.market || null,
     line: bet.line ?? null,
 
