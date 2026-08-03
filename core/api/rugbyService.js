@@ -151,6 +151,8 @@ function normalizeRugbyFixtures(items, competition, data) {
     id: item.id,
     homeId: item.homeId || null,
     awayId: item.awayId || null,
+    homeLogo: item.homeLogo || (item.homeId ? `https://media.api-sports.io/rugby/teams/${item.homeId}.png` : ""),
+    awayLogo: item.awayLogo || (item.awayId ? `https://media.api-sports.io/rugby/teams/${item.awayId}.png` : ""),
     home: decodeHtmlEntities(item.home),
     away: decodeHtmlEntities(item.away),
     competition: decodeHtmlEntities(item.competition || competition.name),
