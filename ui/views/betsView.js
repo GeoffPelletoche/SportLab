@@ -190,7 +190,13 @@ function renderBetMatchup(bet = {}, branding = {}) {
 }
 
 function resolveBetBranding(bet = {}, lookup = new Map()) {
-  const current = lookup?.get?.(String(bet.matchId ?? "")) || {};
+  const parsed = splitMatchLabel(bet.match);
+  const current = lookup?.resolve?.({
+    matchId: bet.matchId,
+    sport: bet.sport,
+    home: bet.home || bet.homeTeam || parsed.home,
+    away: bet.away || bet.awayTeam || parsed.away
+  }) || lookup?.get?.(String(bet.matchId ?? "")) || {};
   return {
     sport: bet.sport || current.sport || "",
     homeId: bet.homeId ?? current.homeId ?? null,

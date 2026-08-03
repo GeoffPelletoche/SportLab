@@ -734,7 +734,12 @@ function renderJournalMatchup(entry = {}, branding = {}) {
 }
 
 function resolveEntryBranding(entry = {}, lookup = new Map()) {
-    const current = lookup?.get?.(String(entry.matchId ?? "")) || {};
+    const current = lookup?.resolve?.({
+        matchId: entry.matchId,
+        sport: entry.sport,
+        home: entry.homeTeam,
+        away: entry.awayTeam
+    }) || lookup?.get?.(String(entry.matchId ?? "")) || {};
     return {
         sport: entry.sport || current.sport || "",
         homeId: entry.homeId ?? current.homeId ?? null,

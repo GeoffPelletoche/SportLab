@@ -267,11 +267,11 @@ function hasSameIdentifier(firstValue, secondValue) {
  */
 function createJournalEntry(analysis, bet) {
     const homeTeam = normalizeText(
-        analysis?.homeTeam
+        analysis?.homeTeam ?? analysis?.home ?? bet?.home ?? bet?.homeTeam
     );
 
     const awayTeam = normalizeText(
-        analysis?.awayTeam
+        analysis?.awayTeam ?? analysis?.away ?? bet?.away ?? bet?.awayTeam
     );
 
     const match = normalizeText(
@@ -294,19 +294,19 @@ function createJournalEntry(analysis, bet) {
             createFallbackId(analysis),
 
         matchId:
-            analysis?.matchId ?? "",
+            analysis?.matchId ?? bet?.matchId ?? "",
 
         betId:
             bet?.id ?? analysis?.betId ?? "",
 
         sport:
-            normalizeText(analysis?.sport),
+            normalizeText(analysis?.sport ?? bet?.sport),
 
         source:
-            normalizeText(analysis?.source),
+            normalizeText(analysis?.source ?? bet?.source),
 
         competition:
-            normalizeText(analysis?.competition),
+            normalizeText(analysis?.competition ?? bet?.competition),
 
         match,
 

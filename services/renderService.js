@@ -172,9 +172,26 @@ function buildCloudStorageSummary() {
 function buildTeamBrandingLookup({ drawhunter = [], frenchflair = [] } = {}) {
   const lookup = new Map();
 
+  const normalizeTeamKey = value => String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/&apos;|&#0*39;/g, "'")
+    .replace(/&amp;/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  const pairKey = (sport, home, away) => {
+    const homeKey = normalizeTeamKey(home);
+    const awayKey = normalizeTeamKey(away);
+    if (!homeKey || !awayKey) return "";
+    return `pair:${String(sport || "").toLowerCase()}:${homeKey}|${awayKey}`;
+  };
+
   const register = (match, sport) => {
-    if (!match || match.id === undefined || match.id === null) return;
-    lookup.set(String(match.id), {
+    if (!match) return;
+
+    const branding = {
       sport,
       homeId: match.homeId ?? null,
       awayId: match.awayId ?? null,
@@ -182,11 +199,30 @@ function buildTeamBrandingLookup({ drawhunter = [], frenchflair = [] } = {}) {
       awayLogo: match.awayLogo || "",
       home: match.home || "",
       away: match.away || ""
-    });
+    };
+
+    if (match.id !== undefined && match.id !== null) {
+      lookup.set(String(match.id), branding);
+      lookup.set(`id:${String(match.id)}`, branding);
+    }
+
+    const key = pairKey(sport, match.home, match.away);
+    if (key) lookup.set(key, branding);
   };
 
   drawhunter.forEach(match => register(match, "football"));
   frenchflair.forEach(match => register(match, "rugby"));
+
+  // Helpers non énumérables pour permettre aux vues de retrouver les
+  // anciens paris même lorsque leur matchId n'est plus disponible.
+  lookup.resolve = ({ matchId, sport, home, away } = {}) => {
+    const byId = matchId !== undefined && matchId !== null
+      ? lookup.get(String(matchId)) || lookup.get(`id:${String(matchId)}`)
+      : null;
+    if (byId) return byId;
+    const key = pairKey(sport, home, away);
+    return key ? (lookup.get(key) || null) : null;
+  };
 
   return lookup;
 }
