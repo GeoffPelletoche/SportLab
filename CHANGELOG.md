@@ -1,3 +1,12 @@
+## 11.3.0 — Calibration Engine
+
+- Nouvelle page Calibration, distincte de Performances.
+- Mesure globale, par module, compétition et tranche de probabilité.
+- Indice basé sur l’erreur de calibration pondérée, avec garde-fous d’échantillon.
+- Intégration au centre Diagnostics.
+- Compatibilité avec les enregistrements Passive Learning V11.2.
+- Aucun recalibrage ni changement automatique du modèle.
+
 ## 11.2.3 — Team Branding Recovery
 
 - Logos Paris et Journal retrouvés par matchId ou par noms d’équipes.
