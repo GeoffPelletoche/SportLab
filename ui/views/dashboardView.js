@@ -22,6 +22,7 @@ export function renderDashboard({
   cloudHtml = "",
   recoveryHtml = "",
   modelPerformanceHtml = "",
+  calibrationHtml = "",
 
   dashboard = {},
   drawhunterPayload = {},
@@ -38,6 +39,7 @@ export function renderDashboard({
     cloudHtml,
     recoveryHtml,
     modelPerformanceHtml,
+    calibrationHtml,
     dashboard,
     drawhunterPayload,
     frenchflairPayload
@@ -63,6 +65,7 @@ function renderActivePage({
   cloudHtml,
   recoveryHtml,
   modelPerformanceHtml,
+  calibrationHtml,
   dashboard,
   drawhunterPayload,
   frenchflairPayload
@@ -91,6 +94,9 @@ function renderActivePage({
 
     case "performance":
       return renderStandardPage("", "", modelPerformanceHtml, true);
+
+    case "calibration":
+      return renderStandardPage("", "", calibrationHtml, true);
 
     case "diagnostics":
       return renderStandardPage("🩺", "Diagnostics", diagnosticsHtml);

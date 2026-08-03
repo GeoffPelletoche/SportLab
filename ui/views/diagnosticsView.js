@@ -72,7 +72,8 @@ export function renderDiagnostics({
   drawhunterMeta = {},
   frenchflairMeta = {},
   learningDataset = [],
-  learningSummary = {}
+  learningSummary = {},
+  calibration = {}
 } = {}) {
   const evaluated = learningDataset.filter(item => item?.evaluatedAt).length;
   const pending = learningDataset.filter(item => !item?.evaluatedAt).length;
@@ -81,7 +82,7 @@ export function renderDiagnostics({
   return `
     <section class="diagnostics-page sl-page sl-stack">
       <header class="sl-panel">
-        <span class="sl-label">SportLab V11.2</span>
+        <span class="sl-label">SportLab V11.3</span>
         <h1>Diagnostics opérationnels</h1>
         <p>Chaque compétition est maintenant distinguée entre fonctionnement normal, période sans match et véritable erreur API.</p>
       </header>
@@ -109,6 +110,19 @@ export function renderDiagnostics({
         <p>Niveau de maturité : <strong>${escapeHtml(learningSummary.maturity?.label || "Observation")}</strong></p>
         <p class="sl-muted">${escapeHtml(learningSummary.maturity?.message || "Le moteur collecte les résultats sans modifier les prédictions.")}</p>
         <p><strong>Aucun changement automatique du modèle n’est autorisé.</strong></p>
+      </article>
+
+
+      <article class="sl-panel">
+        <h2>🎯 Calibration Engine</h2>
+        <p>État : <strong>Actif — mesure passive</strong></p>
+        <p>Observations exploitables : <strong>${n(calibration.observations)}</strong></p>
+        <p>Calibration globale : <strong>${calibration.global?.count ? `${Number(calibration.global.score || 0).toFixed(1)}%` : "En attente"}</strong></p>
+        <p>DrawHunter : <strong>${calibration.modules?.drawhunter?.count ? `${Number(calibration.modules.drawhunter.score || 0).toFixed(1)}%` : "En attente"}</strong></p>
+        <p>FrenchFlair : <strong>${calibration.modules?.frenchflair?.count ? `${Number(calibration.modules.frenchflair.score || 0).toFixed(1)}%` : "En attente"}</strong></p>
+        <p>Compétitions calibrées : <strong>${n(calibration.calibratedCompetitions)}</strong></p>
+        <p>Dernière mise à jour : <strong>${calibration.lastUpdatedAt ? new Date(calibration.lastUpdatedAt).toLocaleString("fr-FR") : "Aucune évaluation"}</strong></p>
+        <p class="sl-muted">Le moteur mesure l’écart entre probabilités annoncées et résultats observés sans modifier le modèle.</p>
       </article>
 
       <article class="sl-panel">
