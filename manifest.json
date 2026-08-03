@@ -1,6 +1,6 @@
 {
   "project": "SportLab",
-  "version": "10.0.0",
+  "version": "11.2.3",
   "pack": "Sprint 7.1.1B — Cloud Integration",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",

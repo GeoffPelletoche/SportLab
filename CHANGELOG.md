@@ -1,3 +1,8 @@
+## 11.2.3 — Team Branding Recovery
+
+- Logos Paris et Journal retrouvés par matchId ou par noms d’équipes.
+- Correction des anciens enregistrements ne contenant pas homeId/awayId.
+
 ## 11.1.2 — Unified Bet Store
 
 - Correction du Journal qui ignorait les paris DrawHunter sans entrée analysisStore.
