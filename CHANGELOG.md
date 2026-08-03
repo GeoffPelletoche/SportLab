@@ -281,3 +281,7 @@
 ## V11.1.1 — Correctif Explainable AI DrawHunter
 - Le bloc d’explication utilise les indicateurs déjà calculés et ne dépend plus uniquement de predictionStatus.
 - Aucun appel API supplémentaire.
+
+## V11.2.2 — Team Branding Paris & Journal
+- Logos des équipes ajoutés aux paris et aux entrées du Journal.
+- Métadonnées de branding persistées dans les nouveaux paris et analyses.
