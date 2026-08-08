@@ -1,6 +1,5 @@
 import { fetchUpcomingFootballFixtures } from "../core/api/footballService.js";
 import { predictDrawMatch } from "../core/engines/footballDrawPredictionEngine.js";
-import { getBets } from "../core/stores/betsStore.js";
 
 /** SPORTLAB V8 — DRAWHUNTER */
 export async function loadDrawHunterMatches() {
@@ -29,7 +28,18 @@ export async function loadDrawHunterMatches() {
           : null
     };
   });
-  const bets = getBets();
-  const visibleMatches = matches.filter(match => !bets.some(bet => bet.source === "DrawHunter" && bet.match === `${match.home} vs ${match.away}`));
-  return { matches: visibleMatches, meta: { ...meta, visibleTotal: visibleMatches.length, hiddenTotal: matches.length - visibleMatches.length, model: "V8_RECENCY_WEIGHTED_MULTI_SEASON" } };
+  /*
+   * V11.3.1 : les rencontres à venir restent accessibles jusqu'au coup
+   * d'envoi, même après sauvegarde d'une analyse ou d'une abstention.
+   * Le workflow de la carte indique l'état courant et contrôle l'édition.
+   */
+  return {
+    matches,
+    meta: {
+      ...meta,
+      visibleTotal: matches.length,
+      hiddenTotal: 0,
+      model: "V8_RECENCY_WEIGHTED_MULTI_SEASON"
+    }
+  };
 }

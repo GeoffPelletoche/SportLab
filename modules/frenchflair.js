@@ -1,6 +1,5 @@
 import { fetchUpcomingRugbyFixtures } from "../core/api/rugbyService.js";
 import { predictRugbyMatch } from "../core/engines/rugbyPredictionEngine.js";
-import { getAnalysisForMatch } from "../core/stores/analysisStore.js";
 
 /**
  * SPORTLAB V3 — FRENCHFLAIR MODULE
@@ -18,35 +17,19 @@ export async function loadFrenchFlairMatches() {
 
   const predictedMatches = fixtures.map(match => predictRugbyMatch(match));
 
-  const matches = predictedMatches.filter(match => {
-    const analysis = getAnalysisForMatch(match.id);
-
-    // Match jamais analysé → visible
-    if (!analysis) return true;
-
-    // Pari placé → masqué
-    if (analysis.placed === true || analysis.status === "betPlaced") {
-      return false;
-    }
-
-    // NO VALUE → masqué
-    if (
-      analysis.finalDecision === "NO VALUE" ||
-      analysis.decision === "NO BET"
-    ) {
-      return false;
-    }
-
-    // VALUE non placée → visible
-    return true;
-  });
+  /*
+   * V11.3.1 : une analyse VALUE ou NO VALUE reste consultable et
+   * ré-ouvrable tant que le match n'a pas commencé. Le verrouillage
+   * est géré par le workflow/UI à l'heure du coup d'envoi.
+   */
+  const matches = predictedMatches;
 
   return {
     matches,
     meta: {
       ...meta,
       visibleTotal: matches.length,
-      hiddenTotal: predictedMatches.length - matches.length
+      hiddenTotal: 0
     }
   };
 }
