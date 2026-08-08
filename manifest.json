@@ -1,6 +1,6 @@
 {
   "project": "SportLab",
-  "version": "11.3.0",
+  "version": "11.3.1",
   "pack": "Sprint 7.1.1B — Cloud Integration",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
@@ -181,8 +181,8 @@
     "docs/SPRINT7.1.1B_CLOUD_INTEGRATION.md",
     "docs/SPRINT7.1.1B_VALIDATION.md"
   ],
-  "name": "SportLab V11.3",
-  "short_name": "SportLab V11.3",
+  "name": "SportLab V11.3.1",
+  "short_name": "SportLab V11.3.1",
   "calibration_engine": {
     "status": "active_passive",
     "source": "sportlab_learning_v1",
@@ -192,6 +192,23 @@
       "ui/views/calibrationView.js",
       "ui/views/diagnosticsView.js",
       "ui/views/navigationView.js"
+    ]
+  },
+  "v11_3_1": {
+    "status": "settlement_and_reopen_analysis",
+    "worker": "3.10.0",
+    "football_settlement": true,
+    "reopen_until_kickoff": true,
+    "files": [
+      "core/engines/betSettlementEngine.js",
+      "core/stores/betsStore.js",
+      "modules/drawhunter.js",
+      "modules/frenchflair.js",
+      "ui/views/drawhunterView.js",
+      "ui/views/frenchflairView.js",
+      "ui/interactions/drawHunterWorkflow.js",
+      "ui/interactions/frenchFlairWorkflow.js",
+      "legacyApp.js"
     ]
   }
 }

@@ -33,6 +33,11 @@ let frenchflairPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 
+function isMatchEditableBeforeKickoff(match) {
+  const kickoff = Date.parse(match?.date || match?.matchDate || "");
+  return Number.isFinite(kickoff) && kickoff > Date.now();
+}
+
 function initializeUi() {
   initSportLabUi();
   initDashboardPremium();
@@ -135,6 +140,11 @@ window.saveDrawHunterBet = function(index) {
 
   if (!match) {
     alert("Match introuvable.");
+    return;
+  }
+
+  if (!isMatchEditableBeforeKickoff(match)) {
+    alert("Le match a commencé : l’analyse et le pari sont désormais en lecture seule.");
     return;
   }
 
@@ -271,6 +281,11 @@ window.calculateFrenchFlairAnalysis = function(matchId) {
 
   if (!match) {
     alert("Match introuvable.");
+    return;
+  }
+
+  if (!isMatchEditableBeforeKickoff(match)) {
+    alert("Le match a commencé : la ligne, la cote et la décision sont désormais en lecture seule.");
     return;
   }
 
@@ -567,6 +582,12 @@ window.saveFrenchFlairAnalysis = function(matchId) {
     return;
   }
 
+  const match = getFrenchFlairMatchById(matchId);
+  if (!match || !isMatchEditableBeforeKickoff(match)) {
+    alert("Le match a commencé : l’analyse ne peut plus être modifiée.");
+    return;
+  }
+
   saveAnalysis(pending);
   saveFrenchFlairMatchWorkflow(matchId, {
     status: pending.finalDecision === "VALUE" ? "value" : "decided",
@@ -590,6 +611,11 @@ window.saveFrenchFlairBet = function(matchId, analysisId) {
 
   if (!match || !analysis) {
     alert("Analyse introuvable.");
+    return;
+  }
+
+  if (!isMatchEditableBeforeKickoff(match)) {
+    alert("Le match a commencé : aucun pari ne peut plus être ajouté ou modifié.");
     return;
   }
 

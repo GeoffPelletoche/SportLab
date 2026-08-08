@@ -1,3 +1,14 @@
+## 11.3.1 — Settlement DrawHunter & analyses réouvrables
+
+- Règlement automatique des paris DrawHunter via `/football/game-result`.
+- Support du marché `DRAW` dans le Settlement Engine.
+- Les analyses VALUE et NO VALUE restent réouvrables jusqu’au coup d’envoi si aucun pari n’est placé.
+- Une variation de cote peut donc déclencher un nouveau calcul de VALUE avant match.
+- Verrouillage des modifications au coup d’envoi.
+- Transformation sans doublon d’une entrée `NON_PLACED` en pari `PENDING`.
+- FrenchFlair et DrawHunter conservent les rencontres futures accessibles après sauvegarde.
+- Worker Cloudflare inchangé : API Bridge 3.10.0.
+
 ## 11.3.0 — Calibration Engine
 
 - Nouvelle page Calibration, distincte de Performances.

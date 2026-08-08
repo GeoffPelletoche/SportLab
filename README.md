@@ -75,6 +75,10 @@ SportLab enregistre désormais chaque prédiction évaluée dans un Learning Sto
 Les cartes DrawHunter et FrenchFlair affichent désormais les logos officiels API-Sports à gauche ou à droite du nom des équipes. Les images sont chargées paresseusement, mises en cache par le navigateur et masquées proprement si un logo n’est pas disponible. Aucun appel API supplémentaire ni changement du Worker n’est requis.
 
 
+## V11.3.1 — Settlement & analyses réouvrables
+
+DrawHunter bénéficie désormais du règlement automatique des paris football. Les analyses DrawHunter et FrenchFlair, y compris les `NO VALUE`, peuvent être rouvertes et recalculées jusqu’au coup d’envoi tant qu’aucun pari n’a été placé. Après le début du match, elles passent en lecture seule. Voir `docs/SPORTLAB_V11.3.1_SETTLEMENT_REOPEN_ANALYSIS.md`.
+
 ## V11.3.0 — Calibration Engine
 
 SportLab mesure désormais l’écart entre les probabilités annoncées et les résultats observés, globalement, par module, compétition et tranche de probabilité. Le moteur est strictement passif et ne modifie jamais les prédictions. Voir `docs/SPORTLAB_V11.3_ARCHITECTURE_REVIEW.md`.
