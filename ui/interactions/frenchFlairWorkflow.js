@@ -1,3 +1,4 @@
+import { showToast } from "./sportlabUi.js";
 import {
   getFrenchFlairContext,
   saveFrenchFlairContext,
@@ -8,6 +9,15 @@ import {
 let activeScrollController = null;
 
 const STATUS_ORDER = ["new", "pending", "awaiting_result", "resulted", "archived"];
+
+function isCardBeforeKickoff(card) {
+  const raw = card?.dataset?.date;
+  const numeric = Number(raw);
+  const kickoff = Number.isFinite(numeric) && numeric > 0
+    ? numeric
+    : Date.parse(raw || "");
+  return Number.isFinite(kickoff) && kickoff > Date.now();
+}
 
 export function initFrenchFlairWorkflow() {
   activeScrollController?.abort();
@@ -111,6 +121,41 @@ export function initFrenchFlairWorkflow() {
         action.setAttribute("aria-expanded", String(!panel.hidden));
         saveFrenchFlairContext(kind === "history" ? { selectedMatchId: panel.hidden ? null : matchId } : { detailsMatchId: panel.hidden ? null : matchId });
       }
+      return;
+    }
+
+    if (kind === "edit") {
+      if (!isCardBeforeKickoff(card)) {
+        showToast({
+          title: "Analyse verrouillée",
+          text: "Le match a commencé : la ligne, la cote et le pari sont désormais en lecture seule.",
+          tone: "warning",
+          icon: "!"
+        });
+        return;
+      }
+
+      saveFrenchFlairMatchWorkflow(matchId, {
+        status: "pending",
+        event: {
+          type: "reopened",
+          label: "Analyse rouverte",
+          note: "Réévaluation autorisée avant le coup d’envoi"
+        }
+      });
+      updateCardState(card, "pending");
+      apply();
+      globalThis.analyzeFrenchFlairValue?.(matchId);
+      return;
+    }
+
+    if (kind === "complete" && !isCardBeforeKickoff(card)) {
+      showToast({
+        title: "Analyse verrouillée",
+        text: "Le match a commencé : l’analyse ne peut plus être modifiée.",
+        tone: "warning",
+        icon: "!"
+      });
       return;
     }
 

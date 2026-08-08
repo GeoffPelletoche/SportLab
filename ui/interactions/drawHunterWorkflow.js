@@ -134,6 +134,12 @@ function updateBookmakerExplanation(card, valuation) {
 }
 
 
+
+function isCardBeforeKickoff(card) {
+  const kickoff = Date.parse(card?.dataset?.dhDate || "");
+  return Number.isFinite(kickoff) && kickoff > Date.now();
+}
+
 function updateDrawHunterCardState(card, status) {
   if (!card) return;
 
@@ -154,8 +160,11 @@ function updateDrawHunterCardState(card, status) {
       primary.dataset.dhAction = "complete";
       primary.textContent = "Terminer l’analyse";
     } else if (status === "awaiting_result") {
-      primary.dataset.dhAction = "history";
-      primary.textContent = "Voir l’historique";
+      const canEdit =
+        isCardBeforeKickoff(card) &&
+        card.dataset.dhPlaced !== "true";
+      primary.dataset.dhAction = canEdit ? "edit" : "history";
+      primary.textContent = canEdit ? "Modifier l’analyse" : "Voir l’historique";
       primary.setAttribute("aria-expanded", "false");
     }
   }
@@ -274,7 +283,42 @@ export function initDrawHunterWorkflow() {
       return;
     }
 
+    if (kind === "edit") {
+      if (!isCardBeforeKickoff(card)) {
+        showToast({
+          title: "Analyse verrouillée",
+          text: "Le match a commencé : la cote, la décision et le pari sont désormais en lecture seule.",
+          tone: "warning",
+          icon: "!"
+        });
+        return;
+      }
+
+      saveDrawHunterMatchWorkflow(matchId, {
+        status: "pending",
+        event: {
+          type: "reopened",
+          label: "Analyse rouverte",
+          note: "Réévaluation autorisée avant le coup d’envoi"
+        }
+      });
+      updateDrawHunterCardState(card, "pending");
+      applyView();
+      card.querySelector("[data-dh-bookmaker-odds]")?.focus();
+      return;
+    }
+
     if (kind === "complete") {
+      if (!isCardBeforeKickoff(card)) {
+        showToast({
+          title: "Analyse verrouillée",
+          text: "Le match a commencé : l’analyse ne peut plus être modifiée.",
+          tone: "warning",
+          icon: "!"
+        });
+        return;
+      }
+
       const valuation = getValuation(card);
 
       if (!valuation) {
