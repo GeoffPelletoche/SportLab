@@ -124,10 +124,18 @@ export function saveBet(bet) {
     finalTotalPoints: null
   };
 
-  const existingIndex = bets.findIndex(item =>
-    isSameBetIdentity(item, cleanBet) &&
-    normalizeResult(item?.result) === "PENDING"
-  );
+  const existingIndex = bets.findIndex(item => {
+    if (!isSameBetIdentity(item, cleanBet)) return false;
+
+    const result = normalizeResult(item?.result);
+
+    /*
+     * V11.3.1 : une analyse sauvegardée sans pari (NON_PLACED) peut
+     * devenir un vrai pari avant le coup d'envoi si la cote évolue.
+     * On met alors à jour la même entrée au lieu de créer un doublon.
+     */
+    return ["PENDING", "NON_PLACED"].includes(result);
+  });
 
   if (existingIndex >= 0) {
     cleanBet.id = bets[existingIndex].id;
