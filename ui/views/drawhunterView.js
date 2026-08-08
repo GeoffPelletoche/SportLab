@@ -353,6 +353,11 @@ function renderMatchCard(match, index) {
   };
 
   const workflowState = deriveDrawHunterWorkflowState(analyzedMatch, storedWorkflow);
+  const editableBeforeKickoff = isBeforeKickoff(match?.date);
+  const analysisEditable = editableBeforeKickoff && storedWorkflow?.placed !== true;
+  const canReopenAnalysis =
+    workflowState === "awaiting_result" &&
+    analysisEditable;
   const state = getMatchState(analyzedMatch, workflowState);
   const probability = toPercent(analyzedMatch?.probability);
   const value = bookmakerOdds ? toPercent(analyzedMatch?.value) : "-";
@@ -373,6 +378,7 @@ function renderMatchCard(match, index) {
       data-dh-value="${Number(analyzedMatch?.value) || 0}"
       data-dh-probability-raw="${Number(analyzedMatch?.probability) || 0}"
       data-dh-competition="${safe(String(match?.competition || "").toLowerCase())}"
+      data-dh-placed="${storedWorkflow?.placed === true ? "true" : "false"}"
       tabindex="0"
     >
       <header class="dh-match-card__header">
@@ -450,6 +456,7 @@ function renderMatchCard(match, index) {
               placeholder="Ex : 3.16"
               value="${bookmakerOdds ? bookmakerOdds.toFixed(2) : ""}"
               data-dh-bookmaker-odds
+              ${analysisEditable ? "" : "disabled"}
               aria-describedby="draw-odds-help-${matchId}"
             >
           </div>
@@ -478,9 +485,9 @@ function renderMatchCard(match, index) {
       ${renderHistory(storedWorkflow, match)}
 
       <footer class="dh-match-card__footer">
-        ${renderContextActions(workflowState)}
+        ${renderContextActions(workflowState, canReopenAnalysis)}
         <div data-dh-bet-container ${state.isValue ? "" : "hidden"}>
-          ${renderBetForm(index, matchId)}
+          ${renderBetForm(index, matchId, analysisEditable)}
         </div>
         <div data-dh-pass-container ${state.isValue ? "hidden" : ""}>
           ${renderNoBet(state)}
@@ -569,12 +576,14 @@ function renderAnalysisDetails(match, state, confidence) {
   `;
 }
 
-function renderContextActions(workflowState) {
+function renderContextActions(workflowState, canReopenAnalysis = false) {
   const primary = workflowState === "new"
     ? ["start", "Commencer"]
     : workflowState === "pending"
       ? ["complete", "Terminer l’analyse"]
-      : ["history", workflowState === "resulted" ? "Voir l’évaluation" : "Voir l’historique"];
+      : canReopenAnalysis
+        ? ["edit", "Modifier l’analyse"]
+        : ["history", workflowState === "resulted" ? "Voir l’évaluation" : "Voir l’historique"];
 
   return `
     <div class="dh-context-actions">
@@ -631,11 +640,11 @@ function renderTimelineStep(label, complete) {
   `;
 }
 
-function renderBetForm(index, matchId) {
+function renderBetForm(index, matchId, editableBeforeKickoff = true) {
   return `
     <div class="dh-bet-panel">
       <label class="dh-check" for="draw-placed-${matchId}">
-        <input type="checkbox" id="draw-placed-${matchId}">
+        <input type="checkbox" id="draw-placed-${matchId}" ${editableBeforeKickoff ? "" : "disabled"}>
         <span>
           <strong>Pari placé</strong>
           <small>Confirmer le suivi de cette décision.</small>
@@ -652,6 +661,7 @@ function renderBetForm(index, matchId) {
             step="0.01"
             inputmode="decimal"
             placeholder="Ex : 10"
+            ${editableBeforeKickoff ? "" : "disabled"}
           >
           <span>€</span>
         </div>
@@ -661,6 +671,7 @@ function renderBetForm(index, matchId) {
         type="button"
         class="sl-button sl-button-primary dh-save-button"
         onclick="saveDrawHunterBet(${index})"
+        ${editableBeforeKickoff ? "" : "disabled"}
       >
         Enregistrer
         <span aria-hidden="true">→</span>
@@ -679,6 +690,11 @@ function renderNoBet(state) {
       </div>
     </div>
   `;
+}
+
+function isBeforeKickoff(date) {
+  const kickoff = Date.parse(date || "");
+  return Number.isFinite(kickoff) && kickoff > Date.now();
 }
 
 function buildStats(matches, meta) {

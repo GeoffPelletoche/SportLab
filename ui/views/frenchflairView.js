@@ -209,6 +209,11 @@ function renderMatchCard(match, index) {
   const id = safeAttribute(match.id);
   const workflow = getFrenchFlairMatchWorkflow(match.id);
   const workflowState = deriveFrenchFlairWorkflowState(match, workflow);
+  const editableBeforeKickoff = isBeforeKickoff(match?.date);
+  const canReopenAnalysis =
+    workflowState === "awaiting_result" &&
+    editableBeforeKickoff &&
+    workflow?.placed !== true;
 
   return `
     <article
@@ -292,7 +297,7 @@ function renderMatchCard(match, index) {
 
       ${renderWorkflowTimeline(workflowState)}
       <footer class="ff-match-card__footer ff-workflow-actions">
-        ${renderWorkflowActions(workflowState, id, predictionAvailable)}
+        ${renderWorkflowActions(workflowState, id, predictionAvailable, canReopenAnalysis)}
         <div class="ff-card-status"><i></i><span>${workflowStatusNote(workflowState)}</span></div>
       </footer>
 
@@ -318,8 +323,14 @@ function renderWorkflowTimeline(state) {
   </div>`;
 }
 
-function renderWorkflowActions(state, id, predictionAvailable) {
-  const primary = state === "new" ? ["start","Commencer"] : state === "pending" ? ["continue","Continuer"] : ["history", state === "resulted" ? "Voir l’évaluation" : "Historique"];
+function renderWorkflowActions(state, id, predictionAvailable, canReopenAnalysis = false) {
+  const primary = state === "new"
+    ? ["start","Commencer"]
+    : state === "pending"
+      ? ["continue","Continuer"]
+      : canReopenAnalysis
+        ? ["edit","Modifier l’analyse"]
+        : ["history", state === "resulted" ? "Voir l’évaluation" : "Historique"];
   return `<div class="ff-workflow-actions__buttons">
     ${predictionAvailable && ["new","pending"].includes(state) ? `<button type="button" class="sl-button sl-button-primary ff-analyse-button" onclick="analyzeFrenchFlairValue('${id}')"><span>Analyser la VALUE</span><span aria-hidden="true">→</span></button>` : ""}
     <button type="button" class="sl-button sl-button-secondary" data-ff-action="${primary[0]}">${primary[1]}</button>
@@ -333,6 +344,11 @@ function renderWorkflowHistory(workflow, match) {
   const base = { label:"Match importé", note:`${match.home || "Équipe"} vs ${match.away || "Équipe"}`, at:workflow?.createdAt || Date.parse(match.date || "") || Date.now() };
   const events = [base, ...(Array.isArray(workflow?.history) ? workflow.history : [])];
   return `<section class="ff-workflow-history" data-ff-history hidden><strong>Journal de la rencontre</strong>${events.map(event => `<article><time>${formatCompactDateTime(event.at)}</time><div><b>${safe(event.label || "Événement")}</b>${event.note ? `<p>${safe(event.note)}</p>` : ""}</div></article>`).join("")}</section>`;
+}
+
+function isBeforeKickoff(date) {
+  const kickoff = Date.parse(date || "");
+  return Number.isFinite(kickoff) && kickoff > Date.now();
 }
 
 function workflowStatusNote(state) {
