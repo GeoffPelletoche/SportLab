@@ -35,10 +35,11 @@ import {
 import { renderCloudDashboard } from "../ui/views/cloudDashboardView.js";
 import { renderRecoveryCenter } from "../ui/views/recoveryCenterView.js";
 import { renderModelPerformance } from "../ui/views/modelPerformanceView.js";
-import { createPerformanceRepository } from "../core/performance/performanceRepository.js";
 import { buildModelPerformance } from "../core/performance/modelPerformanceEngine.js";
+import { createPerformanceRepository } from "../core/performance/performanceRepository.js";
 import { capturePredictionDataset } from "../core/learning/learningDatasetBuilder.js";
 import { buildLearningSummary, getLearningRecords } from "../core/learning/learningStore.js";
+import { getBets } from "../core/stores/betsStore.js";
 import { buildCalibrationDashboard } from "../core/calibration/calibrationEngine.js";
 import { renderCalibration } from "../ui/views/calibrationView.js";
 
@@ -67,7 +68,12 @@ export function renderApplication(app, data = {}) {
 
   const performanceRepository = createPerformanceRepository();
   const modelPerformanceHtml = renderModelPerformance({
-    performance: buildModelPerformance(performanceRepository.collectFromStorage()),
+    performance: buildModelPerformance({
+      dataset: learningDataset,
+      learning: learningRecords,
+      bets: getBets(),
+      legacy: performanceRepository.read()
+    }),
     learningCount: learningDataset.length
   });
 
