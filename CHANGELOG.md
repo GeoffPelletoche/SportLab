@@ -1,3 +1,14 @@
+# SportLab V11.3.3 — Simplification UX Dashboard & Pipeline DrawHunter
+
+- Correction du pipeline DrawHunter pour utiliser les statuts workflow V10/V11 (`new`, `pending`, `awaiting_result`, `resulted`, `archived`).
+- Le nombre « À analyser » reflète désormais les rencontres réellement encore à traiter.
+- Suppression du scoreboard redondant dans l’en-tête DrawHunter.
+- Suppression du bloc « Priorités » de l’accueil.
+- Suppression de la section « Vue d’ensemble » redondante.
+- Suppression des compteurs VALUE de l’accueil et des cartes modules.
+- Le cockpit affiche simplement le nombre de matchs disponibles, sans message « aucune opportunité ».
+- Les cartes modules utilisent les états workflow pour leur compteur « À analyser ».
+
 ## 11.3.2 — Performance Engine Fix
 - Performances lit le Learning Store pour les prédictions évaluées et la qualité des décisions.
 - ROI et profit proviennent exclusivement du Bet Store unifié.
