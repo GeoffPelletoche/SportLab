@@ -1,3 +1,12 @@
+import {
+  deriveDrawHunterWorkflowState,
+  getDrawHunterMatchWorkflow
+} from "../../core/stores/drawHunterWorkflowStore.js";
+import {
+  deriveFrenchFlairWorkflowState,
+  getFrenchFlairMatchWorkflow
+} from "../../core/stores/frenchFlairWorkflowStore.js";
+
 /**
  * SPORTLAB V6.3.7 — PACK 4
  * DASHBOARD PREMIUM V2
@@ -147,7 +156,6 @@ function renderPremiumHome({
 
   const totals = {
     matches: drawhunterStats.matches + frenchflairStats.matches,
-    value: drawhunterStats.value + frenchflairStats.value,
     placed: drawhunterStats.placed + frenchflairStats.placed,
     pending: toNumber(dashboard?.counters?.pending),
     settled: toNumber(dashboard?.counters?.settled)
@@ -182,13 +190,6 @@ function renderPremiumHome({
         frenchflairStats
       })}
 
-      ${renderPriorityStrip({
-        totals,
-        syncErrors,
-        drawhunterStats,
-        frenchflairStats
-      })}
-
       <section class="dashboard-v2-workspace">
         <div class="dashboard-v2-main sl-stack sl-stack-lg">
           ${renderModuleSection({
@@ -198,7 +199,6 @@ function renderPremiumHome({
             frenchflairPayload
           })}
 
-          ${renderOverview({ totals, roi })}
         </div>
 
         <aside class="dashboard-v2-sidebar sl-stack">
@@ -289,7 +289,6 @@ function renderHero({
 
       <div class="dashboard-v2-scoreboard" aria-label="Résumé du tableau de bord">
         ${renderHeroMetric(totals.matches, "Matchs")}
-        ${renderHeroMetric(totals.value, "VALUE", totals.value > 0 ? "sl-positive" : "")}
         ${renderHeroMetric(formatSignedPercent(roi), "ROI réglé", roiClass(roi))}
       </div>
     </section>
@@ -464,14 +463,12 @@ function renderModuleCard({
   page
 }) {
   const hasError = meta?.error === true;
-  const hasValue = stats.value > 0;
 
   return `
     <article
       class="
         dashboard-v2-module sl-card
         dashboard-v2-module-${escapeAttribute(type)}
-        ${hasValue ? "has-value" : ""}
         ${hasError ? "has-error" : ""}
       "
       data-module="${escapeAttribute(type)}"
@@ -491,15 +488,9 @@ function renderModuleCard({
         </span>
       </header>
 
-      <div class="dashboard-v2-module-focus">
-        <strong class="${hasValue ? "sl-positive" : ""}">
-          ${formatInteger(stats.value)}
-        </strong>
-        <span>opportunité${stats.value > 1 ? "s" : ""} VALUE</span>
-      </div>
 
       <div class="dashboard-v2-module-stats">
-        ${renderModuleStat(stats.matches, "À analyser")}
+        ${renderModuleStat(stats.pending, "À analyser")}
         ${renderModuleStat(stats.placed, "Paris placés")}
         ${renderModuleStat(formatSyncDate(meta?.syncedAt), "Synchronisé")}
       </div>
@@ -813,11 +804,22 @@ function buildModuleStats({
     bet => normalizeText(bet?.source) === normalizedSource
   );
 
-  const value = matches.filter(
-    match => isValueDecision(
-      match?.finalDecision ??
-      match?.decision
-    )
+  const states = matches.map(match => {
+    if (normalizedSource === "drawhunter") {
+      return deriveDrawHunterWorkflowState(
+        match,
+        getDrawHunterMatchWorkflow(match?.id)
+      );
+    }
+
+    return deriveFrenchFlairWorkflowState(
+      match,
+      getFrenchFlairMatchWorkflow(match?.id)
+    );
+  });
+
+  const pending = states.filter(state =>
+    ["new", "pending"].includes(state)
   ).length;
 
   const placed = sourceBets.filter(
@@ -826,35 +828,26 @@ function buildModuleStats({
 
   return {
     matches: matches.length,
-    value,
+    pending,
     placed
   };
 }
 
-function isValueDecision(value) {
-  return ["VALUE", "VALUE BET", "BET"].includes(
-    String(value || "").trim().toUpperCase()
-  );
-}
 
 function buildHeroSentence(totals) {
   if (totals.matches <= 0) {
     return "Aucun match n’est disponible pour le moment. Tu peux vérifier la synchronisation ou consulter ton historique.";
   }
 
-  if (totals.value > 0) {
-    return `${formatInteger(totals.matches)} matchs sont disponibles, dont ${formatInteger(totals.value)} opportunité${totals.value > 1 ? "s" : ""} VALUE à examiner.`;
-  }
-
-  return `${formatInteger(totals.matches)} matchs sont disponibles. Aucune opportunité ne dépasse encore les seuils VALUE.`;
+  return `${formatInteger(totals.matches)} matchs sont disponibles.`;
 }
 
 function getSmartAnalysisTarget({
   drawhunterStats,
   frenchflairStats
 }) {
-  if (drawhunterStats.value > 0 || frenchflairStats.value > 0) {
-    return drawhunterStats.value >= frenchflairStats.value
+  if (drawhunterStats.pending > 0 || frenchflairStats.pending > 0) {
+    return drawhunterStats.pending >= frenchflairStats.pending
       ? "drawhunter"
       : "frenchflair";
   }
@@ -877,19 +870,9 @@ function getSmartAnalysisLabel({
     return "✅ Aucune analyse en attente";
   }
 
-  const targetStats =
-    target === "drawhunter"
-      ? drawhunterStats
-      : frenchflairStats;
-
-  const targetName =
-    target === "drawhunter"
-      ? "DrawHunter"
-      : "FrenchFlair";
-
-  if (targetStats.value > 0) {
-    return `💎 Voir les opportunités ${targetName}`;
-  }
+  const targetName = target === "drawhunter"
+    ? "DrawHunter"
+    : "FrenchFlair";
 
   return `▶ Continuer dans ${targetName}`;
 }

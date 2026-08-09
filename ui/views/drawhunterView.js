@@ -70,23 +70,7 @@ function renderHero(stats, meta) {
         </div>
       </div>
 
-      <div class="dh-hero__scoreboard" aria-label="Synthèse DrawHunter">
-        ${renderHeroMetric("Matchs", stats.total, "Rencontres visibles")}
-        ${renderHeroMetric("À traiter", stats.pending, "Action requise")}
-        ${renderHeroMetric("VALUE", stats.value, "Opportunités détectées", "positive")}
-        ${renderHeroMetric("Progression", `${stats.progress}%`, "Analyses qualifiées")}
-      </div>
     </header>
-  `;
-}
-
-function renderHeroMetric(label, value, note, tone = "") {
-  return `
-    <article class="dh-hero-metric ${tone ? `dh-hero-metric--${tone}` : ""}">
-      <span>${label}</span>
-      <strong>${safe(value)}</strong>
-      <small>${note}</small>
-    </article>
   `;
 }
 
@@ -95,26 +79,26 @@ function renderWorkflow(stats) {
     {
       label: "Nouveau",
       note: "Match importé",
-      count: stats.total,
-      state: stats.total > 0 ? "active" : "idle"
+      count: stats.newlyImported,
+      state: stats.newlyImported > 0 ? "active" : "idle"
     },
     {
       label: "Analyse",
       note: "Modèle disponible",
-      count: stats.analyzed,
-      state: stats.analyzed > 0 ? "active" : "idle"
+      count: stats.pending,
+      state: stats.pending > 0 ? "active" : "idle"
     },
     {
       label: "Décision",
       note: "VALUE ou passage",
-      count: stats.decided,
-      state: stats.decided > 0 ? "active" : "idle"
+      count: stats.awaitingResult,
+      state: stats.awaitingResult > 0 ? "active" : "idle"
     },
     {
       label: "Suivi",
       note: "Pari et résultat",
-      count: stats.tracked,
-      state: stats.tracked > 0 ? "active" : "idle"
+      count: stats.resulted + stats.archived,
+      state: (stats.resulted + stats.archived) > 0 ? "active" : "idle"
     }
   ];
 
@@ -157,10 +141,6 @@ function renderWorkspace(matches, meta, stats) {
             <h2 id="dh-workspace-title">Matchs à examiner</h2>
           </div>
 
-          <div class="dh-workspace__summary" aria-label="Résumé des cartes">
-            <span>${stats.total} visible${stats.total > 1 ? "s" : ""}</span>
-            ${stats.hidden > 0 ? `<span>${stats.hidden} déjà traité${stats.hidden > 1 ? "s" : ""}</span>` : ""}
-          </div>
         </div>
 
         ${matches.length === 0
@@ -699,19 +679,40 @@ function isBeforeKickoff(date) {
 
 function buildStats(matches, meta) {
   const total = matches.length;
-  const states = matches.map(match => deriveDrawHunterWorkflowState(match, getDrawHunterMatchWorkflow(match?.id)));
-  const analyzedStates = ["analyzed", "decided", "value", "tracked", "resulted", "archived"];
-  const decidedStates = ["decided", "value", "tracked", "resulted", "archived"];
-  const analyzed = states.filter(state => analyzedStates.includes(state)).length;
-  const decided = states.filter(state => decidedStates.includes(state)).length;
-  const value = states.filter(state => state === "value").length;
-  const pending = states.filter(state => ["new", "pending"].includes(state)).length;
-  const tracked = states.filter(state => ["tracked", "resulted"].includes(state)).length;
+  const states = matches.map(match =>
+    deriveDrawHunterWorkflowState(
+      match,
+      getDrawHunterMatchWorkflow(match?.id)
+    )
+  );
+
+  /*
+   * V11.3.3 — le workflow store normalise désormais les anciens statuts vers :
+   * new → pending → awaiting_result → resulted → archived.
+   * Le pipeline doit donc compter ces états réels, et non les anciens noms
+   * analyzed / decided / value / tracked.
+   */
+  const newlyImported = states.filter(state => state === "new").length;
+  const pending = states.filter(state => state === "pending").length;
+  const awaitingResult = states.filter(state => state === "awaiting_result").length;
   const resulted = states.filter(state => state === "resulted").length;
   const archived = states.filter(state => state === "archived").length;
-  const progress = total > 0 ? Math.round((decided / total) * 100) : 0;
 
-  return { total, analyzed, decided, value, pending, tracked, resulted, archived, progress, hidden: toFiniteNumber(meta?.hiddenTotal, 0) };
+  const completed = awaitingResult + resulted + archived;
+  const progress = total > 0
+    ? Math.round((completed / total) * 100)
+    : 0;
+
+  return {
+    total,
+    newlyImported,
+    pending,
+    awaitingResult,
+    resulted,
+    archived,
+    progress,
+    hidden: toFiniteNumber(meta?.hiddenTotal, 0)
+  };
 }
 
 function getMatchState(match, workflowState = null) {
