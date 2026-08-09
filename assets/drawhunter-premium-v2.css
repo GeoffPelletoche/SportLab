@@ -19,7 +19,7 @@
   position:relative;
   overflow:hidden;
   display:grid;
-  grid-template-columns:minmax(0,1.35fr) minmax(360px,.8fr);
+  grid-template-columns:minmax(0,1fr);
   gap:28px;
   padding:30px;
   border:1px solid rgba(79,140,255,.25);
