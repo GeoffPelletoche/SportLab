@@ -1,3 +1,8 @@
+## 11.3.2 — Performance Engine Fix
+- Performances lit le Learning Store pour les prédictions évaluées et la qualité des décisions.
+- ROI et profit proviennent exclusivement du Bet Store unifié.
+- Suppression du balayage générique de localStorage dans la vue Performances.
+
 ## 11.3.1 — Settlement DrawHunter & analyses réouvrables
 
 - Règlement automatique des paris DrawHunter via `/football/game-result`.

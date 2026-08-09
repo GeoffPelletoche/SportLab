@@ -1,6 +1,6 @@
 {
   "project": "SportLab",
-  "version": "11.3.1",
+  "version": "11.3.2",
   "pack": "Sprint 7.1.1B — Cloud Integration",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
@@ -181,8 +181,8 @@
     "docs/SPRINT7.1.1B_CLOUD_INTEGRATION.md",
     "docs/SPRINT7.1.1B_VALIDATION.md"
   ],
-  "name": "SportLab V11.3.1",
-  "short_name": "SportLab V11.3.1",
+  "name": "SportLab V11.3.2",
+  "short_name": "SportLab V11.3.2",
   "calibration_engine": {
     "status": "active_passive",
     "source": "sportlab_learning_v1",
