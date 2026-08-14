@@ -39,7 +39,7 @@ export async function loadDrawHunterMatches() {
       ...meta,
       visibleTotal: matches.length,
       hiddenTotal: 0,
-      model: "V8_RECENCY_WEIGHTED_MULTI_SEASON"
+      model: "V11_3_4_DRAW_RATE_ANCHORED"
     }
   };
 }
