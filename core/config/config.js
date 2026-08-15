@@ -1,7 +1,7 @@
 export const CONFIG = {
   appName: "SportLab V10.1",
 
-  analysisWindowDays: 7,
+  analysisWindowDays: 3,
 
   api: {
     workerBaseUrl: "https://sportlab-api-bridge.geoffrey-pelletier.workers.dev"
