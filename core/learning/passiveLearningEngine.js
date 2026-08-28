@@ -7,7 +7,8 @@ export function recordPassiveLearning(snapshot, evaluation, game, evaluatedAt, s
   const bet = getBets().find(item => String(item.matchId) === String(snapshot.matchId));
   const decisionQuality = evaluation.decisionQuality || null;
   const predictionCorrect = evaluation.result === "WON";
-  const decisionCorrect = ["GOOD_PASS", "GOOD_VALUE", "PUSH", "NEUTRAL_PASS"].includes(decisionQuality);
+  const explicitDecision = evaluation.explicitDecision === true;
+  const decisionCorrect = explicitDecision && ["GOOD_PASS", "GOOD_VALUE", "PUSH", "NEUTRAL_PASS"].includes(decisionQuality);
   return saveLearningRecord({
     learningId: `${snapshot.id}:${snapshot.modelVersion}`,
     snapshotId: snapshot.id,
@@ -23,7 +24,8 @@ export function recordPassiveLearning(snapshot, evaluation, game, evaluatedAt, s
     probability: snapshot.probability,
     confidence: snapshot.confidence,
     modelDecision: snapshot.modelDecision,
-    userDecision: bet?.placed ? "BET" : "NO_BET",
+    userDecision: explicitDecision ? (bet?.placed ? "BET" : "NO_BET") : "NOT_DECIDED",
+    explicitDecision,
     placed: Boolean(bet?.placed),
     odds: bet?.odds ?? snapshot.odds ?? analysis?.odds ?? null,
     stake: bet?.stake || 0,

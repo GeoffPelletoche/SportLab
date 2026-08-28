@@ -5,6 +5,9 @@ import { saveDrawHunterMatchWorkflow } from "../stores/drawHunterWorkflowStore.j
 import { saveFrenchFlairMatchWorkflow } from "../stores/frenchFlairWorkflowStore.js";
 import { getAnalysisForMatch, saveAnalysis } from "../stores/analysisStore.js";
 import { recordPassiveLearning } from "../learning/passiveLearningEngine.js";
+import { getBets } from "../stores/betsStore.js";
+import { getDrawHunterMatchWorkflow } from "../stores/drawHunterWorkflowStore.js";
+import { getFrenchFlairMatchWorkflow } from "../stores/frenchFlairWorkflowStore.js";
 
 const DATASET_KEY = "sportlab.v7.learning.dataset";
 
@@ -23,7 +26,8 @@ export async function evaluatePendingPredictions(storage = globalThis.localStora
     try {
       const game = await fetchResult(snapshot);
       if (!game?.isFinished) continue;
-      const evaluation = evaluateSnapshot(snapshot, game);
+      const decisionContext = resolveDecisionContext(snapshot);
+      const evaluation = evaluateSnapshot(snapshot, game, decisionContext);
       const evaluatedAt = new Date().toISOString();
       Object.assign(snapshot, evaluation, { evaluatedAt, finalGame: game });
       persistLifecycleEvaluation(snapshot, evaluation, game, evaluatedAt);
@@ -66,8 +70,9 @@ async function fetchResult(snapshot) {
   return payload?.response;
 }
 
-function evaluateSnapshot(snapshot, game) {
-  const decision = String(snapshot.modelDecision || "").toUpperCase();
+function evaluateSnapshot(snapshot, game, decisionContext = null) {
+  const decision = String(decisionContext?.decision || snapshot.modelDecision || "").toUpperCase();
+  const hasExplicitDecision = Boolean(decisionContext?.explicit);
   if (snapshot.moduleId === "drawhunter") {
     const predictedDraw = Number(snapshot.probability || 0) >= 0.30;
     const actualDraw = game.isDraw === true;
@@ -75,7 +80,12 @@ function evaluateSnapshot(snapshot, game) {
     return {
       result: won ? "WON" : "LOST",
       eventOccurred: actualDraw,
-      decisionQuality: decision.includes("NO") ? (actualDraw ? "MISSED_OPPORTUNITY" : "GOOD_PASS") : (actualDraw ? "GOOD_VALUE" : "BAD_VALUE")
+      decisionQuality: !hasExplicitDecision
+        ? "NOT_DECIDED"
+        : decision.includes("NO")
+          ? (actualDraw ? "MISSED_OPPORTUNITY" : "GOOD_PASS")
+          : (actualDraw ? "GOOD_VALUE" : "BAD_VALUE"),
+      explicitDecision: hasExplicitDecision
     };
   }
   const total = Number(game.totalPoints);
@@ -88,8 +98,46 @@ function evaluateSnapshot(snapshot, game) {
     result,
     eventOccurred: result === "PUSH" ? null : result === "WON",
     predictionError:Number.isFinite(predicted) ? Math.abs(predicted-total) : null,
-    decisionQuality: decision.includes("NO") ? (result === "LOST" ? "GOOD_PASS" : result === "WON" ? "MISSED_OPPORTUNITY" : "NEUTRAL_PASS") : (result === "WON" ? "GOOD_VALUE" : result === "LOST" ? "BAD_VALUE" : "PUSH")
+    decisionQuality: !hasExplicitDecision
+      ? "NOT_DECIDED"
+      : decision.includes("NO")
+        ? (result === "LOST" ? "GOOD_PASS" : result === "WON" ? "MISSED_OPPORTUNITY" : "NEUTRAL_PASS")
+        : (result === "WON" ? "GOOD_VALUE" : result === "LOST" ? "BAD_VALUE" : "PUSH"),
+    explicitDecision: hasExplicitDecision
   };
+}
+
+
+function resolveDecisionContext(snapshot = {}) {
+  const matchId = snapshot.matchId;
+  const bet = getBets().find(item => String(item?.matchId) === String(matchId));
+  const workflow = snapshot.moduleId === "drawhunter"
+    ? getDrawHunterMatchWorkflow(matchId)
+    : getFrenchFlairMatchWorkflow(matchId);
+  const analysis = getAnalysisForMatch(matchId);
+
+  const candidates = [
+    workflow?.decision,
+    analysis?.finalDecision,
+    analysis?.decision,
+    bet?.decision
+  ];
+
+  for (const candidate of candidates) {
+    const raw = String(candidate || "").trim().toUpperCase();
+    if (!raw) continue;
+    if (raw.includes("NO BET") || raw.includes("NO VALUE") || raw.includes("PAS DE PARI") || raw.includes("PASS")) {
+      return { decision: "NO BET", explicit: true };
+    }
+    if (raw === "VALUE" || raw.includes("VALUE BET") || raw.includes("BET VALUE")) {
+      return { decision: "VALUE BET", explicit: true };
+    }
+  }
+
+  if (bet?.placed === true) return { decision: "VALUE BET", explicit: true };
+  if (bet && bet?.placed === false) return { decision: "NO BET", explicit: true };
+
+  return { decision: snapshot.modelDecision || "", explicit: false };
 }
 
 

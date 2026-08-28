@@ -36,13 +36,15 @@ export function buildModelPerformance(input = []) {
   const learning = Array.isArray(input?.learning) ? input.learning : [];
   const bets = Array.isArray(input?.bets) ? input.bets : [];
   const legacy = Array.isArray(input?.legacy) ? input.legacy : [];
+  const analyses = Array.isArray(input?.analyses) ? input.analyses : [];
+  const workflows = input?.workflows && typeof input.workflows === "object" ? input.workflows : {};
   return {
-    drawhunter: summarize("drawhunter", dataset, learning, bets, legacy),
-    frenchflair: summarize("frenchflair", dataset, learning, bets, legacy)
+    drawhunter: summarize("drawhunter", dataset, learning, bets, legacy, analyses, workflows.drawhunter || {}),
+    frenchflair: summarize("frenchflair", dataset, learning, bets, legacy, analyses, workflows.frenchflair || {})
   };
 }
 
-function summarize(moduleId, dataset, learning, bets, legacy = []) {
+function summarize(moduleId, dataset, learning, bets, legacy = [], analyses = [], workflow = {}) {
   const predictions = unique(dataset.filter(item => moduleOf(item) === moduleId), item => `${item.id || item.matchId}:${item.modelVersion || "model"}`);
   const learningEvaluated = learning.filter(item => moduleOf(item) === moduleId && item?.evaluatedAt);
   // Compatibilité avec les évaluations V7–V11.1 déjà persistées avant le Learning Store.
@@ -66,10 +68,31 @@ function summarize(moduleId, dataset, learning, bets, legacy = []) {
   }
   const roi = stakes > 0 ? profit / stakes * 100 : 0;
 
-  const goodPasses = evaluated.filter(item => item.decisionQuality === "GOOD_PASS").length;
-  const missedOpportunities = evaluated.filter(item => item.decisionQuality === "MISSED_OPPORTUNITY").length;
-  const goodValues = evaluated.filter(item => item.decisionQuality === "GOOD_VALUE").length;
-  const badValues = evaluated.filter(item => item.decisionQuality === "BAD_VALUE").length;
+  /*
+   * V11.3.5 — la qualité de décision est reconstruite depuis la décision
+   * réellement sauvegardée (workflow / analyse / Bet Store), plutôt que
+   * depuis le snapshot brut capturé avant saisie de la cote.
+   *
+   * Cela répare également les anciennes évaluations DrawHunter déjà
+   * enregistrées avec GOOD_VALUE / BAD_VALUE par défaut.
+   */
+  const decisionEvaluations = evaluated
+    .map(item => ({
+      ...item,
+      resolvedDecisionQuality: resolveDecisionQuality({
+        item,
+        moduleId,
+        bets,
+        analyses,
+        workflow
+      })
+    }))
+    .filter(item => item.resolvedDecisionQuality);
+
+  const goodPasses = decisionEvaluations.filter(item => item.resolvedDecisionQuality === "GOOD_PASS").length;
+  const missedOpportunities = decisionEvaluations.filter(item => item.resolvedDecisionQuality === "MISSED_OPPORTUNITY").length;
+  const goodValues = decisionEvaluations.filter(item => item.resolvedDecisionQuality === "GOOD_VALUE").length;
+  const badValues = decisionEvaluations.filter(item => item.resolvedDecisionQuality === "BAD_VALUE").length;
   const decisionsEvaluated = goodPasses + missedOpportunities + goodValues + badValues;
   const decisionScore = decisionsEvaluated ? (goodPasses + goodValues) / decisionsEvaluated * 100 : 0;
 
@@ -87,6 +110,78 @@ function summarize(moduleId, dataset, learning, bets, legacy = []) {
     calibration: buildCalibration(calibrationRecords),
     goodPasses, missedOpportunities, goodValues, badValues, decisionsEvaluated, decisionScore
   };
+}
+
+function resolveDecisionQuality({ item = {}, moduleId, bets = [], analyses = [], workflow = {} } = {}) {
+  const matchId = item.matchId ?? item.id ?? null;
+  const bet = bets.find(candidate => String(candidate?.matchId) === String(matchId));
+  const analysis = analyses.find(candidate => String(candidate?.matchId) === String(matchId));
+  const workflowEntry = matchId !== null && matchId !== undefined ? workflow[String(matchId)] : null;
+
+  const decisionType = resolveDecisionType({
+    item,
+    bet,
+    analysis,
+    workflowEntry
+  });
+
+  if (!decisionType) {
+    return legacyDecisionQuality(item);
+  }
+
+  const occurred = eventOccurredOf(item, moduleId);
+  if (typeof occurred !== "boolean") return legacyDecisionQuality(item);
+
+  if (decisionType === "NO_VALUE") {
+    return occurred ? "MISSED_OPPORTUNITY" : "GOOD_PASS";
+  }
+  if (decisionType === "VALUE") {
+    return occurred ? "GOOD_VALUE" : "BAD_VALUE";
+  }
+  return null;
+}
+
+function resolveDecisionType({ item = {}, bet = null, analysis = null, workflowEntry = null } = {}) {
+  const candidates = [
+    workflowEntry?.decision,
+    analysis?.finalDecision,
+    analysis?.decision,
+    bet?.decision,
+    item?.modelDecision
+  ];
+
+  for (const value of candidates) {
+    const raw = String(value || "").trim().toUpperCase();
+    if (!raw) continue;
+    if (raw.includes("NO BET") || raw.includes("NO VALUE") || raw.includes("PAS DE PARI") || raw.includes("PASS")) {
+      return "NO_VALUE";
+    }
+    if (raw === "VALUE" || raw.includes("VALUE BET") || raw.includes("BET VALUE")) {
+      return "VALUE";
+    }
+  }
+
+  if (bet?.placed === true) return "VALUE";
+  if (bet && bet?.placed === false) return "NO_VALUE";
+  if (String(item?.userDecision || "").toUpperCase() === "BET") return "VALUE";
+  if (String(item?.userDecision || "").toUpperCase() === "NO_BET" && item?.explicitDecision === true) return "NO_VALUE";
+
+  return null;
+}
+
+function legacyDecisionQuality(item = {}) {
+  const value = String(item.decisionQuality || "").toUpperCase();
+  return ["GOOD_PASS", "MISSED_OPPORTUNITY", "GOOD_VALUE", "BAD_VALUE"].includes(value) ? value : null;
+}
+
+function eventOccurredOf(item = {}, moduleId) {
+  if (typeof item.eventOccurred === "boolean") return item.eventOccurred;
+
+  if (moduleId === "frenchflair" && typeof item.predictionCorrect === "boolean") {
+    return item.predictionCorrect;
+  }
+
+  return null;
 }
 
 function buildLegacyPerformance(records) {
