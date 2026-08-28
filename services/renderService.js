@@ -42,6 +42,8 @@ import { buildLearningSummary, getLearningRecords } from "../core/learning/learn
 import { getBets } from "../core/stores/betsStore.js";
 import { buildCalibrationDashboard } from "../core/calibration/calibrationEngine.js";
 import { renderCalibration } from "../ui/views/calibrationView.js";
+import { getDrawHunterWorkflow } from "../core/stores/drawHunterWorkflowStore.js";
+import { getFrenchFlairWorkflow } from "../core/stores/frenchFlairWorkflowStore.js";
 
 /**
  * SPORTLAB V6.3.1
@@ -72,7 +74,12 @@ export function renderApplication(app, data = {}) {
       dataset: learningDataset,
       learning: learningRecords,
       bets: getBets(),
-      legacy: performanceRepository.read()
+      legacy: performanceRepository.read(),
+      analyses: data.analyses || [],
+      workflows: {
+        drawhunter: getDrawHunterWorkflow(),
+        frenchflair: getFrenchFlairWorkflow()
+      }
     }),
     learningCount: learningDataset.length
   });

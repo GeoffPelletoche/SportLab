@@ -1,11 +1,10 @@
-# SportLab V11.3.4 — Recalibration du modèle DrawHunter
+# V11.3.5 — DrawHunter Decision Quality Fix
 
-- La probabilité de nul est désormais ancrée sur le taux de nuls pondéré des deux équipes.
-- Les profils faible score et équilibre attaque/défense deviennent des ajustements secondaires bornés.
-- Réduction de la surévaluation qui pouvait produire des cotes justes proches de 2.10 malgré un profil de nul autour de 33 %.
-- La cote juste reste calculée par `1 / probabilité`, sans correction visuelle artificielle.
-- Nouveau modèle DrawHunter `DH-11.3.4`, séparé des observations historiques précédentes pour le Learning/Calibration Engine.
-- FrenchFlair inchangé.
+- Corrige les compteurs Bonnes abstentions / Opportunités manquées dans Performances.
+- Reconstruit la décision réelle depuis le workflow, les analyses et le Bet Store.
+- Corrige aussi les futures évaluations du Passive Learning Engine.
+- Conserve la fenêtre d’analyse à J+3.
+- Aucun changement du Worker Cloudflare.
 
 # SportLab V11.3.3 — Simplification UX Dashboard & Pipeline DrawHunter
 
