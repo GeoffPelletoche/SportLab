@@ -32,6 +32,6 @@ test("V11.3.5 reconstruit les abstentions DrawHunter depuis le workflow réel", 
   assert.equal(performance.drawhunter.decisionScore, 50);
 });
 
-test("V11.3.5 conserve la fenêtre d'analyse à 3 jours", () => {
-  assert.equal(CONFIG.analysisWindowDays, 3);
+test("V11.3.6 conserve la fenêtre quotidienne à 1 jour", () => {
+  assert.equal(CONFIG.analysisWindowDays, 1);
 });

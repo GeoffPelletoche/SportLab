@@ -1,3 +1,11 @@
+# V11.3.6 — FrenchFlair : masquer les paris placés
+
+- Aligne le comportement FrenchFlair sur DrawHunter : dès qu’un pari est réellement placé, la rencontre n’est plus affichée dans l’atelier d’analyse.
+- La rencontre reste disponible dans Paris et Journal et continue d’être suivie par le moteur de règlement.
+- Les analyses sans pari, y compris NO VALUE, restent visibles et modifiables jusqu’au coup d’envoi.
+- Fenêtre d’analyse conservée à J+1.
+- Aucun changement du Worker Cloudflare.
+
 # V11.3.5 — DrawHunter Decision Quality Fix
 
 - Corrige les compteurs Bonnes abstentions / Opportunités manquées dans Performances.

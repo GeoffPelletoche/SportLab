@@ -15,7 +15,18 @@ import {
  */
 
 export function renderFrenchFlair(payload) {
-  const matches = sortByDate(payload?.matches || []);
+  /*
+   * V11.3.6 : alignement UX avec DrawHunter.
+   * Une fois un pari réellement placé, la rencontre quitte l’atelier
+   * FrenchFlair. Elle reste disponible dans Paris / Journal et continue
+   * d’être suivie par le settlement engine, mais l’analyse n’est plus
+   * affichée dans la liste de travail. Les analyses sans pari (VALUE ou
+   * NO VALUE) restent, elles, réouvrables jusqu’au coup d’envoi.
+   */
+  const matches = sortByDate((payload?.matches || []).filter(match => {
+    const workflow = getFrenchFlairMatchWorkflow(match?.id);
+    return workflow?.placed !== true;
+  }));
   const meta = payload?.meta || {};
   const stats = computePageStats(matches, meta);
 
