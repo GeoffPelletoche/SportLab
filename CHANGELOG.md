@@ -342,3 +342,7 @@
 ## V11.2.2 — Team Branding Paris & Journal
 - Logos des équipes ajoutés aux paris et aux entrées du Journal.
 - Métadonnées de branding persistées dans les nouveaux paris et analyses.
+
+## V11.3.7 — Correctif zoom iOS sur les mises
+- Empêche Safari iPhone de zoomer automatiquement lors de la saisie du montant misé dans DrawHunter et FrenchFlair.
+- Conserve le zoom/pinch utilisateur pour l’accessibilité : aucun `maximum-scale=1` ni `user-scalable=no` n’est ajouté.
