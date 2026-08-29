@@ -37,3 +37,16 @@
 .recovery-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;background:linear-gradient(135deg,rgba(20,184,166,.12),rgba(59,130,246,.08))}
 .recovery-hero h2,.recovery-action-card h3{margin:4px 0 8px}.recovery-actions-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.recovery-action-card{display:flex;flex-direction:column;align-items:flex-start}.recovery-action-card .sl-button{margin-top:auto}.recovery-action-icon{font-size:1.65rem}.recovery-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.recovery-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.07)}.recovery-row:last-child{border-bottom:0}.recovery-row>div{display:grid;gap:4px;min-width:0}.recovery-row strong{overflow-wrap:anywhere}.recovery-row small{color:var(--sl-muted)}.recovery-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0}.recovery-compare>div{padding:14px;border-radius:14px;background:rgba(255,255,255,.04)}.recovery-compare dl{display:grid;gap:8px;margin:12px 0 0}.recovery-compare dl div{display:flex;justify-content:space-between;gap:12px}.recovery-compare dt{color:var(--sl-muted)}.recovery-compare dd{margin:0;font-weight:800}.recovery-empty{padding:14px 0}.recovery-snapshot .sl-button{flex:0 0 auto}
 @media(max-width:1050px){.recovery-actions-grid{grid-template-columns:1fr 1fr}}@media(max-width:760px){.recovery-grid,.recovery-compare{grid-template-columns:1fr}.recovery-hero{align-items:flex-start;flex-direction:column}}@media(max-width:560px){.recovery-actions-grid{grid-template-columns:1fr}.recovery-row{align-items:flex-start;flex-direction:column}.recovery-row .sl-button{width:100%}}
+
+/* =========================================================
+   SportLab V11.3.7 — iOS stake input zoom fix
+   Safari on iPhone automatically zooms focused form controls
+   whose computed font size is below 16px. Keep stake fields at
+   16px without disabling user pinch-zoom/accessibility.
+   ========================================================= */
+@media (max-width: 760px) {
+  input[id^="draw-stake-"],
+  input[id^="ff-stake-"] {
+    font-size: 16px !important;
+  }
+}
