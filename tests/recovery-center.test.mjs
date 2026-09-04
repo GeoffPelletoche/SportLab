@@ -45,3 +45,29 @@ test("Recovery Center compare Local et Cloud sans mutation", async () => {
   assert.equal(preview.comparison.differences.find(item => item.key === "sportlab_analyses_v1").status, "different");
   assert.equal(JSON.parse(localStorage.getItem("sportlab_analyses_v1"))[0].id, 1);
 });
+
+test("Recovery Center ne journalise pas deux fois le même conflit", () => {
+  installBrowserMocks();
+  const listeners = new Map();
+  const eventBus = { on(name, handler) { listeners.set(name, handler); } };
+  const syncEngine = {
+    api: { snapshot: async () => ({ records: [] }) },
+    getStatus: () => ({ deviceId: "device-test" }),
+    syncNow: async () => ({ ok: true })
+  };
+  const recovery = createRecoveryManager({ syncEngine, eventBus, logger: { info() {} }, notifications: { success() {} } });
+  const handler = listeners.get("sync:conflict");
+  const payload = {
+    at: 12345,
+    conflicts: [{
+      namespace: "bets", key: "sportlab_bets_v3",
+      server: { namespace: "bets", key: "sportlab_bets_v3", version: 7, clientUpdatedAt: 100 },
+      client: { namespace: "bets", key: "sportlab_bets_v3", clientUpdatedAt: 200, fingerprint: "abc" }
+    }],
+    decisions: [{ namespace: "bets", key: "sportlab_bets_v3", winner: "client", serverTimestamp: 100, clientTimestamp: 200, serverVersion: 7, localFingerprint: "abc", serverFingerprint: "def" }]
+  };
+  handler(payload);
+  handler(payload);
+  assert.equal(recovery.listConflicts().length, 1);
+  assert.equal(recovery.listJournal().filter(item => item.type === "conflict").length, 1);
+});

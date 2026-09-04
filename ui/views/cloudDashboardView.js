@@ -33,6 +33,8 @@ export function renderCloudDashboard({ cloud = {}, storageSummary = {}, recovery
           ${renderRow("Appareil", cloud.deviceId ? shortId(cloud.deviceId) : "Non enregistré")}
           ${renderRow("Dernière raison", humanReason(cloud.lastReason))}
           ${renderRow("Dernière tentative", formatDate(cloud.lastAttemptAt))}
+          ${renderRow("Erreurs consécutives", formatInteger(cloud.consecutiveErrors))}
+          ${cloud.cloudBlockedUntil > Date.now() ? renderRow("Protection cloud", `Suspendue jusqu'à ${formatDate(cloud.cloudBlockedUntil)}`) : ""}
         </article>
 
         <article class="sl-card cloud-dashboard-card">
@@ -43,6 +45,8 @@ export function renderCloudDashboard({ cloud = {}, storageSummary = {}, recovery
           ${renderRow("Push cumulés", formatInteger(cloud.totalPushes))}
           ${renderRow("Pull cumulés", formatInteger(cloud.totalPulls))}
           ${renderRow("Conflits cumulés", formatInteger(cloud.totalConflicts))}
+          ${renderRow("Changements envoyés", formatInteger(cloud.totalAcceptedChanges))}
+          ${renderRow("Changements reçus", formatInteger(cloud.totalPulledChanges))}
           ${renderRow("Snapshots Recovery", formatInteger(recovery.snapshots?.length))}
         </article>
 

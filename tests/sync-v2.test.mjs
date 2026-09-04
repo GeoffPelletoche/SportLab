@@ -9,7 +9,9 @@ class MemoryStorage {
   removeItem(key) { this.values.delete(key); }
 }
 globalThis.localStorage = new MemoryStorage();
+globalThis.window = { dispatchEvent() {} };
 const { queueManager } = await import("../core/sync/queueManager.js");
+const { collectLocalChanges } = await import("../core/sync/localDataAdapter.js");
 
 test("queue V2 déduplique les changements par namespace et clé", () => {
   queueManager.clear();
@@ -26,6 +28,38 @@ test("queue V2 conserve un élément en échec avec backoff", () => {
   assert.equal(failed.attempts, 1);
   assert.ok(failed.nextAttemptAt > Date.now());
   assert.equal(failed.lastError, "offline");
+});
+
+test("queue V2 ne réinitialise pas le backoff pour le même fingerprint", () => {
+  const item = queueManager.list()[0];
+  const delayedUntil = item.nextAttemptAt;
+  queueManager.enqueue([{ ...item, payload: { n: 2 } }]);
+  const preserved = queueManager.list()[0];
+  assert.equal(preserved.attempts, 1);
+  assert.equal(preserved.nextAttemptAt, delayedUntil);
+});
+
+test("queue V2 réinitialise le backoff lorsqu'une nouvelle donnée arrive", () => {
+  queueManager.enqueue([{ namespace: "bets", key: "a", payload: { n: 3 }, fingerprint: "new-value", clientUpdatedAt: 3 }]);
+  const fresh = queueManager.list()[0];
+  assert.equal(fresh.attempts, 0);
+  assert.equal(fresh.nextAttemptAt, 0);
+});
+
+test("capture locale conserve le même timestamp tant que le fingerprint en attente ne change pas", () => {
+  localStorage.removeItem("sportlab.v7.cloud.meta");
+  localStorage.setItem("sportlab_bets_v3", JSON.stringify({ test: 1 }));
+  const first = collectLocalChanges().find(item => item.key === "sportlab_bets_v3");
+  assert.ok(first);
+  const second = collectLocalChanges().find(item => item.key === "sportlab_bets_v3");
+  assert.ok(second);
+  assert.equal(second.fingerprint, first.fingerprint);
+  assert.equal(second.clientUpdatedAt, first.clientUpdatedAt);
+  localStorage.setItem("sportlab_bets_v3", JSON.stringify({ test: 2 }));
+  const third = collectLocalChanges().find(item => item.key === "sportlab_bets_v3");
+  assert.ok(third);
+  assert.notEqual(third.fingerprint, first.fingerprint);
+  assert.ok(third.clientUpdatedAt >= first.clientUpdatedAt);
 });
 
 test("résolution LWW choisit la donnée la plus récente", () => {

@@ -69,6 +69,17 @@
 
 # Changelog
 
+## V11.3.9 — Correctif boucle de conflits / quota D1
+
+- Empêche `enqueue()` de réinitialiser le backoff lorsqu'un changement possède le même fingerprint.
+- Stabilise le `clientUpdatedAt` d'une modification locale tant qu'elle n'est pas acquittée.
+- Diffère les réessais après conflit (1 min → 5 min → 15 min → 1 h) au lieu de relancer immédiatement.
+- Déduplique les entrées identiques du Recovery Center pour éviter de remplir le journal avec le même conflit.
+- Ajoute un circuit breaker cloud après plusieurs erreurs consécutives et suspend les appels jusqu'au prochain reset UTC en cas de quota D1 quotidien atteint.
+- Conserve le correctif V11.3.8 de réduction de fréquence à 5 min, d'absence d'appel `me()` à chaque sync et de no-op D1.
+- Fenêtre d'analyse conservée à 1 jour.
+
+
 ## 10.1.2
 
 - Suppression de la cote DrawHunter simulée à 3,10.
@@ -343,6 +354,10 @@
 - Logos des équipes ajoutés aux paris et aux entrées du Journal.
 - Métadonnées de branding persistées dans les nouveaux paris et analyses.
 
-## V11.3.7 — Correctif zoom iOS sur les mises
-- Empêche Safari iPhone de zoomer automatiquement lors de la saisie du montant misé dans DrawHunter et FrenchFlair.
-- Conserve le zoom/pinch utilisateur pour l’accessibilité : aucun `maximum-scale=1` ni `user-scalable=no` n’est ajouté.
+## V11.3.8 — Stabilisation Cloud Sync / quota D1
+
+- cycle de synchronisation automatique porté de 30 s à 5 min ;
+- aucun cycle périodique lorsque l'onglet est masqué ;
+- suppression de l'appel `/v1/me` à chaque synchronisation ;
+- détection des écritures cloud strictement identiques afin d'éviter un INSERT/UPDATE et un change_log inutiles ;
+- classification explicite des dépassements quotidiens D1 dans le Worker.
