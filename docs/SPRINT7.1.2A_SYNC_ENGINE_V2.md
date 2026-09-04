@@ -39,3 +39,12 @@ La stratégie V2 est Last-Write-Wins à partir de `clientUpdatedAt`. Une version
 - `sync:complete`
 - `sync:error`
 - `cloud:status`
+
+## Stabilisation quota D1 — V11.3.8
+
+Le cycle périodique est désormais de 5 minutes. Les synchronisations restent immédiates sur démarrage, retour réseau, retour au premier plan et modification locale. Les cycles périodiques sont ignorés lorsque l'onglet est masqué. La vérification `/v1/me` n'est plus effectuée à chaque cycle : le push/pull porte déjà l'authentification et retourne une erreur si le jeton est invalide.
+
+
+### V11.3.9 — Protection contre les boucles de conflits
+
+Le Sync Engine conserve le fingerprint et le timestamp d'une modification locale en attente, préserve les backoffs de file pour un changement identique, différé les réessais après conflit et active un circuit breaker après erreurs répétées. Le Recovery Center déduplique les conflits déjà enregistrés.
