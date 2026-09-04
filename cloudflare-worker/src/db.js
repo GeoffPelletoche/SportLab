@@ -48,9 +48,14 @@ export async function pushChanges(env, userId, deviceId, changes) {
       conflicts.push({ namespace: change.namespace, key: change.key, current });
       continue;
     }
+    const incomingPayload = change.deleted ? null : JSON.stringify(change.payload ?? null);
+    if (current && Number(current.deleted) === (change.deleted ? 1 : 0) && current.payload === incomingPayload) {
+      accepted.push({ namespace: change.namespace, key: change.key, version: Number(current.version), serverUpdatedAt: Number(current.server_updated_at || Date.now()) });
+      continue;
+    }
     const now = Date.now();
     const nextVersion = current ? Number(current.version) + 1 : 1;
-    const payload = change.deleted ? null : JSON.stringify(change.payload ?? null);
+    const payload = incomingPayload;
     await env.DB.batch([
       env.DB.prepare(`
         INSERT INTO sync_records

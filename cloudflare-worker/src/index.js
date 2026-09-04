@@ -17,9 +17,15 @@ export default {
       return new Response(response.body, { status: response.status, headers });
     } catch (error) {
       const known = error instanceof HttpError;
-      const status = known ? error.status : 500;
-      if (!known) console.error('Unhandled worker error', error);
-      return json({ error: { code: known ? error.code : 'internal_error', message: known ? error.message : 'Erreur interne.', details: known ? error.details : undefined } }, status, { ...corsHeaders(origin), 'cache-control': 'no-store', 'x-content-type-options': 'nosniff' });
+      const rawMessage = error instanceof Error ? error.message : String(error);
+      const quota = /D1.*(free tier|daily).*(row read|row write)|exceeded D1.*daily row/i.test(rawMessage);
+      const status = quota ? 429 : (known ? error.status : 500);
+      const code = quota ? 'd1_daily_quota_exceeded' : (known ? error.code : 'internal_error');
+      const message = quota
+        ? 'Quota quotidienne D1 dépassé. Vérifie les Row Metrics Cloudflare : lectures/écritures.'
+        : (known ? error.message : 'Erreur interne.');
+      if (!known && !quota) console.error('Unhandled worker error', error);
+      return json({ error: { code, message, details: known ? error.details : undefined } }, status, { ...corsHeaders(origin), 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer' });
     }
   }
 };

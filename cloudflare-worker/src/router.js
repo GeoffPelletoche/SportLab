@@ -16,7 +16,7 @@ export async function route(request, env) {
   const path = url.pathname.replace(/\/+$/, '') || '/';
 
   if (request.method === 'GET' && path === '/health') {
-    return json({ ok: true, service: 'sportlab-cloud-sync', version: '7.1.2A', environment: env.APP_ENV || 'unknown', time: Date.now() });
+    return json({ ok: true, service: 'sportlab-cloud-sync', version: '7.1.3', environment: env.APP_ENV || 'unknown', time: Date.now() });
   }
 
   if (request.method === 'POST' && path === '/v1/auth/bootstrap') {
@@ -61,7 +61,7 @@ export async function route(request, env) {
   if (request.method === 'GET' && path === '/v1/sync/snapshot') return json({ records: await getSnapshot(env, user.id) });
 
   if (request.method === 'GET' && path === '/v1/backup') {
-    return json({ version: '7.1.2A', exportedAt: Date.now(), records: await getSnapshot(env, user.id) });
+    return json({ version: '7.1.3', exportedAt: Date.now(), records: await getSnapshot(env, user.id) });
   }
 
   if (request.method === 'POST' && path === '/v1/restore') {
