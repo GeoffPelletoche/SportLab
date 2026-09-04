@@ -136,17 +136,28 @@ export function createRecoveryManager({ syncEngine, eventBus, logger, notificati
 
   function recordConflicts(payload = {}) {
     const existing = read(CONFLICTS_KEY);
-    const conflicts = (payload.conflicts || payload.decisions || []).map((conflict, index) => ({
-      id: uid(`conflict-${index}`), at: payload.at || now(), status: "resolved-auto",
-      namespace: conflict.namespace || conflict.current?.namespace || "unknown",
-      key: conflict.key || conflict.current?.key || conflict.current?.record_key || "unknown",
-      winner: payload.decisions?.[index]?.winner || conflict.winner || "lww",
-      serverTimestamp: payload.decisions?.[index]?.serverTimestamp || 0,
-      clientTimestamp: payload.decisions?.[index]?.clientTimestamp || 0
-    }));
+    const existingIdentities = new Set(existing.map(item => [
+      item.namespace, item.key, item.serverVersion, item.serverTimestamp, item.clientTimestamp, item.winner, item.localFingerprint
+    ].join("|")));
+    const conflicts = (payload.conflicts || payload.decisions || []).map((conflict, index) => {
+      const decision = payload.decisions?.[index] || conflict;
+      return {
+        id: uid(`conflict-${index}`), at: payload.at || now(), status: "resolved-auto",
+        namespace: conflict.namespace || conflict.current?.namespace || decision.namespace || "unknown",
+        key: conflict.key || conflict.current?.key || conflict.current?.record_key || decision.key || "unknown",
+        winner: decision.winner || conflict.winner || "lww",
+        serverTimestamp: decision.serverTimestamp || 0,
+        clientTimestamp: decision.clientTimestamp || 0,
+        serverVersion: Number(decision.serverVersion || conflict.server?.version || conflict.current?.version || 0),
+        localFingerprint: String(decision.localFingerprint || conflict.client?.fingerprint || ""),
+        serverFingerprint: String(decision.serverFingerprint || conflict.server?.fingerprint || conflict.current?.fingerprint || "")
+      };
+    }).filter(item => !existingIdentities.has([
+      item.namespace, item.key, item.serverVersion, item.serverTimestamp, item.clientTimestamp, item.winner, item.localFingerprint
+    ].join("|")));
     if (conflicts.length) {
       write(CONFLICTS_KEY, [...conflicts, ...existing].slice(0, MAX_CONFLICTS));
-      journal("conflict", `${conflicts.length} conflit(s) traité(s)`, { count: conflicts.length });
+      journal("conflict", `${conflicts.length} nouveau(x) conflit(s) traité(s)`, { count: conflicts.length });
     }
   }
 

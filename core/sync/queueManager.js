@@ -3,6 +3,11 @@ const LEGACY_QUEUE_KEY = "sportlab.v7.cloud.queue";
 
 function now() { return Date.now(); }
 function identity(item) { return `${item.namespace}:${item.key}`; }
+function fingerprintOf(item) {
+  if (item?.fingerprint) return String(item.fingerprint);
+  try { return JSON.stringify({ deleted: Boolean(item?.deleted), payload: item?.payload ?? null }); }
+  catch { return String(item?.payload ?? ""); }
+}
 function readRaw(key) {
   try { const value = JSON.parse(localStorage.getItem(key)); return Array.isArray(value) ? value : []; }
   catch { return []; }
@@ -37,7 +42,17 @@ export const queueManager = Object.freeze({
     for (const change of changes) {
       if (!change?.namespace || !change?.key) continue;
       const previous = map.get(identity(change));
-      map.set(identity(change), normalize({ ...previous, ...change, attempts: 0, nextAttemptAt: 0, queuedAt: previous?.queuedAt || now(), lastError: "" }));
+      const incoming = normalize({ ...previous, ...change, fingerprint: fingerprintOf(change), queuedAt: previous?.queuedAt || now() });
+      const sameChange = previous && fingerprintOf(previous) === fingerprintOf(change);
+      map.set(identity(change), normalize({
+        ...previous,
+        ...incoming,
+        attempts: sameChange ? Number(previous.attempts || 0) : 0,
+        nextAttemptAt: sameChange ? Number(previous.nextAttemptAt || 0) : 0,
+        lastAttemptAt: sameChange ? Number(previous.lastAttemptAt || 0) : 0,
+        queuedAt: previous?.queuedAt || now(),
+        lastError: sameChange ? String(previous.lastError || "") : ""
+      }));
     }
     return write([...map.values()]);
   },
@@ -55,6 +70,15 @@ export const queueManager = Object.freeze({
       if (!failed.has(identity(item))) return item;
       const attempts = item.attempts + 1;
       return { ...item, attempts, lastAttemptAt: now(), nextAttemptAt: now() + backoffMs(attempts), lastError: String(error) };
+    }));
+  },
+  defer(items = [], error = "Conflit de synchronisation", delays = [60_000, 5 * 60_000, 15 * 60_000, 60 * 60_000]) {
+    const deferred = new Set(items.map(identity));
+    return write(read().map(item => {
+      if (!deferred.has(identity(item))) return item;
+      const attempts = item.attempts + 1;
+      const delay = delays[Math.min(attempts - 1, delays.length - 1)] ?? delays[delays.length - 1];
+      return { ...item, attempts, lastAttemptAt: now(), nextAttemptAt: now() + delay, lastError: String(error) };
     }));
   },
   clear() { return write([]); },

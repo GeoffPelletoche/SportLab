@@ -15,7 +15,19 @@ export function collectLocalChanges() {
   for (const key of SYNCED_KEYS) {
     const raw = localStorage.getItem(key); const fingerprint = hash(raw ?? "__deleted__"); const entry = state[key] || {};
     if (entry.hash === fingerprint) continue;
-    changes.push({ namespace: namespaceFor(key), key: recordKeyFor(key), payload: raw === null ? null : { storageKey: key, raw }, deleted: raw === null, clientUpdatedAt: now, baseVersion: Number(entry.version || 0) });
+    const clientUpdatedAt = entry.pendingHash === fingerprint && Number(entry.pendingClientUpdatedAt || 0) > 0
+      ? Number(entry.pendingClientUpdatedAt)
+      : now;
+    changes.push({
+      namespace: namespaceFor(key),
+      key: recordKeyFor(key),
+      payload: raw === null ? null : { storageKey: key, raw },
+      deleted: raw === null,
+      fingerprint,
+      clientUpdatedAt,
+      baseVersion: Number(entry.version || 0)
+    });
+    state[key] = { ...entry, pendingHash: fingerprint, pendingClientUpdatedAt: clientUpdatedAt };
   }
   return changes;
 }
@@ -27,7 +39,7 @@ export function applyRemoteRecords(records = []) {
     const deleted = Boolean(record.deleted);
     const raw = record?.payload?.raw ?? null;
     if (deleted) localStorage.removeItem(key); else if (typeof raw === "string" && localStorage.getItem(key) !== raw) { localStorage.setItem(key, raw); changed = true; }
-    state[key] = { hash: hash(deleted ? "__deleted__" : String(raw)), version: Number(record.version || 0), serverUpdatedAt: Number(record.serverUpdatedAt || record.server_updated_at || Date.now()) };
+    state[key] = { hash: hash(deleted ? "__deleted__" : String(raw)), version: Number(record.version || 0), serverUpdatedAt: Number(record.serverUpdatedAt || record.server_updated_at || Date.now()), pendingHash: "", pendingClientUpdatedAt: 0 };
   }
   saveMeta(state);
   if (changed) window.dispatchEvent(new CustomEvent("sportlab:cloud-data-applied"));
@@ -37,7 +49,7 @@ export function acknowledgeChanges(accepted = []) {
   const state = meta();
   for (const item of accepted) {
     const key = item.key || item.recordKey || item.record_key; if (!SYNCED_KEYS.includes(key)) continue;
-    const raw = localStorage.getItem(key); state[key] = { hash: hash(raw ?? "__deleted__"), version: Number(item.version || 0), serverUpdatedAt: Number(item.serverUpdatedAt || Date.now()) };
+    const raw = localStorage.getItem(key); state[key] = { hash: hash(raw ?? "__deleted__"), version: Number(item.version || 0), serverUpdatedAt: Number(item.serverUpdatedAt || Date.now()), pendingHash: "", pendingClientUpdatedAt: 0 };
   }
   saveMeta(state);
 }

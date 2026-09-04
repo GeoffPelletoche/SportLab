@@ -79,14 +79,17 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
         const resolution = resolveConflicts(conflicts, batch);
         applyRemoteRecords(resolution.recordsToApply);
         queueManager.acknowledgeKeys(resolution.recordsToApply.map(item => `${item.namespace}:${item.key || item.record_key}`));
-        if (resolution.localToRetry.length) queueManager.enqueue(resolution.localToRetry);
+        if (resolution.localToRetry.length) {
+          queueManager.enqueue(resolution.localToRetry);
+          queueManager.defer(resolution.localToRetry, "Conflit cloud — nouvelle tentative différée");
+        }
         conflictCount += conflicts.length;
         emitEvent(SYNC_EVENTS.CONFLICT, { count: conflicts.length, conflicts, decisions: resolution.decisions });
       }
       emitEvent(SYNC_EVENTS.PUSH, { phase: "complete", accepted: acceptedCount, conflicts: conflictCount });
     }
     const config = syncConfigStore.get();
-    syncConfigStore.set({ lastPushAt: Date.now(), totalPushes: Number(config.totalPushes || 0) + 1, totalConflicts: Number(config.totalConflicts || 0) + conflictCount });
+    syncConfigStore.set({ lastPushAt: Date.now(), totalPushes: Number(config.totalPushes || 0) + 1, totalConflicts: Number(config.totalConflicts || 0) + conflictCount, totalAcceptedChanges: Number(config.totalAcceptedChanges || 0) + acceptedCount });
     return { accepted: acceptedCount, conflicts: conflictCount };
   }
 
@@ -104,7 +107,7 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
       more = Boolean(pulled.hasMore);
     }
     const config = syncConfigStore.get();
-    syncConfigStore.set({ cursor, lastPullAt: Date.now(), totalPulls: Number(config.totalPulls || 0) + 1 });
+    syncConfigStore.set({ cursor, lastPullAt: Date.now(), totalPulls: Number(config.totalPulls || 0) + 1, totalPulledChanges: Number(config.totalPulledChanges || 0) + applied });
     emitEvent(SYNC_EVENTS.PULL, { phase: "complete", cursor, applied });
     return { cursor, applied };
   }
@@ -114,6 +117,11 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     const config = syncConfigStore.get();
     if (!config.enabled || !config.token) { emit("disconnected"); return { skipped: true }; }
     captureChanges({ force: reason === "startup" || reason === "manual" });
+    const blockedUntil = Number(config.cloudBlockedUntil || 0);
+    if (blockedUntil > Date.now()) {
+      emit("error", { error: config.lastError || config.cloudBlockedReason || "Synchronisation cloud temporairement suspendue.", reason, blockedUntil });
+      return { blocked: true, blockedUntil, error: config.lastError || config.cloudBlockedReason || "Synchronisation cloud temporairement suspendue." };
+    }
     if (!navigator.onLine) { emit("offline", { reason }); return { offline: true, queued: queueManager.size() }; }
     if (syncing) { rerunRequested = true; return { busy: true, rerunScheduled: true }; }
 
@@ -123,22 +131,30 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     emit("syncing", { reason });
     emitEvent(SYNC_EVENTS.START, { reason });
     try {
-      await api.me();
       const deviceId = await ensureDevice();
       await initialReconcile();
       captureChanges({ force: true });
       const pushed = await pushQueue(deviceId);
       const pulled = await pullRemote();
       const now = Date.now();
-      syncConfigStore.set({ lastSyncAt: now, lastError: "" });
+      syncConfigStore.set({ lastSyncAt: now, lastError: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
       emit("synced", { lastSyncAt: now, reason, pushed, pulled });
       emitEvent(SYNC_EVENTS.COMPLETE, { reason, pushed, pulled, queueSize: queueManager.size() });
       if (!silent) notifications.success("Les données SportLab sont synchronisées.", "Cloud SportLab");
       return { ok: true, ...pushed, ...pulled };
     } catch (error) {
       logger.error("Échec de synchronisation cloud", { message: error.message, code: error.code, reason });
-      syncConfigStore.set({ lastError: error.message });
-      emit("error", { error: error.message, reason });
+      const current = syncConfigStore.get();
+      const consecutiveErrors = Number(current.consecutiveErrors || 0) + 1;
+      const isQuota = error.code === "d1_daily_quota_exceeded" || /quota.*(dépass|exceed)|daily.*quota/i.test(String(error.message || ""));
+      const nextMidnightUtc = (() => { const d = new Date(); d.setUTCHours(24, 0, 0, 0); return d.getTime(); })();
+      const circuitDelay = Math.min(15 * 60_000, 60_000 * (2 ** Math.min(consecutiveErrors - 1, 4)));
+      const cloudBlockedUntil = isQuota ? nextMidnightUtc : (consecutiveErrors >= 3 ? Date.now() + circuitDelay : 0);
+      syncConfigStore.set({
+        lastError: error.message, consecutiveErrors, cloudBlockedUntil,
+        cloudBlockedReason: isQuota ? "Quota D1 quotidien atteint" : consecutiveErrors >= 3 ? "Circuit breaker cloud actif" : ""
+      });
+      emit("error", { error: error.message, reason, consecutiveErrors, cloudBlockedUntil });
       emitEvent(SYNC_EVENTS.ERROR, { error: error.message, code: error.code, reason });
       if (!silent) notifications.error(error.message, "Synchronisation impossible");
       if (!silent) throw error;
@@ -155,7 +171,7 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
   const scheduler = createSyncScheduler({
     run: reason => syncNow({ silent: true, reason }).catch(() => {}),
     onOffline: () => { diff.markDirty(); captureChanges({ force: true }); emit("offline"); },
-    intervalMs: Number(syncConfigStore.get().intervalMs || 30_000)
+    intervalMs: Number(syncConfigStore.get().intervalMs || 300_000)
   });
   const watchedEvents = ["sportlab:bets-updated", "sportlab:drawhunter-workflow-updated", "sportlab:frenchflair-workflow-updated"];
   const onDomainChange = () => { diff.markDirty(); captureChanges(); scheduler.schedule("change"); };
@@ -177,7 +193,7 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     window.removeEventListener("storage", onStorage);
   }
   async function connect({ endpoint, token }) {
-    syncConfigStore.set({ endpoint: String(endpoint || "").replace(/\/+$/, ""), token, enabled: true, lastError: "" });
+    syncConfigStore.set({ endpoint: String(endpoint || "").replace(/\/+$/, ""), token, enabled: true, lastError: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
     diff.markDirty();
     if (!scheduler.isStarted()) start();
     return syncNow({ reason: "connect" });

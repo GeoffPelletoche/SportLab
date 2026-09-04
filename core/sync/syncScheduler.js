@@ -1,4 +1,4 @@
-export function createSyncScheduler({ run, onOffline, intervalMs = 30_000, debounceMs = 500 }) {
+export function createSyncScheduler({ run, onOffline, intervalMs = 300_000, debounceMs = 500 }) {
   let interval = null;
   let debounce = null;
   let started = false;
@@ -16,7 +16,10 @@ export function createSyncScheduler({ run, onOffline, intervalMs = 30_000, debou
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOfflineEvent);
     document.addEventListener("visibilitychange", onVisibility);
-    interval = setInterval(() => run("interval"), intervalMs);
+    interval = setInterval(() => {
+      if (document.visibilityState !== "visible") return;
+      run("interval");
+    }, intervalMs);
     run("startup");
   }
   function stop() {
