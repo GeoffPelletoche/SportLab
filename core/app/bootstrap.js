@@ -38,20 +38,29 @@ export async function bootstrapSportLabV7({ startLegacyApplication }) {
   await lifecycle.start(context);
   await drawHunterModule.mount(context);
   await frenchFlairModule.mount(context);
-  await startLegacyApplication();
+
+  // V11.3.14 — Cloud Bootstrap First:
+  // Le Cloud doit être disponible avant le chargement réseau Football/Rugby.
+  // La V11.3.13 affichait l'UI rapidement mais conservait le bootstrap Core
+  // bloqué sur startLegacyApplication(), rendant SportLabCore/cloud indisponible
+  // pendant le chargement sportif.
   createSyncPanel({ engine: syncEngine, eventBus, notifications });
   syncEngine.start();
 
   window.SportLabCore = Object.freeze({
     version: context.version,
     cloud: Object.freeze({ status: syncEngine.getStatus, syncNow: syncEngine.syncNow, connect: syncEngine.connect, disconnect: syncEngine.disconnect, markDirty: syncEngine.markDirty }),
-    recovery: Object.freeze({ state: recoveryManager.getState, preview: recoveryManager.preview, restoreCloudToLocal: recoveryManager.restoreCloudToLocal, forceLocalToCloud: recoveryManager.forceLocalToCloud, smartMerge: recoveryManager.smartMerge, restoreSnapshot: recoveryManager.restoreSnapshot, createSnapshot: recoveryManager.createSnapshot }),
+    recovery: Object.freeze({ state: recoveryManager.getState, preview: recoveryManager.preview, restoreCloudToLocal: recoveryManager.restoreCloudToLocal, forceLocalToCloud: recoveryManager.forceLocalToCloud, smartMerge: recoveryManager.smartMerge, restoreSnapshot: recoveryManager.restoreSnapshot, createSnapshot: recoveryManager.createSnapshot, clearResolvedConflictHistory: recoveryManager.clearResolvedConflictHistory }),
     modules: moduleRegistry.list().map(({ id, label, sport, capabilities }) => ({ id, label, sport, capabilities })),
     settings: () => settingsStore.getState(),
     setTheme: themeService.setTheme,
     setDensity: themeService.setDensity,
     diagnostics: () => logger.entries()
   });
+
+  // Le rendu local peut maintenant consulter immédiatement l'état Cloud, puis
+  // Football/Rugby continuent leur chargement sans désactiver les commandes Cloud.
+  await startLegacyApplication();
   logger.info("Core Foundation opérationnel", { modules: moduleRegistry.list().map(module => module.id) });
   eventBus.emit("core:ready", { version: context.version });
   return context;
