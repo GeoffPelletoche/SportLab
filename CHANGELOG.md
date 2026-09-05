@@ -1,3 +1,12 @@
+# V11.3.17 — Calibration Mobile Responsive Fix
+
+- Corrige le débordement horizontal de la page Calibration sur iPhone.
+- Ajoute `min-width: 0` / `max-width: 100%` aux conteneurs flex/grid Calibration.
+- Rend le hero, la date de mise à jour, les cartes KPI et les textes adaptatifs sur petits écrans.
+- Passe les métriques Calibration en une colonne sur mobile.
+- Conserve les tableaux en défilement horizontal local, sans élargir toute la page.
+- Aucun changement métier, Cloud Sync, modèles DrawHunter/FrenchFlair ou chargement sportif.
+
 # V11.3.16 — Progressive Sports Loading & Performance Fix
 
 - Séparation complète des chargements Football et Rugby.

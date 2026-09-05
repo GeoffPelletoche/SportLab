@@ -1,6 +1,6 @@
-> Version actuelle : **SportLab V11.3.16** — chargement Football/Rugby progressif, Performances corrigées, protections Cloud conservées.
+> Version actuelle : **SportLab V11.3.17** — chargement Football/Rugby progressif, Performances corrigées, protections Cloud conservées.
 
-## V11.3.16 — Progressive Sports Loading & Performance Fix
+## V11.3.17 — Progressive Sports Loading & Performance Fix
 
 - Football et Rugby possèdent désormais deux cycles de chargement indépendants.
 - Les rencontres sont publiées dès la récupération des fixtures, sans attendre l'enrichissement historique complet.
