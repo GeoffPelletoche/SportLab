@@ -1,4 +1,12 @@
-# V11.3.11 — Clean Start + Sync Safety
+# V11.3.12 — Clean Start + Sync Safety
+
+## V11.3.12 — Sync Tombstone Guard
+- Purge automatique des tombstones implicites/anciens de la file Sync V2 avant push.
+- Le scan local automatique ne génère plus jamais de suppression Cloud.
+- Les suppressions en file exigent désormais une intention explicite `explicit-user-delete`.
+- Les tombstones Cloud deviennent autoritaires lors de tout conflit.
+- Correctif ciblé du scénario iPhone observé pendant le Clean Start V11.3.11.
+
 
 - Sécurité Cloud Sync : une clé `localStorage` absente n'est plus convertie automatiquement en tombstone Cloud.
 - Un navigateur/profil vierge ne peut donc plus supprimer analyses, paris, workflows, réglages ou learning du Cloud par simple absence locale.
