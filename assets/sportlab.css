@@ -502,3 +502,154 @@ MIGRATED VIEW COMPATIBILITY — BASED ON CURRENT SPORTLAB.CSS
   .calibration-hero { flex-direction:column; }
   .calibration-hero-meta { width:100%; min-width:0; }
 }
+
+
+/* =========================================================
+   SPORTLAB V11.3.17 — CALIBRATION MOBILE RESPONSIVE FIX
+   Empêche les cartes et textes Calibration d'élargir la page sur iOS.
+========================================================= */
+.calibration-page,
+.calibration-page > *,
+.calibration-hero > *,
+.calibration-summary-grid > *,
+.calibration-summary-card,
+.calibration-summary-card header,
+.calibration-summary-card header > div,
+.calibration-section-title,
+.calibration-section-title > div,
+.calibration-section-title > div > div,
+.calibration-method-note {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.calibration-hero p,
+.calibration-hero-meta,
+.calibration-hero-meta strong,
+.calibration-hero-meta span,
+.calibration-summary-card,
+.calibration-summary-card dd,
+.calibration-section-title h2,
+.calibration-section-title p,
+.calibration-method-note p {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.calibration-hero-meta strong,
+.calibration-hero-meta span {
+  display: block;
+  max-width: 100%;
+}
+
+.calibration-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 640px) {
+  .calibration-page {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .calibration-hero {
+    width: 100%;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .calibration-hero > div:first-child {
+    width: 100%;
+  }
+
+  .calibration-hero h1 {
+    font-size: clamp(1.85rem, 9vw, 2.35rem);
+    line-height: 1.05;
+  }
+
+  .calibration-hero p {
+    margin-bottom: 0;
+    font-size: 1rem;
+    line-height: 1.55;
+  }
+
+  .calibration-hero-meta {
+    width: 100%;
+    min-width: 0;
+    padding: 14px;
+  }
+
+  .calibration-hero-meta strong {
+    font-size: clamp(1.05rem, 5.4vw, 1.35rem);
+    line-height: 1.25;
+  }
+
+  .calibration-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .calibration-summary-card {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .calibration-summary-card header {
+    align-items: flex-start;
+  }
+
+  .calibration-summary-card header strong {
+    font-size: clamp(1.75rem, 9vw, 2rem);
+  }
+
+  .calibration-grade {
+    max-width: 100%;
+    width: fit-content;
+    white-space: normal;
+  }
+
+  .calibration-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .calibration-metrics div,
+  .calibration-metrics dt,
+  .calibration-metrics dd {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .calibration-section-title > div {
+    min-width: 0;
+  }
+
+  .calibration-section-title > div > span {
+    flex: 0 0 auto;
+  }
+
+  .calibration-table {
+    min-width: 560px;
+  }
+
+  .calibration-method-note {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .calibration-hero,
+  .calibration-summary-card,
+  .calibration-page > .sl-panel {
+    padding: 14px;
+  }
+
+  .calibration-section-title > div {
+    gap: 8px;
+  }
+}
