@@ -29,6 +29,10 @@ export function collectLocalChanges() {
     });
     state[key] = { ...entry, pendingHash: fingerprint, pendingClientUpdatedAt: clientUpdatedAt };
   }
+  // V11.3.10: persiste immédiatement l'identité/timestamp du changement en attente.
+  // Sans cela, un scan forcé recréait un nouveau clientUpdatedAt et pouvait relancer
+  // les mêmes conflits malgré la déduplication de la file.
+  if (changes.length) saveMeta(state);
   return changes;
 }
 export function applyRemoteRecords(records = []) {

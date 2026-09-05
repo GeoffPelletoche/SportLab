@@ -5,7 +5,7 @@ function defaults() {
   return {
     endpoint: DEFAULT_ENDPOINT, token: "", deviceId: "", cursor: 0, enabled: false,
     lastSyncAt: 0, lastPushAt: 0, lastPullAt: 0, lastAttemptAt: 0,
-    lastError: "", initialMigrationDone: false, intervalMs: 300_000,
+    lastError: "", lastErrorCode: "", initialMigrationDone: false, intervalMs: 300_000,
     totalPushes: 0, totalPulls: 0, totalConflicts: 0, totalAcceptedChanges: 0, totalPulledChanges: 0,
     consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: ""
   };

@@ -117,10 +117,21 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     const config = syncConfigStore.get();
     if (!config.enabled || !config.token) { emit("disconnected"); return { skipped: true }; }
     captureChanges({ force: reason === "startup" || reason === "manual" });
+    // V11.3.10: une protection quota héritée de V11.3.9 sans code D1 explicite
+    // est considérée comme ambiguë. On la libère et on laisse le Worker confirmer
+    // une éventuelle vraie limite D1 via le code d1_daily_quota_exceeded.
+    if (Number(config.cloudBlockedUntil || 0) > Date.now()
+      && config.cloudBlockedReason === "Quota D1 quotidien atteint"
+      && config.lastErrorCode !== "d1_daily_quota_exceeded") {
+      syncConfigStore.set({ cloudBlockedUntil: 0, cloudBlockedReason: "", consecutiveErrors: 0 });
+      config.cloudBlockedUntil = 0;
+      config.cloudBlockedReason = "";
+      config.consecutiveErrors = 0;
+    }
     const blockedUntil = Number(config.cloudBlockedUntil || 0);
     if (blockedUntil > Date.now()) {
-      emit("error", { error: config.lastError || config.cloudBlockedReason || "Synchronisation cloud temporairement suspendue.", reason, blockedUntil });
-      return { blocked: true, blockedUntil, error: config.lastError || config.cloudBlockedReason || "Synchronisation cloud temporairement suspendue." };
+      emit("error", { error: config.lastError || config.cloudBlockedReason || "Synchronisation cloud temporairement suspendue.", reason, blockedUntil, code: config.lastErrorCode || "" });
+      return { blocked: true, blockedUntil, error: config.lastError || config.cloudBlockedReason || "Synchronisation cloud temporairement suspendue.", code: config.lastErrorCode || "" };
     }
     if (!navigator.onLine) { emit("offline", { reason }); return { offline: true, queued: queueManager.size() }; }
     if (syncing) { rerunRequested = true; return { busy: true, rerunScheduled: true }; }
@@ -137,7 +148,7 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
       const pushed = await pushQueue(deviceId);
       const pulled = await pullRemote();
       const now = Date.now();
-      syncConfigStore.set({ lastSyncAt: now, lastError: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
+      syncConfigStore.set({ lastSyncAt: now, lastError: "", lastErrorCode: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
       emit("synced", { lastSyncAt: now, reason, pushed, pulled });
       emitEvent(SYNC_EVENTS.COMPLETE, { reason, pushed, pulled, queueSize: queueManager.size() });
       if (!silent) notifications.success("Les données SportLab sont synchronisées.", "Cloud SportLab");
@@ -146,12 +157,15 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
       logger.error("Échec de synchronisation cloud", { message: error.message, code: error.code, reason });
       const current = syncConfigStore.get();
       const consecutiveErrors = Number(current.consecutiveErrors || 0) + 1;
-      const isQuota = error.code === "d1_daily_quota_exceeded" || /quota.*(dépass|exceed)|daily.*quota/i.test(String(error.message || ""));
+      // Seul le code explicite renvoyé par le Worker Cloud peut déclencher
+      // la suspension jusqu'au reset D1. Les messages génériques contenant
+      // « quota » ne sont plus assimilés à D1.
+      const isQuota = error.code === "d1_daily_quota_exceeded";
       const nextMidnightUtc = (() => { const d = new Date(); d.setUTCHours(24, 0, 0, 0); return d.getTime(); })();
       const circuitDelay = Math.min(15 * 60_000, 60_000 * (2 ** Math.min(consecutiveErrors - 1, 4)));
       const cloudBlockedUntil = isQuota ? nextMidnightUtc : (consecutiveErrors >= 3 ? Date.now() + circuitDelay : 0);
       syncConfigStore.set({
-        lastError: error.message, consecutiveErrors, cloudBlockedUntil,
+        lastError: error.message, lastErrorCode: String(error.code || ""), consecutiveErrors, cloudBlockedUntil,
         cloudBlockedReason: isQuota ? "Quota D1 quotidien atteint" : consecutiveErrors >= 3 ? "Circuit breaker cloud actif" : ""
       });
       emit("error", { error: error.message, reason, consecutiveErrors, cloudBlockedUntil });
@@ -193,7 +207,7 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     window.removeEventListener("storage", onStorage);
   }
   async function connect({ endpoint, token }) {
-    syncConfigStore.set({ endpoint: String(endpoint || "").replace(/\/+$/, ""), token, enabled: true, lastError: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
+    syncConfigStore.set({ endpoint: String(endpoint || "").replace(/\/+$/, ""), token, enabled: true, lastError: "", lastErrorCode: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
     diff.markDirty();
     if (!scheduler.isStarted()) start();
     return syncNow({ reason: "connect" });

@@ -24,9 +24,13 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
       let payload = null;
       try { payload = await response.json(); } catch { throw new Error(`INVALID_JSON_${response.status}`); }
       if (!response.ok) {
-        const error = new Error(payload?.message || payload?.error || `API_ERROR_${response.status}`);
+        const payloadError = payload?.error;
+        const code = payload?.code || (typeof payloadError === "object" ? payloadError?.code : payloadError) || `API_ERROR_${response.status}`;
+        const message = payload?.message || (typeof payloadError === "object" ? payloadError?.message : payloadError) || `API_ERROR_${response.status}`;
+        const error = new Error(message);
         error.status = response.status;
-        error.code = payload?.error || `API_ERROR_${response.status}`;
+        error.code = code;
+        error.retryAfterMs = Number(payload?.retryAfterMs || 0);
         error.payload = payload;
         error.url = url.toString();
         throw error;
@@ -34,7 +38,10 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
       return payload;
     } catch (error) {
       lastError = error;
-      if (attempt < attempts) await wait(350 * attempt);
+      const status = Number(error?.status || 0);
+      const retryable = ![400, 401, 403, 404, 409, 422, 429].includes(status);
+      if (attempt < attempts && retryable) await wait(Math.min(2500, 500 * attempt));
+      else if (!retryable) break;
     } finally {
       clearTimeout(timeout);
     }

@@ -161,6 +161,16 @@ export function createRecoveryManager({ syncEngine, eventBus, logger, notificati
     }
   }
 
+
+  function clearResolvedConflictHistory() {
+    write(CONFLICTS_KEY, []);
+    const keptJournal = read(JOURNAL_KEY).filter(item => item?.type !== "conflict");
+    write(JOURNAL_KEY, keptJournal);
+    journal("cleanup", "Historique des conflits résolus effacé", { preservedJournalEntries: keptJournal.length });
+    window.dispatchEvent(new CustomEvent("sportlab:recovery-updated"));
+    return { ok: true, preservedJournalEntries: keptJournal.length };
+  }
+
   eventBus.on?.(SYNC_EVENTS.CONFLICT, recordConflicts);
 
   function getState() {
@@ -172,5 +182,5 @@ export function createRecoveryManager({ syncEngine, eventBus, logger, notificati
   }
 
   logger.info("Recovery & Conflict Center opérationnel");
-  return Object.freeze({ createSnapshot, listSnapshots, listJournal, listConflicts, preview, restoreCloudToLocal, forceLocalToCloud, smartMerge, restoreSnapshot, getState, compareRecords });
+  return Object.freeze({ createSnapshot, listSnapshots, listJournal, listConflicts, preview, restoreCloudToLocal, forceLocalToCloud, smartMerge, restoreSnapshot, clearResolvedConflictHistory, getState, compareRecords });
 }

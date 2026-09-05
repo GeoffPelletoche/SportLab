@@ -3,7 +3,7 @@ import { fetchFromWorker, getDateRange } from "./apiClient.js";
 import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
 
 const HISTORY_LIMIT = 30;
-const HISTORY_CONCURRENCY = 3;
+const HISTORY_CONCURRENCY = 2;
 
 export async function fetchUpcomingFootballFixtures() {
   const range = getDateRange(CONFIG.analysisWindowDays);
@@ -195,11 +195,11 @@ function classifyFootballError(error) {
   if (status === 401 || /key|token|unauthor/i.test(message)) {
     return "Clé API Football refusée ou absente.";
   }
+  if (status === 429 || /rate.?limit|too many requests|requests per minute|quota|limit/i.test(message) || error?.code === "API_SPORTS_RATE_LIMIT") {
+    return "Limite temporaire de requêtes API Football atteinte. SportLab ralentit automatiquement les appels.";
+  }
   if (status === 403 || /plan|subscription|access/i.test(message)) {
     return "Abonnement API Football insuffisant pour cette ressource.";
-  }
-  if (status === 429 || /rate|quota|limit/i.test(message)) {
-    return "Quota ou limite de requêtes API Football atteint.";
   }
   if (/season/i.test(message)) {
     return "Saison football introuvable ou non transmise.";
