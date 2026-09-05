@@ -1,3 +1,11 @@
+# V11.3.11 — Clean Start + Sync Safety
+
+- Sécurité Cloud Sync : une clé `localStorage` absente n'est plus convertie automatiquement en tombstone Cloud.
+- Un navigateur/profil vierge ne peut donc plus supprimer analyses, paris, workflows, réglages ou learning du Cloud par simple absence locale.
+- Protection anti-résurrection : lors d'un conflit, un tombstone Cloud dont la version est plus récente que la `baseVersion` connue par l'appareil est autoritaire.
+- Conservation des protections V11.3.10 : polling 5 min, onglets masqués ignorés, stabilité des timestamps de queue, circuit breaker D1 et protections API-Sports.
+- Aucun changement du modèle DrawHunter (`DH-11.3.4`), de FrenchFlair, du settlement, de la fenêtre d'analyse 1 jour ou du correctif zoom iOS.
+
 # V11.3.6 — FrenchFlair : masquer les paris placés
 
 - Aligne le comportement FrenchFlair sur DrawHunter : dès qu’un pari est réellement placé, la rencontre n’est plus affichée dans l’atelier d’analyse.
