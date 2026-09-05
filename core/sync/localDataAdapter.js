@@ -15,6 +15,17 @@ export function collectLocalChanges() {
   for (const key of SYNCED_KEYS) {
     const raw = localStorage.getItem(key); const fingerprint = hash(raw ?? "__deleted__"); const entry = state[key] || {};
     if (entry.hash === fingerprint) continue;
+
+    // V11.3.11 — Sync Safety:
+    // L'absence d'une clé localStorage n'est plus interprétée comme une suppression
+    // métier à propager au Cloud. Un nouveau navigateur / profil vierge ne peut donc
+    // plus effacer l'historique Cloud simplement parce que ses clés sont absentes.
+    // Les suppressions distantes explicites restent appliquées via applyRemoteRecords().
+    if (raw === null) {
+      state[key] = { ...entry, pendingHash: "", pendingClientUpdatedAt: 0 };
+      continue;
+    }
+
     const clientUpdatedAt = entry.pendingHash === fingerprint && Number(entry.pendingClientUpdatedAt || 0) > 0
       ? Number(entry.pendingClientUpdatedAt)
       : now;
