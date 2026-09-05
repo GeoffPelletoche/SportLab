@@ -20,11 +20,10 @@ export function resolveConflicts(conflicts = [], localQueue = []) {
     const key = server.key || server.recordKey || server.record_key || conflict.key;
     const local = conflict.client || conflict.local || localByKey.get(`${namespace}:${key}`);
     const serverVersion = Number(server.version || 0);
-    const localBaseVersion = Number(local?.baseVersion || local?.base_version || 0);
-    // V11.3.11 — un tombstone Cloud plus récent que la base connue d'un ancien
-    // appareil est autoritaire. Cela empêche un appareil resté hors ligne de
-    // ressusciter des données volontairement remises à zéro.
-    const authoritativeServerDelete = Boolean(server.deleted) && local && localBaseVersion < serverVersion;
+    // V11.3.12 — un tombstone déjà présent côté Cloud est toujours autoritaire
+    // lors d'un conflit. Un ancien appareil ne peut donc pas le contourner avec
+    // une version de base ou un timestamp local incohérent.
+    const authoritativeServerDelete = Boolean(server.deleted);
     const serverWins = authoritativeServerDelete || !local || timestamp(server) >= timestamp(local);
     if (serverWins) recordsToApply.push(server);
     else localToRetry.push({ ...local, baseVersion: Number(server.version || 0) });

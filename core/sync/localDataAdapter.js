@@ -32,8 +32,11 @@ export function collectLocalChanges() {
     changes.push({
       namespace: namespaceFor(key),
       key: recordKeyFor(key),
-      payload: raw === null ? null : { storageKey: key, raw },
-      deleted: raw === null,
+      payload: { storageKey: key, raw },
+      // V11.3.12 — Tombstone Guard : le scanner automatique ne crée jamais
+      // de suppression. Une suppression Cloud doit passer par une intention
+      // explicite séparée, jamais par l'absence d'une clé localStorage.
+      deleted: false,
       fingerprint,
       clientUpdatedAt,
       baseVersion: Number(entry.version || 0)

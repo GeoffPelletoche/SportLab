@@ -1,5 +1,6 @@
 const QUEUE_KEY = "sportlab.v7.cloud.queue.v2";
 const LEGACY_QUEUE_KEY = "sportlab.v7.cloud.queue";
+const EXPLICIT_DELETE_INTENT = "explicit-user-delete";
 
 function now() { return Date.now(); }
 function identity(item) { return `${item.namespace}:${item.key}`; }
@@ -23,24 +24,48 @@ function normalize(item) {
     lastError: String(item.lastError || "")
   };
 }
-function read() {
-  const current = readRaw(QUEUE_KEY).map(normalize);
-  if (current.length) return current;
-  const legacy = readRaw(LEGACY_QUEUE_KEY).map(normalize);
-  if (legacy.length) { write(legacy); localStorage.removeItem(LEGACY_QUEUE_KEY); }
-  return legacy;
-}
 function write(items) { localStorage.setItem(QUEUE_KEY, JSON.stringify(items)); return items; }
+function isSafeQueueItem(item) {
+  // V11.3.12 — aucune ancienne entrée deleted=true ne doit survivre dans la
+  // file. Seule une future action métier explicitement marquée peut créer un
+  // tombstone volontaire.
+  return !Boolean(item?.deleted) || item?.deleteIntent === EXPLICIT_DELETE_INTENT;
+}
+function sanitize(items = []) { return items.map(normalize).filter(isSafeQueueItem); }
+function read() {
+  const currentRaw = readRaw(QUEUE_KEY);
+  if (currentRaw.length) {
+    const clean = sanitize(currentRaw);
+    if (clean.length !== currentRaw.length) write(clean);
+    return clean;
+  }
+  const legacyRaw = readRaw(LEGACY_QUEUE_KEY);
+  if (legacyRaw.length) {
+    const clean = sanitize(legacyRaw);
+    write(clean);
+    localStorage.removeItem(LEGACY_QUEUE_KEY);
+    return clean;
+  }
+  return [];
+}
 function backoffMs(attempts) { return Math.min(5 * 60_000, 1_000 * (2 ** Math.min(attempts, 8))); }
 
 export const queueManager = Object.freeze({
   key: QUEUE_KEY,
+  explicitDeleteIntent: EXPLICIT_DELETE_INTENT,
   list: read,
   ready(at = now()) { return read().filter(item => item.nextAttemptAt <= at); },
+  purgeUnsafeTombstones() {
+    const currentRaw = readRaw(QUEUE_KEY);
+    const legacyRaw = currentRaw.length ? [] : readRaw(LEGACY_QUEUE_KEY);
+    const before = (currentRaw.length ? currentRaw : legacyRaw).length;
+    const after = read().length;
+    return Math.max(0, before - after);
+  },
   enqueue(changes = []) {
     const map = new Map(read().map(item => [identity(item), item]));
     for (const change of changes) {
-      if (!change?.namespace || !change?.key) continue;
+      if (!change?.namespace || !change?.key || !isSafeQueueItem(change)) continue;
       const previous = map.get(identity(change));
       const incoming = normalize({ ...previous, ...change, fingerprint: fingerprintOf(change), queuedAt: previous?.queuedAt || now() });
       const sameChange = previous && fingerprintOf(previous) === fingerprintOf(change);

@@ -116,6 +116,13 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     lastReason = reason;
     const config = syncConfigStore.get();
     if (!config.enabled || !config.token) { emit("disconnected"); return { skipped: true }; }
+    // V11.3.12 — nettoie avant tout push les tombstones historiques pouvant
+    // rester dans la file d'un ancien navigateur/PWA (cas observé sur iPhone).
+    const purgedTombstones = queueManager.purgeUnsafeTombstones();
+    if (purgedTombstones > 0) {
+      logger.warn("Tombstones Sync V2 obsolètes neutralisés", { count: purgedTombstones, reason });
+      emitEvent(SYNC_EVENTS.QUEUE, { purgedTombstones, queueSize: queueManager.size() });
+    }
     captureChanges({ force: reason === "startup" || reason === "manual" });
     // V11.3.10: une protection quota héritée de V11.3.9 sans code D1 explicite
     // est considérée comme ambiguë. On la libère et on laisse le Worker confirmer
