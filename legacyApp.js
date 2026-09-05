@@ -1,5 +1,5 @@
 // SPORTLAB V7.0.0 — Legacy runtime encapsulated by Sprint 7.1 Core Foundation
-import { loadApplicationData } from "./services/appService.js";
+import { loadApplicationData, loadLocalApplicationData, loadSportsApplicationData } from "./services/appService.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
@@ -32,6 +32,8 @@ let drawhunterPayload = null;
 let frenchflairPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
+let currentAppData = null;
+let initializationRun = 0;
 
 function isMatchEditableBeforeKickoff(match) {
   const kickoff = Date.parse(match?.date || match?.matchDate || "");
@@ -47,31 +49,34 @@ function initializeUi() {
 
 async function init() {
   const app = document.getElementById("app");
+  const runId = ++initializationRun;
 
   try {
-    app.innerHTML = `
-      <h1>🏟️ SportLab</h1>
-      <p>Chargement...</p>
-    `;
+    // V11.3.13 — Fast Start: les données locales et la navigation sont
+    // affichées immédiatement. Les deux modules sportifs se chargent ensuite
+    // en parallèle sans bloquer l'accueil, Cloud ou les autres vues locales.
+    const localData = loadLocalApplicationData();
+    currentAppData = {
+      ...localData,
+      drawhunterPayload: drawhunterPayload || { matches: [], meta: { loading: true } },
+      frenchflairPayload: frenchflairPayload || { matches: [], meta: { loading: true } }
+    };
+    renderCurrentApplication(app);
 
-    const appData = await loadApplicationData();
+    const sportsData = await loadSportsApplicationData();
+    if (runId !== initializationRun) return;
 
-drawhunterPayload = appData.drawhunterPayload;
-frenchflairPayload = appData.frenchflairPayload;
-
-    renderApplication(app, {
-      ...appData,
-      currentPage
-    });
-
-    initializeUi();
+    drawhunterPayload = sportsData.drawhunterPayload;
+    frenchflairPayload = sportsData.frenchflairPayload;
+    currentAppData = { ...localData, ...sportsData };
+    renderCurrentApplication(app);
 
     try {
       const predictionEvaluation = await evaluatePendingPredictions();
       console.log("[PredictionEvaluation]", predictionEvaluation);
-      if (predictionEvaluation.evaluated > 0) {
-        renderApplication(app, { ...appData, currentPage });
-        initializeUi();
+      if (predictionEvaluation.evaluated > 0 && runId === initializationRun) {
+        currentAppData = { ...currentAppData, ...loadLocalApplicationData() };
+        renderCurrentApplication(app);
       }
     } catch (error) {
       console.warn("[PredictionEvaluation] Échec", error);
@@ -79,57 +84,29 @@ frenchflairPayload = appData.frenchflairPayload;
 
     try {
       const settlement = await runAutomaticSettlement();
-
-      console.log(
-        "[Settlement] Règlement automatique terminé :",
-        settlement.reports
-      );
-
-      const hasSettledBet = settlement.settledCount > 0;
-
-      if (hasSettledBet) {
-    const refreshedData =
-        await loadApplicationData();
-
-    drawhunterPayload =
-        refreshedData.drawhunterPayload;
-
-    frenchflairPayload =
-        refreshedData.frenchflairPayload;
-
-    renderApplication(app, {
-      ...refreshedData,
-      currentPage
-    });
-
-    initializeUi();
-}
-   } catch (error) {
-      console.error(
-        "[Settlement] Échec du règlement automatique :",
-        error
-      );
+      console.log("[Settlement] Règlement automatique terminé :", settlement.reports);
+      if (settlement.settledCount > 0 && runId === initializationRun) {
+        const refreshedData = await loadApplicationData();
+        if (runId !== initializationRun) return;
+        drawhunterPayload = refreshedData.drawhunterPayload;
+        frenchflairPayload = refreshedData.frenchflairPayload;
+        currentAppData = refreshedData;
+        renderCurrentApplication(app);
+      }
+    } catch (error) {
+      console.error("[Settlement] Échec du règlement automatique :", error);
     }
   } catch (error) {
-    console.error(
-      "SportLab init error:",
-      error
-    );
-
-    const message =
-      error?.message ||
-      String(error) ||
-      "Erreur inconnue au chargement de SportLab.";
-
-    app.innerHTML = `
-      <h1>🏟️ SportLab</h1>
-
-      <section class="card">
-        <h2>Erreur de chargement</h2>
-        <p>${message}</p>
-      </section>
-    `;
+    console.error("SportLab init error:", error);
+    const message = error?.message || String(error) || "Erreur inconnue au chargement de SportLab.";
+    app.innerHTML = `<h1>🏟️ SportLab</h1><section class="card"><h2>Erreur de chargement</h2><p>${message}</p></section>`;
   }
+}
+
+function renderCurrentApplication(app = document.getElementById("app")) {
+  if (!app || !currentAppData) return;
+  renderApplication(app, { ...currentAppData, currentPage });
+  initializeUi();
 }
 
 /**
@@ -829,8 +806,16 @@ window.refreshSportLab = async function() {
 
 window.navigateSportLab = function(page) {
   closeSportLabMenu();
-
   currentPage = page;
+
+  // V11.3.13 — Fast Navigation: changer de vue ne relance plus les appels
+  // Football/Rugby, le settlement ni l'évaluation des prédictions.
+  // On réutilise l'état déjà chargé en mémoire et on ne reconstruit que la vue.
+  if (currentAppData) {
+    renderCurrentApplication();
+    return;
+  }
+
   init();
 };
 

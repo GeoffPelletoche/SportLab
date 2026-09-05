@@ -1,4 +1,4 @@
-> Version actuelle : **SportLab V11.3.12** — protection Cloud stricte et lissage API-Sports Football.
+> Version actuelle : **SportLab V11.3.13** — protection Cloud stricte et lissage API-Sports Football.
 
 # SportLab V11.1
 

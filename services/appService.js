@@ -33,44 +33,27 @@ import {
  *
  * Point d'entrée unique des données de l'application.
  */
-export async function loadApplicationData() {
-  /*
-   * Les données locales sont synchrones.
-   */
-  const dashboard =
-    getDashboardData();
+export function loadLocalApplicationData() {
+  return {
+    dashboard: getDashboardData(),
+    analyses: getAnalyses(),
+    journal: getJournalData(),
+    statistics: getAdvancedStatistics(),
+    diagnostic: getSettlementDiagnostic()
+  };
+}
 
-  const analyses =
-    getAnalyses();
-
-  const journal =
-    getJournalData();
-
-  const statistics =
-    getAdvancedStatistics();
-
-  const diagnostic =
-    getSettlementDiagnostic();
-
-  /*
-   * Les modules sportifs chargent des données
-   * distantes : ils sont donc asynchrones.
-   */
-  const [
-    drawhunterPayload,
-    frenchflairPayload
-  ] = await Promise.all([
+export async function loadSportsApplicationData() {
+  const [drawhunterPayload, frenchflairPayload] = await Promise.all([
     getDrawHunterPayload(),
     getFrenchFlairPayload()
   ]);
 
-  return {
-    dashboard,
-    analyses,
-    journal,
-    statistics,
-    diagnostic,
-    drawhunterPayload,
-    frenchflairPayload
-  };
+  return { drawhunterPayload, frenchflairPayload };
+}
+
+export async function loadApplicationData() {
+  const localData = loadLocalApplicationData();
+  const sportsData = await loadSportsApplicationData();
+  return { ...localData, ...sportsData };
 }

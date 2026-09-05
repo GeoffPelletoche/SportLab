@@ -56,119 +56,97 @@ import { getFrenchFlairWorkflow } from "../core/stores/frenchFlairWorkflowStore.
  * - ne contenir aucune logique métier.
  */
 export function renderApplication(app, data = {}) {
-  const activePage =
-    data.currentPage || "home";
+  const activePage = data.currentPage || "home";
+  const navigationHtml = renderNavigation(activePage);
 
-  const learningDataset = capturePredictionDataset({
-    drawhunter: data.drawhunterPayload?.matches || [],
-    frenchflair: data.frenchflairPayload?.matches || [],
-    analyses: data.analyses || []
-  });
-  const learningRecords = getLearningRecords();
-  const calibrationDashboard = buildCalibrationDashboard(learningRecords);
-  const calibrationHtml = renderCalibration(calibrationDashboard);
+  // V11.3.13 — Lazy View Rendering:
+  // une navigation ne construit plus toutes les pages cachées. Seule la vue
+  // demandée est rendue, ce qui réduit fortement le coût DOM/CPU sur iPhone.
+  let drawhunterHtml = "";
+  let frenchflairHtml = "";
+  let journalHtml = "";
+  let betsHtml = "";
+  let portfolioHtml = "";
+  let diagnosticsHtml = "";
+  let cloudHtml = "";
+  let recoveryHtml = "";
+  let modelPerformanceHtml = "";
+  let calibrationHtml = "";
 
-  const performanceRepository = createPerformanceRepository();
-  const modelPerformanceHtml = renderModelPerformance({
-    performance: buildModelPerformance({
-      dataset: learningDataset,
-      learning: learningRecords,
-      bets: getBets(),
-      legacy: performanceRepository.read(),
-      analyses: data.analyses || [],
-      workflows: {
-        drawhunter: getDrawHunterWorkflow(),
-        frenchflair: getFrenchFlairWorkflow()
-      }
-    }),
-    learningCount: learningDataset.length
-  });
-
-  const navigationHtml =
-    renderNavigation(activePage);
-
-  const drawhunterHtml =
-    renderDrawHunter(
-      data.drawhunterPayload
-    );
-
-  const frenchflairHtml =
-    renderFrenchFlair(
-      data.frenchflairPayload
-    );
-
-  const teamBrandingLookup = buildTeamBrandingLookup({
-    drawhunter: data.drawhunterPayload?.matches || [],
-    frenchflair: data.frenchflairPayload?.matches || []
-  });
-
-  const journalHtml =
-    renderJournal(
-      data.journal,
-      teamBrandingLookup
-    );
-
-  const betsHtml =
-    renderBets(
-      data.dashboard?.bets || [],
-      teamBrandingLookup
-    );
-
-  const portfolioHtml =
-    renderPortfolio({
-      summary:
-        data.dashboard?.portfolio || {},
-
-      statistics:
-        data.statistics || {}
+  if (activePage === "drawhunter") {
+    drawhunterHtml = renderDrawHunter(data.drawhunterPayload);
+  } else if (activePage === "frenchflair") {
+    frenchflairHtml = renderFrenchFlair(data.frenchflairPayload);
+  } else if (activePage === "journal" || activePage === "bets") {
+    const teamBrandingLookup = buildTeamBrandingLookup({
+      drawhunter: data.drawhunterPayload?.matches || [],
+      frenchflair: data.frenchflairPayload?.matches || []
     });
-
-  const diagnosticsHtml =
-    renderDiagnostics({
-      settlement: data.diagnostic,
-      drawhunterMeta: data.drawhunterPayload?.meta || {},
-      frenchflairMeta: data.frenchflairPayload?.meta || {},
-      learningDataset,
-      learningSummary: buildLearningSummary(learningRecords),
-      calibration: calibrationDashboard
+    if (activePage === "journal") journalHtml = renderJournal(data.journal, teamBrandingLookup);
+    if (activePage === "bets") betsHtml = renderBets(data.dashboard?.bets || [], teamBrandingLookup);
+  } else if (activePage === "portfolio") {
+    portfolioHtml = renderPortfolio({ summary: data.dashboard?.portfolio || {}, statistics: data.statistics || {} });
+  } else if (["diagnostics", "model-performance", "calibration"].includes(activePage)) {
+    const learningDataset = capturePredictionDataset({
+      drawhunter: data.drawhunterPayload?.matches || [],
+      frenchflair: data.frenchflairPayload?.matches || [],
+      analyses: data.analyses || []
     });
+    const learningRecords = getLearningRecords();
+    const calibrationDashboard = buildCalibrationDashboard(learningRecords);
 
-  const cloudState = window.SportLabCore?.cloud?.status?.() || {};
-  const recoveryState = window.SportLabCore?.recovery?.state?.() || {};
-  const cloudHtml = renderCloudDashboard({
-    cloud: cloudState,
-    storageSummary: buildCloudStorageSummary(),
-    recovery: recoveryState
+    if (activePage === "calibration") {
+      calibrationHtml = renderCalibration(calibrationDashboard);
+    } else if (activePage === "model-performance") {
+      const performanceRepository = createPerformanceRepository();
+      modelPerformanceHtml = renderModelPerformance({
+        performance: buildModelPerformance({
+          dataset: learningDataset,
+          learning: learningRecords,
+          bets: getBets(),
+          legacy: performanceRepository.read(),
+          analyses: data.analyses || [],
+          workflows: { drawhunter: getDrawHunterWorkflow(), frenchflair: getFrenchFlairWorkflow() }
+        }),
+        learningCount: learningDataset.length
+      });
+    } else {
+      diagnosticsHtml = renderDiagnostics({
+        settlement: data.diagnostic,
+        drawhunterMeta: data.drawhunterPayload?.meta || {},
+        frenchflairMeta: data.frenchflairPayload?.meta || {},
+        learningDataset,
+        learningSummary: buildLearningSummary(learningRecords),
+        calibration: calibrationDashboard
+      });
+    }
+  } else if (activePage === "cloud" || activePage === "recovery") {
+    const cloudState = window.SportLabCore?.cloud?.status?.() || {};
+    const recoveryState = window.SportLabCore?.recovery?.state?.() || {};
+    if (activePage === "cloud") {
+      cloudHtml = renderCloudDashboard({ cloud: cloudState, storageSummary: buildCloudStorageSummary(), recovery: recoveryState });
+    } else {
+      recoveryHtml = renderRecoveryCenter({ recovery: recoveryState, cloud: cloudState });
+    }
+  }
+
+  app.innerHTML = renderDashboard({
+    activePage,
+    navigationHtml,
+    drawhunterHtml,
+    frenchflairHtml,
+    journalHtml,
+    betsHtml,
+    portfolioHtml,
+    diagnosticsHtml,
+    cloudHtml,
+    recoveryHtml,
+    modelPerformanceHtml,
+    calibrationHtml,
+    dashboard: data.dashboard || {},
+    drawhunterPayload: data.drawhunterPayload || {},
+    frenchflairPayload: data.frenchflairPayload || {}
   });
-  const recoveryHtml = renderRecoveryCenter({ recovery: recoveryState, cloud: cloudState });
-
-  app.innerHTML =
-    renderDashboard({
-      activePage,
-      navigationHtml,
-      drawhunterHtml,
-      frenchflairHtml,
-      journalHtml,
-      betsHtml,
-      portfolioHtml,
-      diagnosticsHtml,
-      cloudHtml,
-      recoveryHtml,
-      modelPerformanceHtml,
-      calibrationHtml,
-      dashboard:
-
-      data.dashboard || {},
-
-    drawhunterPayload:
-
-      data.drawhunterPayload || {},
-
-    frenchflairPayload:
-
-      data.frenchflairPayload || {}
-
-    });
 }
 
 function buildCloudStorageSummary() {
