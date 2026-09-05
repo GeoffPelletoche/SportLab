@@ -13,8 +13,8 @@ test('V11.3.11 does not auto-push missing localStorage keys as deletes', () => {
   assert.ok(guardPos >= 0 && pushPos > guardPos, 'missing-key guard must run before changes.push');
 });
 
-test('V11.3.11 makes newer server tombstones authoritative over stale devices', () => {
+test('V11.3.11/V11.3.12 keep server tombstones authoritative over stale devices', () => {
   assert.match(resolver, /authoritativeServerDelete/);
-  assert.match(resolver, /localBaseVersion < serverVersion/);
+  assert.match(resolver, /const authoritativeServerDelete = Boolean\(server\.deleted\)/);
   assert.match(resolver, /authoritativeServerDelete \|\| !local/);
 });
