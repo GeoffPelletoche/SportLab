@@ -7,24 +7,25 @@ const dashboard = fs.readFileSync(new URL("../ui/views/dashboardView.js", import
 const drawhunter = fs.readFileSync(new URL("../ui/views/drawhunterView.js", import.meta.url), "utf8");
 const frenchflair = fs.readFileSync(new URL("../ui/views/frenchflairView.js", import.meta.url), "utf8");
 
-test("V11.3.15 sports loading is independent from navigation/bootstrap", () => {
-  assert.match(legacy, /sportsRefreshPromise/);
-  assert.match(legacy, /void refreshSportsData\(\{ force: forceSports/);
+test("V11.3.15+ sports loading stays independent from navigation/bootstrap", () => {
   assert.match(legacy, /sportlab:sports-data-updated/);
+  assert.match(legacy, /void refreshDrawHunterData/);
+  assert.match(legacy, /void refreshFrenchFlairData/);
   const nav = legacy.match(/window\.navigateSportLab = function\(page\) \{[\s\S]*?\n\};/)?.[0] || "";
   assert.doesNotMatch(nav, /loadSportsApplicationData/);
 });
 
-test("V11.3.15 manual refresh really reloads sports without resetting page", () => {
+test("V11.3.15+ manual refresh reloads sports without resetting page", () => {
   const refresh = legacy.match(/window\.refreshSportLab = async function\(\) \{[\s\S]*?\n\};/)?.[0] || "";
-  assert.match(refresh, /refreshSportsData\(\{ force: true, reason: "manual" \}\)/);
+  assert.match(refresh, /refreshDrawHunterData\(\{ force: true, reason: "manual" \}\)/);
+  assert.match(refresh, /refreshFrenchFlairData\(\{ force: true, reason: "manual" \}\)/);
   assert.doesNotMatch(refresh, /currentPage = "home"/);
   assert.doesNotMatch(refresh, /syncNow/);
 });
 
-test("V11.3.15 active views rerender after fresh sports payloads", () => {
-  assert.match(legacy, /drawhunterPayload = sportsData\.drawhunterPayload/);
-  assert.match(legacy, /frenchflairPayload = sportsData\.frenchflairPayload/);
+test("V11.3.15+ active views rerender after fresh sports payloads", () => {
+  assert.match(legacy, /drawhunterPayload = payload/);
+  assert.match(legacy, /frenchflairPayload = payload/);
   assert.match(legacy, /renderCurrentApplication\(\);/);
 });
 

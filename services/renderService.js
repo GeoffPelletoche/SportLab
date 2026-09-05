@@ -86,7 +86,7 @@ export function renderApplication(app, data = {}) {
     if (activePage === "bets") betsHtml = renderBets(data.dashboard?.bets || [], teamBrandingLookup);
   } else if (activePage === "portfolio") {
     portfolioHtml = renderPortfolio({ summary: data.dashboard?.portfolio || {}, statistics: data.statistics || {} });
-  } else if (["diagnostics", "model-performance", "calibration"].includes(activePage)) {
+  } else if (["diagnostics", "performance", "model-performance", "calibration"].includes(activePage)) {
     const learningDataset = capturePredictionDataset({
       drawhunter: data.drawhunterPayload?.matches || [],
       frenchflair: data.frenchflairPayload?.matches || [],
@@ -97,7 +97,7 @@ export function renderApplication(app, data = {}) {
 
     if (activePage === "calibration") {
       calibrationHtml = renderCalibration(calibrationDashboard);
-    } else if (activePage === "model-performance") {
+    } else if (activePage === "model-performance" || activePage === "performance") {
       const performanceRepository = createPerformanceRepository();
       modelPerformanceHtml = renderModelPerformance({
         performance: buildModelPerformance({

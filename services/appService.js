@@ -43,10 +43,18 @@ export function loadLocalApplicationData() {
   };
 }
 
-export async function loadSportsApplicationData() {
+export async function loadDrawHunterApplicationData(options = {}) {
+  return getDrawHunterPayload(options);
+}
+
+export async function loadFrenchFlairApplicationData(options = {}) {
+  return getFrenchFlairPayload(options);
+}
+
+export async function loadSportsApplicationData(options = {}) {
   const [drawhunterPayload, frenchflairPayload] = await Promise.all([
-    getDrawHunterPayload(),
-    getFrenchFlairPayload()
+    loadDrawHunterApplicationData(options.drawhunter || {}),
+    loadFrenchFlairApplicationData(options.frenchflair || {})
   ]);
 
   return { drawhunterPayload, frenchflairPayload };

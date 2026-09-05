@@ -16,10 +16,10 @@ import {
  * - ne contenir aucune logique d'affichage.
  */
 
-export async function getDrawHunterPayload() {
+export async function getDrawHunterPayload(options = {}) {
   try {
     const payload =
-      await loadDrawHunterMatches();
+      await loadDrawHunterMatches(options);
 
     return normalizeDrawHunterPayload(
       payload

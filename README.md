@@ -1,4 +1,15 @@
-> Version actuelle : **SportLab V11.3.15** — protection Cloud stricte et lissage API-Sports Football.
+> Version actuelle : **SportLab V11.3.16** — chargement Football/Rugby progressif, Performances corrigées, protections Cloud conservées.
+
+## V11.3.16 — Progressive Sports Loading & Performance Fix
+
+- Football et Rugby possèdent désormais deux cycles de chargement indépendants.
+- Les rencontres sont publiées dès la récupération des fixtures, sans attendre l'enrichissement historique complet.
+- Le cache historique local est utilisé immédiatement ; seules les données manquantes déclenchent des appels réseau.
+- DrawHunter peut devenir disponible sans attendre FrenchFlair, et inversement.
+- Le bouton Actualiser relance les deux sports en parallèle sans redémarrer le Cloud.
+- La route `performance` affiche de nouveau correctement la vue Performances.
+- Les protections Cloud V11.3.12/V11.3.14, l'anti-zoom iOS et la navigation rapide sont conservés.
+
 
 ## V11.3.15 — Sports Data Refresh Fix
 

@@ -1,3 +1,13 @@
+# V11.3.16 — Progressive Sports Loading & Performance Fix
+
+- Séparation complète des chargements Football et Rugby.
+- Publication progressive des fixtures avant la fin des historiques.
+- Cache historique prioritaire ; appels API uniquement pour les historiques manquants.
+- Rafraîchissement automatique de la vue active à chaque étape utile.
+- Correction de la route Performances (`performance` / `model-performance`).
+- Aucun changement du Cloud Sync, Tombstone Guard, modèles métier ou fenêtre J+1.
+- Validation : 98/98 tests.
+
 # V11.3.15 — Cloud Bootstrap & Performance Fix
 
 - Cloud Sync initialisé avant les chargements Football/Rugby.

@@ -17,10 +17,10 @@ import {
  *   même si le chargement rugby échoue.
  */
 
-export async function getFrenchFlairPayload() {
+export async function getFrenchFlairPayload(options = {}) {
   try {
     const payload =
-      await loadFrenchFlairMatches();
+      await loadFrenchFlairMatches(options);
 
     return normalizeFrenchFlairPayload(
       payload

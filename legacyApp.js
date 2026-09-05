@@ -1,5 +1,5 @@
 // SPORTLAB V7.0.0 — Legacy runtime encapsulated by Sprint 7.1 Core Foundation
-import { loadApplicationData, loadLocalApplicationData, loadSportsApplicationData } from "./services/appService.js";
+import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData } from "./services/appService.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
@@ -34,9 +34,12 @@ const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 let currentAppData = null;
 let initializationRun = 0;
-let sportsRefreshPromise = null;
-let sportsRefreshGeneration = 0;
-let sportsDataReady = false;
+let drawHunterRefreshPromise = null;
+let frenchFlairRefreshPromise = null;
+let drawHunterRefreshGeneration = 0;
+let frenchFlairRefreshGeneration = 0;
+let drawHunterReady = false;
+let frenchFlairReady = false;
 let postLoadTasksStarted = false;
 
 function isMatchEditableBeforeKickoff(match) {
@@ -56,20 +59,18 @@ async function init({ forceSports = false } = {}) {
   const runId = ++initializationRun;
 
   try {
-    // V11.3.15 — Sports Data Refresh Fix:
-    // l'interface locale reste instantanée, mais le chargement sportif possède
-    // maintenant son propre cycle de vie. La navigation ne peut plus annuler
-    // silencieusement la publication Football/Rugby.
     const localData = loadLocalApplicationData();
     currentAppData = {
       ...localData,
-      drawhunterPayload: withLoadingState(drawhunterPayload),
-      frenchflairPayload: withLoadingState(frenchflairPayload)
+      drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
+      frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby")
     };
     renderCurrentApplication(app);
 
-    // Ne pas bloquer le bootstrap Cloud sur les historiques sportifs.
-    void refreshSportsData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    // V11.3.16 — Football et Rugby sont totalement indépendants.
+    // Aucun sport n'attend l'autre pour publier ses rencontres.
+    void refreshDrawHunterData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    void refreshFrenchFlairData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
     return { runId };
   } catch (error) {
     console.error("SportLab init error:", error);
@@ -79,90 +80,111 @@ async function init({ forceSports = false } = {}) {
   }
 }
 
-function withLoadingState(payload) {
-  if (payload) {
-    return {
-      ...payload,
-      meta: { ...(payload.meta || {}), loading: !sportsDataReady }
-    };
-  }
-  return { matches: [], meta: { loading: true } };
+function withSportLoadingState(payload, ready, sport) {
+  if (payload) return { ...payload, meta: { ...(payload.meta || {}), loading: !ready, sport } };
+  return { matches: [], meta: { loading: true, sport, phase: "startup" } };
 }
 
-async function refreshSportsData({ force = false, reason = "background" } = {}) {
-  if (sportsRefreshPromise && !force) return sportsRefreshPromise;
-
-  const generation = ++sportsRefreshGeneration;
-  const localData = loadLocalApplicationData();
-
-  // Pendant un refresh manuel, on conserve les matchs déjà présents au lieu
-  // d'afficher artificiellement 0 rencontre.
-  if (currentAppData) {
-    currentAppData = {
-      ...currentAppData,
-      ...localData,
-      drawhunterPayload: withLoadingState(drawhunterPayload),
-      frenchflairPayload: withLoadingState(frenchflairPayload)
-    };
-    renderCurrentApplication();
+function publishSportPayload(kind, payload, { ready = false, reason = "background" } = {}) {
+  if (kind === "drawhunter") {
+    drawhunterPayload = payload;
+    drawHunterReady = ready;
+  } else {
+    frenchflairPayload = payload;
+    frenchFlairReady = ready;
   }
+
+  currentAppData = {
+    ...loadLocalApplicationData(),
+    drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
+    frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby")
+  };
+  renderCurrentApplication();
+  window.dispatchEvent(new CustomEvent("sportlab:sports-data-updated", {
+    detail: {
+      reason,
+      sport: kind === "drawhunter" ? "football" : "rugby",
+      drawhunter: drawhunterPayload?.matches?.length || 0,
+      frenchflair: frenchflairPayload?.matches?.length || 0,
+      drawhunterReady: drawHunterReady,
+      frenchflairReady: frenchFlairReady
+    }
+  }));
+}
+
+async function refreshDrawHunterData({ force = false, reason = "background" } = {}) {
+  if (drawHunterRefreshPromise && !force) return drawHunterRefreshPromise;
+  const generation = ++drawHunterRefreshGeneration;
+  drawHunterReady = false;
+  publishSportPayload("drawhunter", withSportLoadingState(drawhunterPayload, false, "football"), { ready: false, reason });
 
   const task = (async () => {
     try {
-      const sportsData = await loadSportsApplicationData();
-      if (generation !== sportsRefreshGeneration) return null;
-
-      drawhunterPayload = sportsData.drawhunterPayload;
-      frenchflairPayload = sportsData.frenchflairPayload;
-      sportsDataReady = true;
-
-      currentAppData = {
-        ...loadLocalApplicationData(),
-        ...sportsData
-      };
-
-      // Publication explicite des données fraîchement chargées dans la vue
-      // active, qu'elle soit Accueil, DrawHunter ou FrenchFlair.
-      renderCurrentApplication();
-      window.dispatchEvent(new CustomEvent("sportlab:sports-data-updated", {
-        detail: {
-          reason,
-          drawhunter: drawhunterPayload?.matches?.length || 0,
-          frenchflair: frenchflairPayload?.matches?.length || 0
+      const payload = await loadDrawHunterApplicationData({
+        onProgress: progressPayload => {
+          if (generation !== drawHunterRefreshGeneration) return;
+          publishSportPayload("drawhunter", progressPayload, { ready: false, reason: `${reason}:progress` });
         }
-      }));
-
-      if (!postLoadTasksStarted) {
-        postLoadTasksStarted = true;
-        void runPostSportsTasks(generation);
-      }
-
-      return sportsData;
+      });
+      if (generation !== drawHunterRefreshGeneration) return null;
+      publishSportPayload("drawhunter", payload, { ready: true, reason });
+      maybeStartPostSportsTasks();
+      return payload;
     } catch (error) {
-      console.error("[SportsData] Échec du rafraîchissement :", error);
-      if (generation !== sportsRefreshGeneration) return null;
-      sportsDataReady = true;
-      currentAppData = {
-        ...loadLocalApplicationData(),
-        drawhunterPayload: drawhunterPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } },
-        frenchflairPayload: frenchflairPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }
-      };
-      renderCurrentApplication();
+      console.error("[DrawHunterData] Échec du rafraîchissement :", error);
+      if (generation !== drawHunterRefreshGeneration) return null;
+      publishSportPayload("drawhunter", drawhunterPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, reason });
       return null;
     } finally {
-      if (generation === sportsRefreshGeneration) sportsRefreshPromise = null;
+      if (generation === drawHunterRefreshGeneration) drawHunterRefreshPromise = null;
     }
   })();
-
-  sportsRefreshPromise = task;
+  drawHunterRefreshPromise = task;
   return task;
+}
+
+async function refreshFrenchFlairData({ force = false, reason = "background" } = {}) {
+  if (frenchFlairRefreshPromise && !force) return frenchFlairRefreshPromise;
+  const generation = ++frenchFlairRefreshGeneration;
+  frenchFlairReady = false;
+  publishSportPayload("frenchflair", withSportLoadingState(frenchflairPayload, false, "rugby"), { ready: false, reason });
+
+  const task = (async () => {
+    try {
+      const payload = await loadFrenchFlairApplicationData({
+        onProgress: progressPayload => {
+          if (generation !== frenchFlairRefreshGeneration) return;
+          publishSportPayload("frenchflair", progressPayload, { ready: false, reason: `${reason}:progress` });
+        }
+      });
+      if (generation !== frenchFlairRefreshGeneration) return null;
+      publishSportPayload("frenchflair", payload, { ready: true, reason });
+      maybeStartPostSportsTasks();
+      return payload;
+    } catch (error) {
+      console.error("[FrenchFlairData] Échec du rafraîchissement :", error);
+      if (generation !== frenchFlairRefreshGeneration) return null;
+      publishSportPayload("frenchflair", frenchflairPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, reason });
+      return null;
+    } finally {
+      if (generation === frenchFlairRefreshGeneration) frenchFlairRefreshPromise = null;
+    }
+  })();
+  frenchFlairRefreshPromise = task;
+  return task;
+}
+
+function maybeStartPostSportsTasks() {
+  if (postLoadTasksStarted || !drawHunterReady || !frenchFlairReady) return;
+  postLoadTasksStarted = true;
+  void runPostSportsTasks(Math.max(drawHunterRefreshGeneration, frenchFlairRefreshGeneration));
 }
 
 async function runPostSportsTasks(generation) {
   try {
     const predictionEvaluation = await evaluatePendingPredictions();
     console.log("[PredictionEvaluation]", predictionEvaluation);
-    if (predictionEvaluation.evaluated > 0 && generation === sportsRefreshGeneration) {
+    if (predictionEvaluation.evaluated > 0) {
       currentAppData = { ...currentAppData, ...loadLocalApplicationData() };
       renderCurrentApplication();
     }
@@ -173,7 +195,7 @@ async function runPostSportsTasks(generation) {
   try {
     const settlement = await runAutomaticSettlement();
     console.log("[Settlement] Règlement automatique terminé :", settlement.reports);
-    if (settlement.settledCount > 0 && generation === sportsRefreshGeneration) {
+    if (settlement.settledCount > 0) {
       currentAppData = {
         ...loadLocalApplicationData(),
         drawhunterPayload,
@@ -885,7 +907,10 @@ function closeSportLabMenu() {
 window.refreshSportLab = async function() {
   // V11.3.15 : le bouton Actualiser force réellement la récupération
   // Football/Rugby, sans changer de page ni redémarrer le Cloud.
-  await refreshSportsData({ force: true, reason: "manual" });
+  await Promise.allSettled([
+    refreshDrawHunterData({ force: true, reason: "manual" }),
+    refreshFrenchFlairData({ force: true, reason: "manual" })
+  ]);
 };
 
 window.navigateSportLab = function(page) {
@@ -966,8 +991,12 @@ export function getLegacyRuntimeState() {
     currentPage,
     drawhunterLoaded: Boolean(drawhunterPayload),
     frenchflairLoaded: Boolean(frenchflairPayload),
-    sportsDataReady,
-    sportsRefreshInFlight: Boolean(sportsRefreshPromise)
+    sportsDataReady: drawHunterReady && frenchFlairReady,
+    drawHunterReady,
+    frenchFlairReady,
+    sportsRefreshInFlight: Boolean(drawHunterRefreshPromise || frenchFlairRefreshPromise),
+    drawHunterRefreshInFlight: Boolean(drawHunterRefreshPromise),
+    frenchFlairRefreshInFlight: Boolean(frenchFlairRefreshPromise)
   };
 }
 
