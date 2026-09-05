@@ -25,6 +25,19 @@
 - Le cockpit affiche simplement le nombre de matchs disponibles, sans message « aucune opportunité ».
 - Les cartes modules utilisent les états workflow pour leur compteur « À analyser ».
 
+## V11.3.10 — Protection Cloud stricte + rate limiter API-Sports Football
+
+- Base : V11.3.9 validée et déployée.
+- Fenêtre d’analyse conservée à **1 jour**.
+- Cloud Sync : une suspension jusqu’au reset D1 ne peut désormais être déclenchée que par le code explicite `d1_daily_quota_exceeded`.
+- Migration automatique : une ancienne protection quota V11.3.9 sans code D1 explicite est libérée au démarrage ; le Worker Cloud peut alors confirmer ou infirmer un vrai dépassement.
+- Dashboard Cloud : affichage du code d’erreur et de la raison de protection.
+- Recovery Center : ajout d’un nettoyage sécurisé de l’historique des conflits résolus, sans toucher aux analyses, paris ni à la file Sync V2.
+- API Football : Bridge **3.10.1** avec file d’attente conservatrice (~3,6 req/s, budget 240/min), retries contrôlés sur rate-limit, réponses 429 structurées et distinction rate-limit / abonnement.
+- DrawHunter : concurrence des historiques réduite de 3 à 2 pour lisser les rafales.
+- Client API : plus de retries automatiques agressifs sur 4xx/429.
+- Aucun changement du modèle DrawHunter, FrenchFlair, du scoring, du settlement ou du Bet Store.
+
 ## 11.3.2 — Performance Engine Fix
 - Performances lit le Learning Store pour les prédictions évaluées et la qualité des décisions.
 - ROI et profit proviennent exclusivement du Bet Store unifié.

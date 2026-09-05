@@ -1,6 +1,6 @@
 {
   "project": "SportLab",
-  "version": "11.3.6",
+  "version": "11.3.10",
   "pack": "Sprint 7.1.1B — Cloud Integration",
   "requires": [
     "Pack 1 — App Shell & Layout Framework",
@@ -61,7 +61,7 @@
     "docs/PACK4.1_DESKTOP_COCKPIT.md",
     "docs/PACK4.1_VALIDATION.md"
   ],
-  "revision": "sprint7.1.1b-cloud-integration",
+  "revision": "v11.3.10-cloud-football-rate-protection",
   "drawhunter_positioning": "Analyse du match nul; Double chance si pertinente",
   "dashboard_primary_action": "Smart module routing",
   "sprint5_1_files": [
@@ -181,8 +181,8 @@
     "docs/SPRINT7.1.1B_CLOUD_INTEGRATION.md",
     "docs/SPRINT7.1.1B_VALIDATION.md"
   ],
-  "name": "SportLab V11.3.2",
-  "short_name": "SportLab V11.3.2",
+  "name": "SportLab V11.3.10",
+  "short_name": "SportLab V11.3.10",
   "calibration_engine": {
     "status": "active_passive",
     "source": "sportlab_learning_v1",
@@ -209,6 +209,24 @@
       "ui/interactions/drawHunterWorkflow.js",
       "ui/interactions/frenchFlairWorkflow.js",
       "legacyApp.js"
+    ]
+  },
+  "v11_3_10": {
+    "status": "cloud_quota_classification_and_api_sports_rate_protection",
+    "analysis_window_days": 1,
+    "api_bridge": "3.10.1",
+    "cloud_sync_worker": "7.1.3",
+    "business_logic_modified": false,
+    "files": [
+      "core/sync/syncConfigStore.js",
+      "core/sync/syncEngine.js",
+      "ui/views/cloudDashboardView.js",
+      "core/api/apiClient.js",
+      "core/api/footballService.js",
+      "core/sync/recoveryManager.js",
+      "ui/views/recoveryCenterView.js",
+      "legacyApp.js",
+      "cloudflare-worker/sportlab-api-bridge-v3.10.1.js"
     ]
   }
 }

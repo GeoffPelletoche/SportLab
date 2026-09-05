@@ -15,6 +15,7 @@ export function renderRecoveryCenter({ recovery = {}, cloud = {} } = {}) {
         ${actionCard("⬇️", "Restaurer le Cloud", "Remplace les données locales après création d’un snapshot de sécurité.", "restoreSportLabCloudToLocal()", "Restaurer", true)}
         ${actionCard("⬆️", "Sauvegarder le Local", "Envoie volontairement l’état local vers le cloud.", "forceSportLabLocalToCloud()", "Sauvegarder", true)}
         ${actionCard("🔀", "Fusion intelligente", "Utilise la stratégie LWW du Sync Engine V2.", "mergeSportLabCloudData()", "Fusionner")}
+        ${actionCard("🧹", "Nettoyer les anciens conflits", "Efface uniquement l’historique des conflits déjà résolus. Les analyses, paris et files de synchronisation sont conservés.", "clearSportLabResolvedConflicts()", "Nettoyer")}
       </section>
 
       ${preview ? renderPreview(preview) : `<section class="sl-card"><h3>Comparaison Local / Cloud</h3><p class="sl-muted">Aucune comparaison chargée. Utilise le bouton « Comparer » pour obtenir un aperçu actuel.</p></section>`}

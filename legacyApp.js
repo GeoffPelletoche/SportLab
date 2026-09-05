@@ -950,4 +950,9 @@ window.restoreSportLabSnapshot = async function(snapshotId) {
   try { window.SportLabCore?.recovery?.restoreSnapshot?.(snapshotId); } catch (error) { alert(`Rollback impossible : ${error.message}`); }
   await refreshRecoveryCenter();
 };
+window.clearSportLabResolvedConflicts = async function() {
+  if (!confirm("Effacer l’historique des conflits déjà résolus ? Les données SportLab et la file de synchronisation seront conservées.")) return;
+  try { window.SportLabCore?.recovery?.clearResolvedConflictHistory?.(); } catch (error) { alert(`Nettoyage impossible : ${error.message}`); }
+  await refreshRecoveryCenter();
+};
 window.addEventListener("sportlab:recovery-updated", () => { if (currentPage === "recovery" || currentPage === "cloud") init(); });

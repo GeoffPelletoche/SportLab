@@ -34,6 +34,8 @@ export function renderCloudDashboard({ cloud = {}, storageSummary = {}, recovery
           ${renderRow("Dernière raison", humanReason(cloud.lastReason))}
           ${renderRow("Dernière tentative", formatDate(cloud.lastAttemptAt))}
           ${renderRow("Erreurs consécutives", formatInteger(cloud.consecutiveErrors))}
+          ${cloud.lastErrorCode ? renderRow("Code erreur", cloud.lastErrorCode) : ""}
+          ${cloud.cloudBlockedReason ? renderRow("Protection", cloud.cloudBlockedReason) : ""}
           ${cloud.cloudBlockedUntil > Date.now() ? renderRow("Protection cloud", `Suspendue jusqu'à ${formatDate(cloud.cloudBlockedUntil)}`) : ""}
         </article>
 

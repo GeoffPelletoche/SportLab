@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 const root = new URL("../", import.meta.url);
 
 test("V10.1 worker adds season to football fixtures", async () => {
-  const code = await readFile(new URL("cloudflare-worker/sportlab-api-bridge-v3.10.0.js", root), "utf8");
+  const code = await readFile(new URL("cloudflare-worker/sportlab-api-bridge-v3.10.1.js", root), "utf8");
   assert.match(code, /getCurrentFootballSeason\(env, league\)/);
   assert.match(code, /&season=\$\{encodeURIComponent\(season\)\}/);
   assert.match(code, /status: normalized\.length > 0 \? "OK" : "EMPTY"/);
