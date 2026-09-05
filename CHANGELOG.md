@@ -1,12 +1,19 @@
+# V11.3.14 — Cloud Bootstrap & Performance Fix
 
-## V11.3.13 — iOS UX & Navigation Performance
+- Cloud Sync initialisé avant les chargements Football/Rugby.
+- `window.SportLabCore` et les commandes Cloud sont disponibles dès l'affichage local.
+- Les rafraîchissements Cloud/Recovery ne relancent plus le chargement sportif complet.
+- Conserve le Tombstone Guard V11.3.12 et les optimisations iOS/navigation V11.3.13.
+
+
+## V11.3.14 — iOS UX & Navigation Performance
 - iOS: tous les champs de saisie interactifs utilisent au moins 16 px pour empêcher le zoom automatique au focus, sans désactiver le zoom utilisateur.
 - Fast Start: l’interface et les données locales s’affichent avant la fin des chargements Football/Rugby.
 - Fast Navigation: les changements Accueil / DrawHunter / FrenchFlair / Cloud réutilisent les données en mémoire et ne relancent plus les API, le settlement ou l’évaluation des prédictions.
 - Toutes les protections Sync Tombstone Guard V11.3.12 sont conservées.
-# V11.3.13 — Clean Start + Sync Safety
+# V11.3.14 — Clean Start + Sync Safety
 
-## V11.3.13 — Sync Tombstone Guard
+## V11.3.14 — Sync Tombstone Guard
 - Purge automatique des tombstones implicites/anciens de la file Sync V2 avant push.
 - Le scan local automatique ne génère plus jamais de suppression Cloud.
 - Les suppressions en file exigent désormais une intention explicite `explicit-user-delete`.

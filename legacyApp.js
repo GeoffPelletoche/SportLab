@@ -904,13 +904,13 @@ window.openSportLabCloudSettings = function() {
 };
 
 window.addEventListener("sportlab:cloud-config", () => {
-  if (currentPage === "cloud") init();
+  if (currentPage === "cloud") renderCurrentApplication();
 });
-window.addEventListener("online", () => { if (currentPage === "cloud") init(); });
-window.addEventListener("offline", () => { if (currentPage === "cloud") init(); });
+window.addEventListener("online", () => { if (currentPage === "cloud") renderCurrentApplication(); });
+window.addEventListener("offline", () => { if (currentPage === "cloud") renderCurrentApplication(); });
 
 // SPORTLAB V7.1.2C — Recovery & Conflict Center
-async function refreshRecoveryCenter() { await init(); }
+async function refreshRecoveryCenter() { renderCurrentApplication(); }
 window.previewSportLabRecovery = async function() {
   try { await window.SportLabCore?.recovery?.preview?.(); } catch (error) { alert(`Comparaison impossible : ${error.message}`); }
   await refreshRecoveryCenter();
@@ -940,4 +940,4 @@ window.clearSportLabResolvedConflicts = async function() {
   try { window.SportLabCore?.recovery?.clearResolvedConflictHistory?.(); } catch (error) { alert(`Nettoyage impossible : ${error.message}`); }
   await refreshRecoveryCenter();
 };
-window.addEventListener("sportlab:recovery-updated", () => { if (currentPage === "recovery" || currentPage === "cloud") init(); });
+window.addEventListener("sportlab:recovery-updated", () => { if (currentPage === "recovery" || currentPage === "cloud") renderCurrentApplication(); });
