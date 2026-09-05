@@ -176,6 +176,11 @@ function renderPremiumHome({
     frenchflairPayload?.meta?.error === true
   ].filter(Boolean).length;
 
+  const sportsLoading = [
+    drawhunterPayload?.meta?.loading === true,
+    frenchflairPayload?.meta?.loading === true
+  ].some(Boolean);
+
   return `
     <section
       class="premium-dashboard-v2 sl-page sl-stack sl-stack-lg"
@@ -186,6 +191,7 @@ function renderPremiumHome({
         roi,
         latestSync,
         syncErrors,
+        sportsLoading,
         drawhunterStats,
         frenchflairStats
       })}
@@ -225,13 +231,16 @@ function renderHero({
   roi,
   latestSync,
   syncErrors,
+  sportsLoading,
   drawhunterStats,
   frenchflairStats
 }) {
-  const healthTone = syncErrors > 0 ? "warning" : "success";
-  const healthLabel = syncErrors > 0
-    ? "Synchronisation partielle"
-    : "Système opérationnel";
+  const healthTone = sportsLoading ? "info" : syncErrors > 0 ? "warning" : "success";
+  const healthLabel = sportsLoading
+    ? "Chargement des rencontres"
+    : syncErrors > 0
+      ? "Synchronisation partielle"
+      : "Système opérationnel";
 
   const analysisTarget = getSmartAnalysisTarget({
     drawhunterStats,
@@ -311,6 +320,7 @@ function renderHeroMetric(value, label, valueClass = "") {
 function renderPriorityStrip({
   totals,
   syncErrors,
+  sportsLoading,
   drawhunterStats,
   frenchflairStats
 }) {

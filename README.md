@@ -1,4 +1,9 @@
-> Version actuelle : **SportLab V11.3.14** — protection Cloud stricte et lissage API-Sports Football.
+> Version actuelle : **SportLab V11.3.15** — protection Cloud stricte et lissage API-Sports Football.
+
+## V11.3.15 — Sports Data Refresh Fix
+
+Cette version corrige la publication des données Football/Rugby après le démarrage rapide introduit en V11.3.13/11.3.14. Le Cloud reste initialisé immédiatement, tandis que les rencontres se chargent en arrière-plan et rafraîchissent automatiquement la vue active lorsqu'elles arrivent.
+
 
 # SportLab V11.1
 

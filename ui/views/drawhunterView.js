@@ -41,11 +41,13 @@ export function renderDrawHunter(payload) {
 }
 
 function renderHero(stats, meta) {
-  const syncStatus = meta?.error
-    ? "Synchronisation indisponible"
-    : meta?.syncedAt
-      ? `Synchronisé ${formatRelativeDate(meta.syncedAt)}`
-      : "Données disponibles";
+  const syncStatus = meta?.loading
+    ? "Chargement des rencontres…"
+    : meta?.error
+      ? "Synchronisation indisponible"
+      : meta?.syncedAt
+        ? `Synchronisé ${formatRelativeDate(meta.syncedAt)}`
+        : "Données disponibles";
 
   return `
     <header class="dh-hero sl-panel">

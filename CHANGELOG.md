@@ -1,4 +1,4 @@
-# V11.3.14 — Cloud Bootstrap & Performance Fix
+# V11.3.15 — Cloud Bootstrap & Performance Fix
 
 - Cloud Sync initialisé avant les chargements Football/Rugby.
 - `window.SportLabCore` et les commandes Cloud sont disponibles dès l'affichage local.
@@ -6,14 +6,14 @@
 - Conserve le Tombstone Guard V11.3.12 et les optimisations iOS/navigation V11.3.13.
 
 
-## V11.3.14 — iOS UX & Navigation Performance
+## V11.3.15 — iOS UX & Navigation Performance
 - iOS: tous les champs de saisie interactifs utilisent au moins 16 px pour empêcher le zoom automatique au focus, sans désactiver le zoom utilisateur.
 - Fast Start: l’interface et les données locales s’affichent avant la fin des chargements Football/Rugby.
 - Fast Navigation: les changements Accueil / DrawHunter / FrenchFlair / Cloud réutilisent les données en mémoire et ne relancent plus les API, le settlement ou l’évaluation des prédictions.
 - Toutes les protections Sync Tombstone Guard V11.3.12 sont conservées.
-# V11.3.14 — Clean Start + Sync Safety
+# V11.3.15 — Clean Start + Sync Safety
 
-## V11.3.14 — Sync Tombstone Guard
+## V11.3.15 — Sync Tombstone Guard
 - Purge automatique des tombstones implicites/anciens de la file Sync V2 avant push.
 - Le scan local automatique ne génère plus jamais de suppression Cloud.
 - Les suppressions en file exigent désormais une intention explicite `explicit-user-delete`.
@@ -403,3 +403,13 @@
 - suppression de l'appel `/v1/me` à chaque synchronisation ;
 - détection des écritures cloud strictement identiques afin d'éviter un INSERT/UPDATE et un change_log inutiles ;
 - classification explicite des dépassements quotidiens D1 dans le Worker.
+
+## V11.3.15 — Sports Data Refresh Fix
+
+- Sépare définitivement le cycle de chargement Football/Rugby du cycle de navigation et du bootstrap Cloud.
+- Le chargement sportif s'exécute en arrière-plan sans bloquer l'ouverture de SportLab.
+- Les payloads DrawHunter/FrenchFlair sont publiés puis la vue active est automatiquement rerendue dès réception.
+- Le bouton « Actualiser » force désormais un vrai refresh sportif sans changer de page ni redémarrer le Cloud.
+- Pendant un refresh, les matchs déjà chargés restent visibles et l'UI distingue « chargement » d'un vrai résultat à 0 rencontre.
+- Conserve intégralement V11.3.12 Tombstone Guard, V11.3.14 Cloud Bootstrap, navigation rapide et anti-zoom iOS.
+- Aucun changement des modèles DrawHunter/FrenchFlair, Bet Store, settlement ou fenêtre J+1.

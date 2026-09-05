@@ -54,7 +54,7 @@ function renderHero(stats, meta) {
         <div class="ff-hero__session">
           <span>${formatPeriod(meta)}</span>
           <strong>${stats.total} rencontre${stats.total > 1 ? "s" : ""}</strong>
-          <small>${meta?.error ? "Synchronisation limitée" : `Synchronisé ${relativeSync(meta?.syncedAt)}`}</small>
+          <small>${meta?.loading ? "Chargement des rencontres…" : meta?.error ? "Synchronisation limitée" : `Synchronisé ${relativeSync(meta?.syncedAt)}`}</small>
         </div>
       </div>
       <div class="ff-decision-strip ff-decision-strip--${signalClass}">
