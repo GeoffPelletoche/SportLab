@@ -12,8 +12,17 @@ import { predictRugbyMatch } from "../core/engines/rugbyPredictionEngine.js";
  * - masque les paris placés
  */
 
-export async function loadFrenchFlairMatches() {
-  const { fixtures, meta } = await fetchUpcomingRugbyFixtures();
+export async function loadFrenchFlairMatches({ onProgress } = {}) {
+  const { fixtures, meta } = await fetchUpcomingRugbyFixtures({
+    onProgress: progress => {
+      if (typeof onProgress !== "function") return;
+      const matches = (progress.fixtures || []).map(match => predictRugbyMatch(match));
+      onProgress({
+        matches,
+        meta: { ...(progress.meta || {}), visibleTotal: matches.length, hiddenTotal: 0 }
+      });
+    }
+  });
 
   const predictedMatches = fixtures.map(match => predictRugbyMatch(match));
 

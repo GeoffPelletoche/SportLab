@@ -2,9 +2,8 @@ import { fetchUpcomingFootballFixtures } from "../core/api/footballService.js";
 import { predictDrawMatch } from "../core/engines/footballDrawPredictionEngine.js";
 
 /** SPORTLAB V8 — DRAWHUNTER */
-export async function loadDrawHunterMatches() {
-  const { fixtures, meta } = await fetchUpcomingFootballFixtures();
-  const matches = fixtures.map(match => {
+export async function loadDrawHunterMatches({ onProgress } = {}) {
+  const mapMatches = fixtures => fixtures.map(match => {
     const prediction = predictDrawMatch(match);
 
     /*
@@ -28,6 +27,18 @@ export async function loadDrawHunterMatches() {
           : null
     };
   });
+
+  const { fixtures, meta } = await fetchUpcomingFootballFixtures({
+    onProgress: progress => {
+      if (typeof onProgress !== "function") return;
+      const matches = mapMatches(progress.fixtures || []);
+      onProgress({
+        matches,
+        meta: { ...(progress.meta || {}), visibleTotal: matches.length, hiddenTotal: 0, model: "V11_3_4_DRAW_RATE_ANCHORED" }
+      });
+    }
+  });
+  const matches = mapMatches(fixtures);
   /*
    * V11.3.1 : les rencontres à venir restent accessibles jusqu'au coup
    * d'envoi, même après sauvegarde d'une analyse ou d'une abstention.
