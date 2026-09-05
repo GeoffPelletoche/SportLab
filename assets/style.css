@@ -2381,3 +2381,14 @@ body.sportlab-navigation-open {
 
 /* SportLab V10 — décision et cycle automatique */
 .mp-decision{margin-top:16px;padding-top:14px;border-top:1px solid rgba(148,163,184,.18);display:grid;gap:8px}.mp-decision>div{display:flex;justify-content:space-between;gap:12px}.mp-decision span{color:var(--sl-muted,#94a3b8)}.mp-decision b{color:var(--sl-text,#f8fafc)}
+
+/* SPORTLAB V11.3.13 — iOS Focus Zoom Guard
+   Safari iOS zoome automatiquement les contrôles dont la police est < 16px.
+   On conserve le zoom utilisateur global et on corrige uniquement les champs. */
+@supports (-webkit-touch-callout: none) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
