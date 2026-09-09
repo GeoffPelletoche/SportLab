@@ -124,7 +124,8 @@ function renderActivePage({
       return renderPremiumHome({
         dashboard,
         drawhunterPayload,
-        frenchflairPayload
+        frenchflairPayload,
+        nflPayload
       });
   }
 }
@@ -145,11 +146,13 @@ function renderStandardPage(icon, title, html, contentOnly = false) {
 function renderPremiumHome({
   dashboard,
   drawhunterPayload,
-  frenchflairPayload
+  frenchflairPayload,
+  nflPayload
 }) {
   const bets = getSafeArray(dashboard?.bets);
   const drawhunterMatches = getSafeArray(drawhunterPayload?.matches);
   const frenchflairMatches = getSafeArray(frenchflairPayload?.matches);
+  const nflMatches = getSafeArray(nflPayload?.matches);
 
   const drawhunterStats = buildModuleStats({
     source: "DrawHunter",
@@ -163,9 +166,15 @@ function renderPremiumHome({
     bets
   });
 
+  const nflStats = buildModuleStats({
+    source: "NFL Totals",
+    matches: nflMatches,
+    bets
+  });
+
   const totals = {
-    matches: drawhunterStats.matches + frenchflairStats.matches,
-    placed: drawhunterStats.placed + frenchflairStats.placed,
+    matches: drawhunterStats.matches + frenchflairStats.matches + nflStats.matches,
+    placed: drawhunterStats.placed + frenchflairStats.placed + nflStats.placed,
     pending: toNumber(dashboard?.counters?.pending),
     settled: toNumber(dashboard?.counters?.settled)
   };
@@ -177,17 +186,20 @@ function renderPremiumHome({
 
   const latestSync = getLatestSyncDate([
     drawhunterPayload?.meta?.syncedAt,
-    frenchflairPayload?.meta?.syncedAt
+    frenchflairPayload?.meta?.syncedAt,
+    nflPayload?.meta?.syncedAt
   ]);
 
   const syncErrors = [
     drawhunterPayload?.meta?.error === true,
-    frenchflairPayload?.meta?.error === true
+    frenchflairPayload?.meta?.error === true,
+    nflPayload?.meta?.error === true
   ].filter(Boolean).length;
 
   const sportsLoading = [
     drawhunterPayload?.meta?.loading === true,
-    frenchflairPayload?.meta?.loading === true
+    frenchflairPayload?.meta?.loading === true,
+    nflPayload?.meta?.loading === true
   ].some(Boolean);
 
   return `
@@ -202,7 +214,8 @@ function renderPremiumHome({
         syncErrors,
         sportsLoading,
         drawhunterStats,
-        frenchflairStats
+        frenchflairStats,
+        nflStats
       })}
 
       <section class="dashboard-v2-workspace">
@@ -210,8 +223,10 @@ function renderPremiumHome({
           ${renderModuleSection({
             drawhunterStats,
             frenchflairStats,
+            nflStats,
             drawhunterPayload,
-            frenchflairPayload
+            frenchflairPayload,
+            nflPayload
           })}
 
         </div>
@@ -221,6 +236,7 @@ function renderPremiumHome({
           ${renderSyncPanel({
             drawhunterPayload,
             frenchflairPayload,
+            nflPayload,
             latestSync
           })}
         </aside>
@@ -242,7 +258,8 @@ function renderHero({
   syncErrors,
   sportsLoading,
   drawhunterStats,
-  frenchflairStats
+  frenchflairStats,
+  nflStats
 }) {
   const healthTone = sportsLoading ? "info" : syncErrors > 0 ? "warning" : "success";
   const healthLabel = sportsLoading
@@ -253,13 +270,15 @@ function renderHero({
 
   const analysisTarget = getSmartAnalysisTarget({
     drawhunterStats,
-    frenchflairStats
+    frenchflairStats,
+    nflStats
   });
 
   const analysisLabel = getSmartAnalysisLabel({
     target: analysisTarget,
     drawhunterStats,
-    frenchflairStats
+    frenchflairStats,
+    nflStats
   });
 
   return `
@@ -435,8 +454,10 @@ function renderPriorityCard(item) {
 function renderModuleSection({
   drawhunterStats,
   frenchflairStats,
+  nflStats,
   drawhunterPayload,
-  frenchflairPayload
+  frenchflairPayload,
+  nflPayload
 }) {
   return `
     <section class="dashboard-v2-modules sl-section">
@@ -466,6 +487,16 @@ function renderModuleSection({
           stats: frenchflairStats,
           meta: frenchflairPayload?.meta,
           page: "frenchflair"
+        })}
+
+        ${renderModuleCard({
+          type: "nfl",
+          icon: "🏈",
+          title: "NFL Totals",
+          description: "Totaux Over / Under NFL",
+          stats: nflStats,
+          meta: nflPayload?.meta,
+          page: "nfl"
         })}
       </div>
     </section>
@@ -639,6 +670,7 @@ function renderQuickActions({ totals }) {
       <div class="dashboard-v2-quick-list">
         ${renderQuickAction("⚽", "Analyser le football", "DrawHunter", "drawhunter")}
         ${renderQuickAction("🏉", "Analyser le rugby", "FrenchFlair", "frenchflair")}
+        ${renderQuickAction("🏈", "Analyser la NFL", "NFL Totals", "nfl")}
         ${renderQuickAction("🎯", "Suivre mes paris", `${formatInteger(totals.pending)} en attente`, "bets")}
         ${renderQuickAction("📒", "Consulter le journal", "Historique complet", "journal")}
       </div>
@@ -672,6 +704,7 @@ function renderQuickAction(icon, title, meta, page) {
 function renderSyncPanel({
   drawhunterPayload,
   frenchflairPayload,
+  nflPayload,
   latestSync
 }) {
   return `
@@ -704,6 +737,12 @@ function renderSyncPanel({
           icon: "🏉",
           label: "Rugby",
           meta: frenchflairPayload?.meta
+        })}
+
+        ${renderSyncItem({
+          icon: "🏈",
+          label: "NFL",
+          meta: nflPayload?.meta
         })}
       </div>
 
@@ -831,10 +870,16 @@ function buildModuleStats({
       );
     }
 
-    return deriveFrenchFlairWorkflowState(
-      match,
-      getFrenchFlairMatchWorkflow(match?.id)
-    );
+    if (normalizedSource === "frenchflair") {
+      return deriveFrenchFlairWorkflowState(
+        match,
+        getFrenchFlairMatchWorkflow(match?.id)
+      );
+    }
+
+    // NFL Sprint 0.2 ne possède pas encore de workflow store dédié :
+    // chaque rencontre disponible reste à analyser jusqu'à une évolution future.
+    return "pending";
   });
 
   const pending = states.filter(state =>
@@ -863,37 +908,28 @@ function buildHeroSentence(totals) {
 
 function getSmartAnalysisTarget({
   drawhunterStats,
-  frenchflairStats
+  frenchflairStats,
+  nflStats
 }) {
-  if (drawhunterStats.pending > 0 || frenchflairStats.pending > 0) {
-    return drawhunterStats.pending >= frenchflairStats.pending
-      ? "drawhunter"
-      : "frenchflair";
-  }
+  const modules = [
+    { page: "drawhunter", stats: drawhunterStats },
+    { page: "frenchflair", stats: frenchflairStats },
+    { page: "nfl", stats: nflStats }
+  ];
 
-  if (drawhunterStats.matches > 0 || frenchflairStats.matches > 0) {
-    return drawhunterStats.matches >= frenchflairStats.matches
-      ? "drawhunter"
-      : "frenchflair";
-  }
+  const pending = modules.filter(item => item.stats?.pending > 0)
+    .sort((a, b) => b.stats.pending - a.stats.pending)[0];
+  if (pending) return pending.page;
 
-  return "home";
+  const available = modules.filter(item => item.stats?.matches > 0)
+    .sort((a, b) => b.stats.matches - a.stats.matches)[0];
+  return available?.page || "home";
 }
 
-function getSmartAnalysisLabel({
-  target,
-  drawhunterStats,
-  frenchflairStats
-}) {
-  if (target === "home") {
-    return "✅ Aucune analyse en attente";
-  }
-
-  const targetName = target === "drawhunter"
-    ? "DrawHunter"
-    : "FrenchFlair";
-
-  return `▶ Continuer dans ${targetName}`;
+function getSmartAnalysisLabel({ target }) {
+  if (target === "home") return "✅ Aucune analyse en attente";
+  const names = { drawhunter: "DrawHunter", frenchflair: "FrenchFlair", nfl: "NFL Totals" };
+  return `▶ Continuer dans ${names[target] || "SportLab"}`;
 }
 
 function getLatestSyncDate(values) {

@@ -1,3 +1,11 @@
+# V11.4.2 — NFL VALUE Guard & Dashboard Integration
+
+- Corrige la décision NFL : une EV/Value négative ne peut plus produire une recommandation VALUE, même si le score de qualité dépasse 70.
+- Le formulaire de pari NFL n’est proposé que lorsque la value mathématique est positive et que le score de qualité est suffisant.
+- Ajoute NFL Totals à l’accueil Premium aux côtés de DrawHunter et FrenchFlair.
+- Ajoute NFL aux actions rapides, compteurs globaux et panneau de synchronisation.
+- Bridge Cloudflare 3.11.0 inchangé.
+
 # V11.4.0 — NFL Sprint 0.1 Data Integration
 
 - Nouveau flux NFL indépendant de Football/Rugby.
