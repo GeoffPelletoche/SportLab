@@ -267,6 +267,12 @@ function renderMatchCard(match, index) {
       </section>
 
       ${predictionAvailable ? `
+        <section class="ff-premium-recommendation ff-premium-recommendation--${trend.toLowerCase()}">
+          <div class="ff-premium-recommendation__top"><span>✦ PRÉCONISATION SPORTLAB</span><b>Confiance ${confidence}%</b></div>
+          <div class="ff-premium-recommendation__main"><i>${trend === "OVER" ? "↗" : "↘"}</i><div><strong>${trend}</strong><p>Total modèle <b>${total} pts</b> vs référence historique ${formatNumber(match.historicalReferenceTotal)} pts</p></div></div>
+          <div class="ff-premium-recommendation__reason"><span>◎</span><p>${trendExplanation(trend)}</p></div>
+        </section>
+
         <section class="ff-model-board">
           <div class="ff-model-board__total">
             <span>TOTAL MODÈLE</span>

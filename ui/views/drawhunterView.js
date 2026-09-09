@@ -401,6 +401,12 @@ function renderMatchCard(match, index) {
         </div>
       </div>
 
+      <section class="dh-premium-recommendation">
+        <div class="dh-premium-recommendation__top"><span>✦ PRÉCONISATION SPORTLAB</span><b>Confiance ${confidence}%</b></div>
+        <div class="dh-premium-recommendation__main"><i>=</i><div><strong>MATCH NUL</strong><p>Probabilité modèle <b>${probability}%</b>${bookmakerOdds ? ` · cote Betclic ${formatOdds(bookmakerOdds)}` : ""}</p></div></div>
+        <div class="dh-premium-recommendation__reason"><span>◎</span><p>Le moteur DrawHunter conserve le match nul comme marché principal et valide la VALUE uniquement avec la cote bookmaker.</p></div>
+      </section>
+
       <section class="dh-model-focus" aria-label="Probabilité du match nul">
         <div class="dh-model-focus__value">
           <span>Probabilité modèle</span>

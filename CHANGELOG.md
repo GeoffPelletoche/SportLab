@@ -1,3 +1,12 @@
+# V11.4.5 — Unified Premium Modules UI
+
+- Refonte visuelle harmonisée de NFL Totals, FrenchFlair et DrawHunter.
+- Nouvelle carte de préconisation SportLab commune aux trois modules.
+- NFL Totals gagne une présentation Premium complète : matchup, métriques, projection et confiance.
+- FrenchFlair conserve intégralement son moteur et son workflow.
+- DrawHunter conserve intégralement son moteur, son recalcul de VALUE et son Explainable AI.
+- Aucun changement Cloudflare : Bridge 3.11.0 inchangé.
+
 # V11.4.4 — NFL Full Platform Integration
 
 - NFL Totals intégré à Calibration, Performances, Journal et Paris.
