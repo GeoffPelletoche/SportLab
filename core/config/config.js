@@ -1,5 +1,5 @@
 export const CONFIG = {
-  appName: "SportLab V10.1",
+  appName: "SportLab V11.4.0",
 
   analysisWindowDays: 1,
 
@@ -18,6 +18,14 @@ export const CONFIG = {
       { id: 61, name: "Ligue 1", active: true },
       { id: 62, name: "Ligue 2", active: true }
     ]
+  },
+
+  nfl: {
+    leagueId: 1,
+    name: "NFL",
+    market: "OVER_UNDER",
+    historyLimit: 30,
+    excludePreseason: true
   },
 
   frenchflair: {
