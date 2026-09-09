@@ -2392,3 +2392,13 @@ body.sportlab-navigation-open {
     font-size: 16px !important;
   }
 }
+
+
+/* V11.4.0 — NFL Sprint 0.1 data view */
+.nfl-data { width: 100%; max-width: 100%; min-width: 0; }
+.nfl-data-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 12px; margin-top: 14px; }
+.nfl-data-card { min-width: 0; }
+.nfl-data-teams { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.nfl-data-teams > span { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.nfl-data-teams img { object-fit: contain; flex: 0 0 auto; }
+@media (max-width: 700px) { .nfl-data-grid { grid-template-columns: minmax(0, 1fr); } .nfl-data-teams { align-items: flex-start; } }
