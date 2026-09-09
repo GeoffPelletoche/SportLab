@@ -1,9 +1,12 @@
 import { fetchUpcomingNflFixtures } from "../core/api/nflService.js";
+import { predictNflMatch } from "../core/engines/nflTotalsPredictionEngine.js";
 
-// Sprint NFL 0.1 : données uniquement. Aucun modèle VALUE n'est activé ici.
 export async function loadNflMatches({ onProgress } = {}) {
   const { fixtures, meta } = await fetchUpcomingNflFixtures({
-    onProgress: progress => onProgress?.({ matches: progress.fixtures || [], meta: progress.meta || {} })
+    onProgress: progress => onProgress?.({
+      matches: (progress.fixtures || []).map(match => predictNflMatch(match)),
+      meta: progress.meta || {}
+    })
   });
-  return { matches: fixtures, meta };
+  return { matches: fixtures.map(match => predictNflMatch(match)), meta };
 }
