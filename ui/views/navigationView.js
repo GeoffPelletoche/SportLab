@@ -48,6 +48,13 @@ export function renderNavigation(activePage = "home") {
         })}
 
         ${renderNavigationItem({
+          page: "nfl",
+          icon: "🏈",
+          label: "NFL Data",
+          activePage
+        })}
+
+        ${renderNavigationItem({
           page: "journal",
           icon: "📒",
           label: "Journal",

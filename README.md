@@ -1,3 +1,7 @@
+## SportLab V11.4.0 — NFL Sprint 0.1
+
+Voir `DEPLOIEMENT_V11.4.0.md`.
+
 > Version actuelle : **SportLab V11.3.17** — chargement Football/Rugby progressif, Performances corrigées, protections Cloud conservées.
 
 ## V11.3.17 — Progressive Sports Loading & Performance Fix

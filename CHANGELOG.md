@@ -1,3 +1,14 @@
+# V11.4.0 — NFL Sprint 0.1 Data Integration
+
+- Nouveau flux NFL indépendant de Football/Rugby.
+- API-NFL via Bridge 3.11.0, clé jamais exposée côté navigateur.
+- Ligue NFL id 1, saison courante détectée via `/leagues?current=true`.
+- Fenêtre J/J+1 identique à SportLab.
+- Historique glissant jusqu’à 30 matchs officiels par équipe, multi-saisons et cache-first.
+- Présaison exclue du dataset d’analyse.
+- Nouvelle vue `NFL Data` pour valider couverture et historiques avant le moteur Totals.
+- Aucun changement du modèle DrawHunter, FrenchFlair, Cloud Sync ou Tombstone Guard.
+
 # V11.3.17 — Calibration Mobile Responsive Fix
 
 - Corrige le débordement horizontal de la page Calibration sur iPhone.

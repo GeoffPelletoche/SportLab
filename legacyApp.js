@@ -1,5 +1,5 @@
 // SPORTLAB V7.0.0 — Legacy runtime encapsulated by Sprint 7.1 Core Foundation
-import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData } from "./services/appService.js";
+import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData, loadNflApplicationData } from "./services/appService.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
@@ -30,16 +30,20 @@ import {
 
 let drawhunterPayload = null;
 let frenchflairPayload = null;
+let nflPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
 let currentPage = "home";
 let currentAppData = null;
 let initializationRun = 0;
 let drawHunterRefreshPromise = null;
 let frenchFlairRefreshPromise = null;
+let nflRefreshPromise = null;
 let drawHunterRefreshGeneration = 0;
 let frenchFlairRefreshGeneration = 0;
+let nflRefreshGeneration = 0;
 let drawHunterReady = false;
 let frenchFlairReady = false;
+let nflReady = false;
 let postLoadTasksStarted = false;
 
 function isMatchEditableBeforeKickoff(match) {
@@ -63,7 +67,8 @@ async function init({ forceSports = false } = {}) {
     currentAppData = {
       ...localData,
       drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
-      frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby")
+      frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby"),
+      nflPayload: withSportLoadingState(nflPayload, nflReady, "nfl")
     };
     renderCurrentApplication(app);
 
@@ -71,6 +76,7 @@ async function init({ forceSports = false } = {}) {
     // Aucun sport n'attend l'autre pour publier ses rencontres.
     void refreshDrawHunterData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
     void refreshFrenchFlairData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    void refreshNflData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
     return { runId };
   } catch (error) {
     console.error("SportLab init error:", error);
@@ -89,25 +95,31 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
   if (kind === "drawhunter") {
     drawhunterPayload = payload;
     drawHunterReady = ready;
-  } else {
+  } else if (kind === "frenchflair") {
     frenchflairPayload = payload;
     frenchFlairReady = ready;
+  } else if (kind === "nfl") {
+    nflPayload = payload;
+    nflReady = ready;
   }
 
   currentAppData = {
     ...loadLocalApplicationData(),
     drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
-    frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby")
+    frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby"),
+    nflPayload: withSportLoadingState(nflPayload, nflReady, "nfl")
   };
   renderCurrentApplication();
   window.dispatchEvent(new CustomEvent("sportlab:sports-data-updated", {
     detail: {
       reason,
-      sport: kind === "drawhunter" ? "football" : "rugby",
+      sport: kind === "drawhunter" ? "football" : kind === "frenchflair" ? "rugby" : "nfl",
       drawhunter: drawhunterPayload?.matches?.length || 0,
       frenchflair: frenchflairPayload?.matches?.length || 0,
+      nfl: nflPayload?.matches?.length || 0,
       drawhunterReady: drawHunterReady,
-      frenchflairReady: frenchFlairReady
+      frenchflairReady: frenchFlairReady,
+      nflReady
     }
   }));
 }
@@ -172,6 +184,27 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
   })();
   frenchFlairRefreshPromise = task;
   return task;
+}
+
+async function refreshNflData({ force = false, reason = "background" } = {}) {
+  if (nflRefreshPromise && !force) return nflRefreshPromise;
+  const generation = ++nflRefreshGeneration;
+  nflReady = false;
+  publishSportPayload("nfl", withSportLoadingState(nflPayload, false, "nfl"), { ready: false, reason });
+  const task = (async () => {
+    try {
+      const payload = await loadNflApplicationData({ onProgress: progress => { if (generation === nflRefreshGeneration) publishSportPayload("nfl", progress, { ready: false, reason: `${reason}:progress` }); } });
+      if (generation !== nflRefreshGeneration) return null;
+      publishSportPayload("nfl", payload, { ready: true, reason });
+      return payload;
+    } catch (error) {
+      console.error("[NFLData] Échec du rafraîchissement :", error);
+      if (generation !== nflRefreshGeneration) return null;
+      publishSportPayload("nfl", nflPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, reason });
+      return null;
+    } finally { if (generation === nflRefreshGeneration) nflRefreshPromise = null; }
+  })();
+  nflRefreshPromise = task; return task;
 }
 
 function maybeStartPostSportsTasks() {
@@ -909,7 +942,8 @@ window.refreshSportLab = async function() {
   // Football/Rugby, sans changer de page ni redémarrer le Cloud.
   await Promise.allSettled([
     refreshDrawHunterData({ force: true, reason: "manual" }),
-    refreshFrenchFlairData({ force: true, reason: "manual" })
+    refreshFrenchFlairData({ force: true, reason: "manual" }),
+    refreshNflData({ force: true, reason: "manual" })
   ]);
 };
 
@@ -991,12 +1025,15 @@ export function getLegacyRuntimeState() {
     currentPage,
     drawhunterLoaded: Boolean(drawhunterPayload),
     frenchflairLoaded: Boolean(frenchflairPayload),
+    nflLoaded: Boolean(nflPayload),
     sportsDataReady: drawHunterReady && frenchFlairReady,
     drawHunterReady,
     frenchFlairReady,
-    sportsRefreshInFlight: Boolean(drawHunterRefreshPromise || frenchFlairRefreshPromise),
+    nflReady,
+    sportsRefreshInFlight: Boolean(drawHunterRefreshPromise || frenchFlairRefreshPromise || nflRefreshPromise),
     drawHunterRefreshInFlight: Boolean(drawHunterRefreshPromise),
-    frenchFlairRefreshInFlight: Boolean(frenchFlairRefreshPromise)
+    frenchFlairRefreshInFlight: Boolean(frenchFlairRefreshPromise),
+    nflRefreshInFlight: Boolean(nflRefreshPromise)
   };
 }
 

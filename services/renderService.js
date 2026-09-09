@@ -16,6 +16,8 @@ import {
   renderFrenchFlair
 } from "../ui/views/frenchflairView.js";
 
+import { renderNfl } from "../ui/views/nflView.js";
+
 import {
   renderJournal
 } from "../ui/views/journalView.js";
@@ -64,6 +66,7 @@ export function renderApplication(app, data = {}) {
   // demandée est rendue, ce qui réduit fortement le coût DOM/CPU sur iPhone.
   let drawhunterHtml = "";
   let frenchflairHtml = "";
+  let nflHtml = "";
   let journalHtml = "";
   let betsHtml = "";
   let portfolioHtml = "";
@@ -77,6 +80,8 @@ export function renderApplication(app, data = {}) {
     drawhunterHtml = renderDrawHunter(data.drawhunterPayload);
   } else if (activePage === "frenchflair") {
     frenchflairHtml = renderFrenchFlair(data.frenchflairPayload);
+  } else if (activePage === "nfl") {
+    nflHtml = renderNfl(data.nflPayload);
   } else if (activePage === "journal" || activePage === "bets") {
     const teamBrandingLookup = buildTeamBrandingLookup({
       drawhunter: data.drawhunterPayload?.matches || [],
@@ -135,6 +140,7 @@ export function renderApplication(app, data = {}) {
     navigationHtml,
     drawhunterHtml,
     frenchflairHtml,
+    nflHtml,
     journalHtml,
     betsHtml,
     portfolioHtml,
@@ -145,7 +151,8 @@ export function renderApplication(app, data = {}) {
     calibrationHtml,
     dashboard: data.dashboard || {},
     drawhunterPayload: data.drawhunterPayload || {},
-    frenchflairPayload: data.frenchflairPayload || {}
+    frenchflairPayload: data.frenchflairPayload || {},
+    nflPayload: data.nflPayload || {}
   });
 }
 

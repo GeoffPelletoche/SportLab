@@ -28,6 +28,8 @@ import {
   getFrenchFlairPayload
 } from "./frenchFlairService.js";
 
+import { getNflPayload } from "./nflService.js";
+
 /**
  * SPORTLAB V6.3.1
  *
@@ -51,13 +53,18 @@ export async function loadFrenchFlairApplicationData(options = {}) {
   return getFrenchFlairPayload(options);
 }
 
+export async function loadNflApplicationData(options = {}) {
+  return getNflPayload(options);
+}
+
 export async function loadSportsApplicationData(options = {}) {
-  const [drawhunterPayload, frenchflairPayload] = await Promise.all([
+  const [drawhunterPayload, frenchflairPayload, nflPayload] = await Promise.all([
     loadDrawHunterApplicationData(options.drawhunter || {}),
-    loadFrenchFlairApplicationData(options.frenchflair || {})
+    loadFrenchFlairApplicationData(options.frenchflair || {}),
+    loadNflApplicationData(options.nfl || {})
   ]);
 
-  return { drawhunterPayload, frenchflairPayload };
+  return { drawhunterPayload, frenchflairPayload, nflPayload };
 }
 
 export async function loadApplicationData() {

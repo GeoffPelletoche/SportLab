@@ -24,6 +24,7 @@ export function renderDashboard({
 
   drawhunterHtml = "",
   frenchflairHtml = "",
+  nflHtml = "",
   journalHtml = "",
   portfolioHtml = "",
   betsHtml = "",
@@ -35,12 +36,14 @@ export function renderDashboard({
 
   dashboard = {},
   drawhunterPayload = {},
-  frenchflairPayload = {}
+  frenchflairPayload = {},
+  nflPayload = {}
 }) {
   const content = renderActivePage({
     activePage,
     drawhunterHtml,
     frenchflairHtml,
+    nflHtml,
     journalHtml,
     portfolioHtml,
     betsHtml,
@@ -51,7 +54,8 @@ export function renderDashboard({
     calibrationHtml,
     dashboard,
     drawhunterPayload,
-    frenchflairPayload
+    frenchflairPayload,
+    nflPayload
   });
 
   return `
@@ -67,6 +71,7 @@ function renderActivePage({
   activePage,
   drawhunterHtml,
   frenchflairHtml,
+  nflHtml,
   journalHtml,
   portfolioHtml,
   betsHtml,
@@ -77,7 +82,8 @@ function renderActivePage({
   calibrationHtml,
   dashboard,
   drawhunterPayload,
-  frenchflairPayload
+  frenchflairPayload,
+  nflPayload
 }) {
   switch (activePage) {
     case "drawhunter":
@@ -85,6 +91,9 @@ function renderActivePage({
 
     case "frenchflair":
       return renderStandardPage("🏉", "FrenchFlair", frenchflairHtml);
+
+    case "nfl":
+      return renderStandardPage("🏈", "NFL Data", nflHtml);
 
     case "journal":
       return renderStandardPage("", "", journalHtml, true);
