@@ -32,6 +32,7 @@ let drawhunterPayload = null;
 let frenchflairPayload = null;
 let nflPayload = null;
 const pendingFrenchFlairAnalyses = new Map();
+const pendingNflAnalyses = new Map();
 let currentPage = "home";
 let currentAppData = null;
 let initializationRun = 0;
@@ -798,6 +799,28 @@ if (!match?.id || !match?.date) {
   alert("Analyse FrenchFlair sauvegardée.");
   init();
 };
+
+
+
+/** NFL TOTALS — SPRINT 0.2 */
+window.analyzeNflValue = function(matchId) {
+  const match = getNflMatchById(matchId); if (!match) return alert("Match NFL introuvable.");
+  const existing = getAnalysisForMatch(match.id); const box = document.getElementById(`nfl-result-${match.id}`); if (!box) return;
+  box.innerHTML = `<div class="nfl-analysis-form"><label>Marché<select id="nfl-market-${match.id}"><option value="OVER" ${existing?.market==="OVER"?"selected":""}>Over</option><option value="UNDER" ${existing?.market==="UNDER"?"selected":""}>Under</option></select></label><label>Ligne Betclic<input id="nfl-line-${match.id}" type="number" step="0.5" placeholder="Ex : 45.5" value="${existing?.line??""}"></label><label>Cote<input id="nfl-odds-${match.id}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds||""}"></label><label>Notes<input id="nfl-notes-${match.id}" type="text" value="${existing?.notes??""}"></label></div><button class="sl-button sl-button-primary" onclick="calculateNflAnalysis('${match.id}')">Calculer la VALUE</button><div id="nfl-calculation-${match.id}"></div>`;
+};
+window.calculateNflAnalysis = function(matchId) {
+  const match=getNflMatchById(matchId); if(!match) return alert("Match NFL introuvable."); if(!isMatchEditableBeforeKickoff(match)) return alert("Le match a commencé : analyse verrouillée.");
+  const market=document.getElementById(`nfl-market-${match.id}`)?.value||"OVER"; const line=Number(document.getElementById(`nfl-line-${match.id}`)?.value||0); const odds=Number(document.getElementById(`nfl-odds-${match.id}`)?.value||0); const notes=document.getElementById(`nfl-notes-${match.id}`)?.value||"";
+  if(line<=0||odds<=1) return alert("Saisis une ligne Betclic et une cote valides."); const mean=Number(match.predictedTotalPoints||0), sigma=Number(match.sigma||0); if(mean<=0||sigma<=0) return alert("Total modèle ou sigma NFL indisponible.");
+  const probability=computeTotalsProbability(mean,sigma,market,line); const value=computeValue({probability,odds,minValue:0.01}); const modelEdgePoints=market==="OVER"?mean-line:line-mean; const modelEdgePercent=line>0?modelEdgePoints/line*100:0; const confidence=Number(match.confidence||0);
+  const scoreValue=computeFrenchFlairScore({modelEdgePercent,confidence,sigma,predictedTotal:mean,mathValue:value.value}); const finalDecision=scoreValue>=70?"VALUE":"NO VALUE";
+  const analysis={source:"NFL Totals",sport:"nfl",competition:"NFL",matchId:match.id,match:`${match.home} vs ${match.away}`,home:match.home,away:match.away,homeId:match.homeId,awayId:match.awayId,homeLogo:match.homeLogo||null,awayLogo:match.awayLogo||null,date:match.date,market,line,odds,probability,impliedProbability:value.impliedProbability,value:value.value,edge:value.edge,decision:value.decision,predictedHomePoints:match.predictedHomePoints,predictedAwayPoints:match.predictedAwayPoints,predictedTotalPoints:mean,modelEdgePoints,modelEdgePercent,sigma,confidence,scoreValue,finalDecision,placed:false,stake:0,status:"draft",notes,modelVersion:match.modelVersion||"NFL-TOTALS-11.4.1"}; pendingNflAnalyses.set(String(match.id),analysis);
+  const box=document.getElementById(`nfl-calculation-${match.id}`); if(!box)return; box.innerHTML=`<hr><p><strong>${market} ${line.toFixed(1)}</strong> · cote ${odds.toFixed(2)}</p><p>Total modèle : <strong>${mean.toFixed(1)} pts</strong> · Sigma : ${sigma.toFixed(1)}</p><p>Probabilité SportLab : <strong>${(probability*100).toFixed(1)}%</strong> · implicite : ${(value.impliedProbability*100).toFixed(1)}%</p><p>Edge : <strong>${(value.edge*100).toFixed(1)}%</strong> · Value : ${(value.value*100).toFixed(1)}%</p><p><span class="badge ${finalDecision==="VALUE"?"badge-value":"badge-no"}">${finalDecision} — ${scoreValue}%</span></p><button onclick="saveNflAnalysis('${match.id}')">💾 Sauvegarder l’analyse</button>${finalDecision==="VALUE"?`<label><input type="checkbox" id="nfl-placed-${match.id}"> Pari placé</label><label>Mise <input id="nfl-stake-${match.id}" type="number" min="0" step="0.01"></label><button onclick="saveNflBet('${match.id}')">Sauvegarder le pari</button>`:""}`;
+};
+window.saveNflAnalysis=function(matchId){const a=pendingNflAnalyses.get(String(matchId)); if(!a)return alert("Calcule d’abord la VALUE."); saveAnalysis(a); pendingNflAnalyses.delete(String(matchId)); alert("Analyse NFL sauvegardée dans le Journal."); init();};
+window.saveNflBet=function(matchId){const match=getNflMatchById(matchId); const a=pendingNflAnalyses.get(String(matchId))||getAnalysisForMatch(match?.id); if(!match||!a)return alert("Analyse NFL introuvable."); if(!isMatchEditableBeforeKickoff(match))return alert("Le match a commencé : pari verrouillé."); const placed=document.getElementById(`nfl-placed-${match.id}`)?.checked; const stake=Number(document.getElementById(`nfl-stake-${match.id}`)?.value||0); if(placed&&stake<=0)return alert("Saisis une mise valide."); saveAnalysis({...a,placed,stake,status:placed?"betPlaced":"completed"}); createBet({source:"NFL Totals",sport:"nfl",competition:"NFL",matchId:match.id,matchDate:match.date,match:`${match.home} vs ${match.away}`,home:match.home,away:match.away,homeId:match.homeId,awayId:match.awayId,homeLogo:match.homeLogo,awayLogo:match.awayLogo,market:`${a.market} ${a.line}`,line:a.line,odds:a.odds,probability:a.probability,value:a.value,edge:a.edge,decision:a.decision,placed,stake}); pendingNflAnalyses.delete(String(matchId)); alert("Analyse NFL sauvegardée."); init();};
+function computeTotalsProbability(mean,sigma,market,line){const z=(line-mean)/sigma; const over=1-normalCdf(z); return clamp(market==="OVER"?over:1-over,.01,.99);}
+function getNflMatchById(matchId){return nflPayload?.matches?.find(m=>String(m.id)===String(matchId))||null;}
 
 function computeFrenchFlairProbability(match, market, line) {
   const mean = Number(match.predictedTotalPoints || 0);

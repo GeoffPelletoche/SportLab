@@ -1,34 +1,25 @@
+// Sprint 0.1 data validation preserved; Sprint 0.2 activates NFL Totals.
+import { renderTeamLogo } from "../../core/ui/teamBranding.js";
+
 export function renderNfl(payload = {}) {
   const matches = Array.isArray(payload?.matches) ? payload.matches : [];
   const meta = payload?.meta || {};
   const diag = meta.historyDiagnostics || {};
-  const status = meta.error ? `Erreur : ${escapeHtml(meta.errorMessage || "API NFL indisponible")}` : meta.loading ? "Chargement progressif…" : "Données prêtes";
-  return `
-    <section class="nfl-data sl-page" data-module="nfl">
-      <div class="sl-panel">
-        <h1>🏈 NFL Totals — Data Integration</h1>
-        <p><strong>Sprint 0.1 :</strong> validation des matchs, équipes et historiques. Aucun calcul VALUE n'est encore activé.</p>
-        <p><strong>État :</strong> ${status} · <strong>Saison :</strong> ${escapeHtml(meta.season || "—")} · <strong>Fenêtre :</strong> ${escapeHtml(meta.from || "—")} → ${escapeHtml(meta.to || "—")}</p>
-        <p><strong>Historique :</strong> ${num(diag.gamesLoaded)} matchs chargés · ${num(diag.apiSuccess)} réponses API · ${num(diag.cacheFallback)} lectures cache · ${num(diag.errors)} erreur(s).</p>
-      </div>
-      <div class="nfl-data-grid">
-        ${matches.length ? matches.map(renderGame).join("") : `<article class="sl-card"><p>${meta.loading ? "Recherche des rencontres NFL…" : "Aucune rencontre NFL dans la fenêtre d’analyse."}</p></article>`}
-      </div>
-    </section>`;
+  return `<section class="nfl-totals sl-page" data-module="nfl">
+    <header class="sl-panel"><span class="sl-eyebrow">🏈 NFL · TOTALS</span><h1>Over / Under NFL</h1>
+      <p>Total modèle NFL, sigma puis comparaison avec la ligne et la cote Betclic.</p>
+      <p><strong>${matches.length}</strong> rencontre(s) · saison ${safe(meta.season||"—")} · historique ${num(diag.gamesLoaded)} matchs ${meta.loading ? "· chargement progressif…" : ""}</p></header>
+    ${meta.error ? `<div class="sl-panel">⚠ ${safe(meta.errorMessage)}</div>` : ""}
+    <div class="nfl-totals-grid">${matches.length ? matches.map(renderGame).join("") : `<article class="sl-card"><p>${meta.loading ? "Recherche des rencontres NFL…" : "Aucune rencontre NFL dans la fenêtre d’analyse."}</p></article>`}</div>
+  </section>`;
 }
-function renderGame(match) {
-  return `<article class="sl-card nfl-data-card">
-    <div class="nfl-data-teams">
-      <span>${logo(match.awayLogo, match.away)} <strong>${escapeHtml(match.away)}</strong></span>
-      <span>at</span>
-      <span>${logo(match.homeLogo, match.home)} <strong>${escapeHtml(match.home)}</strong></span>
-    </div>
-    <p>${formatDate(match.date)} · ${escapeHtml(match.stage || "NFL")} ${match.week ? `· ${escapeHtml(match.week)}` : ""}</p>
-    <p>Historique : ${num(match.awayHistory?.length)} / ${num(match.homeHistory?.length)} matchs</p>
-  </article>`;
-}
-function logo(src,name){ return src ? `<img src="${escapeAttr(src)}" alt="" width="34" height="34" loading="lazy">` : "🏈"; }
-function formatDate(v){ const d=new Date(v); return Number.isNaN(d.getTime())?escapeHtml(v||"—"):d.toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"}); }
-function num(v){ return Number(v||0).toLocaleString("fr-FR"); }
-function escapeHtml(v){ return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
-function escapeAttr(v){ return escapeHtml(v); }
+function renderGame(m){ const ok=m.predictionStatus==="OK"; return `<article class="sl-card nfl-total-card" data-nfl-card data-match-id="${attr(m.id)}">
+  <div class="nfl-data-teams"><span>${renderTeamLogo({sport:"nfl",teamId:m.awayId,teamName:m.away,logo:m.awayLogo,className:"sl-team-logo"})}<strong>${safe(m.away)}</strong></span><span>@</span><span>${renderTeamLogo({sport:"nfl",teamId:m.homeId,teamName:m.home,logo:m.homeLogo,className:"sl-team-logo"})}<strong>${safe(m.home)}</strong></span></div>
+  <p>${date(m.date)} · ${safe(m.stage||"NFL")} ${m.week?`· ${safe(m.week)}`:""}</p>
+  ${ok ? `<div class="nfl-model-kpis"><div><span>Total modèle</span><strong>${fmt(m.predictedTotalPoints)} pts</strong></div><div><span>Sigma NFL</span><strong>${fmt(m.sigma)} pts</strong></div><div><span>Intervalle</span><strong>${fmt(m.predictedRangeLow)}–${fmt(m.predictedRangeHigh)}</strong></div><div><span>Confiance</span><strong>${num(m.confidence)}%</strong></div></div>
+  <p>Projection : ${safe(m.away)} ${fmt(m.predictedAwayPoints)} · ${safe(m.home)} ${fmt(m.predictedHomePoints)} · historique ${num(m.awayHistory?.length)}/${num(m.homeHistory?.length)}</p>
+  <button class="sl-button sl-button-primary" onclick="analyzeNflValue('${attr(m.id)}')">Analyser la VALUE</button><div id="nfl-result-${attr(m.id)}"></div>` : `<p>Historique insuffisant (${num(m.awayHistory?.length)}/${num(m.homeHistory?.length)}).</p>`}
+  </article>`; }
+function date(v){const d=new Date(v);return Number.isNaN(d.getTime())?safe(v||"—"):d.toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"});}
+function fmt(v){return Number(v||0).toFixed(1).replace('.',',');} function num(v){return Number(v||0).toLocaleString("fr-FR");}
+function safe(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");} function attr(v){return safe(v);}

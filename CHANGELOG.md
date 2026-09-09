@@ -443,3 +443,6 @@
 - Pendant un refresh, les matchs déjà chargés restent visibles et l'UI distingue « chargement » d'un vrai résultat à 0 rencontre.
 - Conserve intégralement V11.3.12 Tombstone Guard, V11.3.14 Cloud Bootstrap, navigation rapide et anti-zoom iOS.
 - Aucun changement des modèles DrawHunter/FrenchFlair, Bet Store, settlement ou fenêtre J+1.
+
+## V11.4.1 — NFL Sprint 0.2
+- NFL Totals Engine, VALUE Betclic, Bet Store et settlement NFL.
