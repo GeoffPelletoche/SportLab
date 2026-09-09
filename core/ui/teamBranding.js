@@ -19,6 +19,9 @@ export function getTeamLogoUrl({ sport, teamId, logo } = {}) {
   if (normalizedSport === "rugby") {
     return `https://media.api-sports.io/rugby/teams/${id}.png`;
   }
+  if (normalizedSport === "nfl" || normalizedSport === "american-football") {
+    return `https://media.api-sports.io/american-football/teams/${id}.png`;
+  }
   return "";
 }
 

@@ -7,7 +7,8 @@ export function buildCalibrationDashboard(records = [], options = {}) {
   const global = summarizeCalibration(usable, options);
   const modules = {
     drawhunter: summarizeCalibration(usable.filter(item => item.moduleId === "drawhunter"), options),
-    frenchflair: summarizeCalibration(usable.filter(item => item.moduleId === "frenchflair"), options)
+    frenchflair: summarizeCalibration(usable.filter(item => item.moduleId === "frenchflair"), options),
+    nfl: summarizeCalibration(usable.filter(item => item.moduleId === "nfl"), options)
   };
 
   const competitions = groupCalibration(usable, item => item.competition || "Compétition inconnue", options)
@@ -127,7 +128,7 @@ function deriveOutcome(record, probabilityPercent) {
     if (result === "LOST") return !predictedDraw;
   }
 
-  if (moduleId === "frenchflair") {
+  if (moduleId === "frenchflair" || moduleId === "nfl") {
     if (result === "WON") return true;
     if (result === "LOST") return false;
   }
@@ -194,7 +195,8 @@ function normalizeProbability(value) {
 
 function normalizeModule(value) {
   const normalized = String(value || "").toLowerCase();
-  if (normalized.includes("draw") || normalized.includes("foot")) return "drawhunter";
+  if (normalized.includes("nfl") || normalized.includes("american")) return "nfl";
+  if (normalized.includes("draw") || (normalized.includes("foot") && !normalized.includes("american"))) return "drawhunter";
   if (normalized.includes("french") || normalized.includes("rugby")) return "frenchflair";
   return "unknown";
 }

@@ -59,7 +59,7 @@ function inferEventOccurred(snapshot = {}, evaluation = {}) {
     if (result === "WON") return predictedDraw;
     if (result === "LOST") return !predictedDraw;
   }
-  if (snapshot.moduleId === "frenchflair") {
+  if (snapshot.moduleId === "frenchflair" || snapshot.moduleId === "nfl") {
     if (result === "WON") return true;
     if (result === "LOST") return false;
   }

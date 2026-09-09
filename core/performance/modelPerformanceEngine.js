@@ -2,7 +2,7 @@ import { buildCalibration } from "./calibrationEngine.js";
 
 function moduleOf(item = {}) {
   const raw = String(item.moduleId || item.source || item.sport || item.type || "").toLowerCase();
-  return raw.includes("draw") || raw.includes("foot") ? "drawhunter" : raw.includes("french") || raw.includes("rugby") ? "frenchflair" : "unknown";
+  return raw.includes("nfl") || raw.includes("american") ? "nfl" : raw.includes("draw") || (raw.includes("foot") && !raw.includes("american")) ? "drawhunter" : raw.includes("french") || raw.includes("rugby") ? "frenchflair" : "unknown";
 }
 function normalizedResult(item = {}) {
   const value = String(item.result || item.status || item.settlement || "").trim().toUpperCase();
@@ -40,7 +40,8 @@ export function buildModelPerformance(input = []) {
   const workflows = input?.workflows && typeof input.workflows === "object" ? input.workflows : {};
   return {
     drawhunter: summarize("drawhunter", dataset, learning, bets, legacy, analyses, workflows.drawhunter || {}),
-    frenchflair: summarize("frenchflair", dataset, learning, bets, legacy, analyses, workflows.frenchflair || {})
+    frenchflair: summarize("frenchflair", dataset, learning, bets, legacy, analyses, workflows.frenchflair || {}),
+    nfl: summarize("nfl", dataset, learning, bets, legacy, analyses, workflows.nfl || {})
   };
 }
 
@@ -177,7 +178,7 @@ function legacyDecisionQuality(item = {}) {
 function eventOccurredOf(item = {}, moduleId) {
   if (typeof item.eventOccurred === "boolean") return item.eventOccurred;
 
-  if (moduleId === "frenchflair" && typeof item.predictionCorrect === "boolean") {
+  if ((moduleId === "frenchflair" || moduleId === "nfl") && typeof item.predictionCorrect === "boolean") {
     return item.predictionCorrect;
   }
 
@@ -185,7 +186,7 @@ function eventOccurredOf(item = {}, moduleId) {
 }
 
 function buildLegacyPerformance(records) {
-  const groups = { drawhunter: [], frenchflair: [] };
+  const groups = { drawhunter: [], frenchflair: [], nfl: [] };
   records.forEach(item => { const moduleId = moduleOf(item); if (groups[moduleId]) groups[moduleId].push(item); });
   return Object.fromEntries(Object.entries(groups).map(([moduleId, items]) => {
     const settled = items.filter(item => ["WON", "LOST"].includes(normalizedResult(item)));

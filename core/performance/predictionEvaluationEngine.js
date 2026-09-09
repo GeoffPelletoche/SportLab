@@ -61,7 +61,7 @@ export async function evaluatePendingPredictions(storage = globalThis.localStora
 }
 
 async function fetchResult(snapshot) {
-  const path = snapshot.moduleId === "drawhunter" ? "/football/game-result" : "/rugby/game-result";
+  const path = snapshot.moduleId === "drawhunter" ? "/football/game-result" : snapshot.moduleId === "nfl" ? "/nfl/game-result" : "/rugby/game-result";
   const url = new URL(CONFIG.api.workerBaseUrl + path);
   url.searchParams.set("id", snapshot.matchId);
   const response = await fetch(url, { headers:{Accept:"application/json"}, cache:"no-store" });
@@ -113,7 +113,7 @@ function resolveDecisionContext(snapshot = {}) {
   const bet = getBets().find(item => String(item?.matchId) === String(matchId));
   const workflow = snapshot.moduleId === "drawhunter"
     ? getDrawHunterMatchWorkflow(matchId)
-    : getFrenchFlairMatchWorkflow(matchId);
+    : snapshot.moduleId === "frenchflair" ? getFrenchFlairMatchWorkflow(matchId) : null;
   const analysis = getAnalysisForMatch(matchId);
 
   const candidates = [
@@ -144,9 +144,9 @@ function resolveDecisionContext(snapshot = {}) {
 function persistLifecycleEvaluation(snapshot, evaluation, game, evaluatedAt) {
   const saveWorkflow = snapshot.moduleId === "drawhunter"
     ? saveDrawHunterMatchWorkflow
-    : saveFrenchFlairMatchWorkflow;
+    : snapshot.moduleId === "frenchflair" ? saveFrenchFlairMatchWorkflow : null;
 
-  saveWorkflow(snapshot.matchId, {
+  saveWorkflow?.(snapshot.matchId, {
     status: "resulted",
     evaluatedAt,
     evaluation,
