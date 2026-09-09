@@ -47,6 +47,73 @@ let frenchFlairReady = false;
 let nflReady = false;
 let postLoadTasksStarted = false;
 
+// V11.4.6 — Startup Resilience
+// A transient first-load failure must not immediately downgrade a module to ERROR.
+const STARTUP_RETRY_DELAYS_MS = [1200, 2500];
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function isErrorPayload(payload) {
+  return payload?.meta?.error === true;
+}
+
+function retryPayload(previousPayload, sport, attempt, maxAttempts, message = "") {
+  const previousMatches = Array.isArray(previousPayload?.matches) ? previousPayload.matches : [];
+  return {
+    ...(previousPayload || {}),
+    matches: previousMatches,
+    meta: {
+      ...(previousPayload?.meta || {}),
+      sport,
+      loading: true,
+      retrying: true,
+      retryAttempt: attempt,
+      retryMax: maxAttempts,
+      error: false,
+      errorMessage: "",
+      transientErrorMessage: message || "Nouvelle tentative automatique en cours."
+    }
+  };
+}
+
+async function loadSportWithStartupRetry({ load, previousPayload, sport, reason, generationIsCurrent, publishProgress, publishRetry }) {
+  const retryDelays = reason === "startup" ? STARTUP_RETRY_DELAYS_MS : [];
+  const maxAttempts = 1 + retryDelays.length;
+  let lastPayload = null;
+  let lastError = null;
+
+  for (let index = 0; index < maxAttempts; index += 1) {
+    if (!generationIsCurrent()) return null;
+    try {
+      lastPayload = await load({
+        onProgress: progress => {
+          if (generationIsCurrent()) publishProgress(progress);
+        }
+      });
+      lastError = null;
+      if (!isErrorPayload(lastPayload)) return lastPayload;
+      lastError = new Error(lastPayload?.meta?.errorMessage || `Synchronisation ${sport} temporairement indisponible.`);
+    } catch (error) {
+      lastError = error;
+    }
+
+    if (index >= retryDelays.length || !generationIsCurrent()) break;
+    publishRetry(retryPayload(previousPayload, sport, index + 1, retryDelays.length, lastError?.message));
+    await sleep(retryDelays[index]);
+  }
+
+  if (lastPayload && isErrorPayload(lastPayload)) return lastPayload;
+  return {
+    matches: Array.isArray(previousPayload?.matches) ? previousPayload.matches : [],
+    meta: {
+      ...(previousPayload?.meta || {}), sport, loading: false, retrying: false, error: true,
+      errorMessage: lastError?.message || `Synchronisation ${sport} indisponible.`
+    }
+  };
+}
+
 function isMatchEditableBeforeKickoff(match) {
   const kickoff = Date.parse(match?.date || match?.matchDate || "");
   return Number.isFinite(kickoff) && kickoff > Date.now();
@@ -133,11 +200,11 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
 
   const task = (async () => {
     try {
-      const payload = await loadDrawHunterApplicationData({
-        onProgress: progressPayload => {
-          if (generation !== drawHunterRefreshGeneration) return;
-          publishSportPayload("drawhunter", progressPayload, { ready: false, reason: `${reason}:progress` });
-        }
+      const payload = await loadSportWithStartupRetry({
+        load: loadDrawHunterApplicationData, previousPayload: drawhunterPayload, sport: "football", reason,
+        generationIsCurrent: () => generation === drawHunterRefreshGeneration,
+        publishProgress: progressPayload => publishSportPayload("drawhunter", progressPayload, { ready: false, reason: `${reason}:progress` }),
+        publishRetry: retryPayloadValue => publishSportPayload("drawhunter", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== drawHunterRefreshGeneration) return null;
       publishSportPayload("drawhunter", payload, { ready: true, reason });
@@ -164,11 +231,11 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
 
   const task = (async () => {
     try {
-      const payload = await loadFrenchFlairApplicationData({
-        onProgress: progressPayload => {
-          if (generation !== frenchFlairRefreshGeneration) return;
-          publishSportPayload("frenchflair", progressPayload, { ready: false, reason: `${reason}:progress` });
-        }
+      const payload = await loadSportWithStartupRetry({
+        load: loadFrenchFlairApplicationData, previousPayload: frenchflairPayload, sport: "rugby", reason,
+        generationIsCurrent: () => generation === frenchFlairRefreshGeneration,
+        publishProgress: progressPayload => publishSportPayload("frenchflair", progressPayload, { ready: false, reason: `${reason}:progress` }),
+        publishRetry: retryPayloadValue => publishSportPayload("frenchflair", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== frenchFlairRefreshGeneration) return null;
       publishSportPayload("frenchflair", payload, { ready: true, reason });
@@ -194,7 +261,12 @@ async function refreshNflData({ force = false, reason = "background" } = {}) {
   publishSportPayload("nfl", withSportLoadingState(nflPayload, false, "nfl"), { ready: false, reason });
   const task = (async () => {
     try {
-      const payload = await loadNflApplicationData({ onProgress: progress => { if (generation === nflRefreshGeneration) publishSportPayload("nfl", progress, { ready: false, reason: `${reason}:progress` }); } });
+      const payload = await loadSportWithStartupRetry({
+        load: loadNflApplicationData, previousPayload: nflPayload, sport: "nfl", reason,
+        generationIsCurrent: () => generation === nflRefreshGeneration,
+        publishProgress: progress => publishSportPayload("nfl", progress, { ready: false, reason: `${reason}:progress` }),
+        publishRetry: retryPayloadValue => publishSportPayload("nfl", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
+      });
       if (generation !== nflRefreshGeneration) return null;
       publishSportPayload("nfl", payload, { ready: true, reason });
       return payload;

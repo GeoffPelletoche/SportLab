@@ -1,3 +1,12 @@
+# V11.4.6 — Startup Resilience
+
+- Retry automatique ciblé au démarrage pour Football, Rugby et NFL en cas d’échec transitoire.
+- Deux nouvelles tentatives légères (1,2 s puis 2,5 s), uniquement pour le module en échec.
+- Les payloads d’erreur renvoyés par les services déclenchent désormais le retry, même sans exception JavaScript.
+- Les données déjà présentes restent affichées pendant une nouvelle tentative.
+- État visuel « Connexion… » avant de déclarer une erreur définitive.
+- Aucun changement des moteurs DrawHunter, FrenchFlair ou NFL Totals, du Cloud Sync ou du Bridge 3.11.0.
+
 # V11.4.5 — Unified Premium Modules UI
 
 - Refonte visuelle harmonisée de NFL Totals, FrenchFlair et DrawHunter.
