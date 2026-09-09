@@ -7,7 +7,7 @@ const WORKER_BASE_URL =
   "https://sportlab-api-bridge.geoffrey-pelletier.workers.dev";
 
 /**
- * V11.3.1 — règlement automatique unifié Rugby + Football.
+ * V11.4.1 — règlement automatique unifié Rugby + Football + NFL.
  */
 export async function settlePendingBets() {
   const bets = getBets();
@@ -59,7 +59,7 @@ async function checkPendingBet(bet) {
     error: null
   };
 
-  if (!["rugby", "football"].includes(sport)) {
+  if (!["rugby", "football", "nfl"].includes(sport)) {
     return { ...baseReport, error: "SPORT_NOT_SUPPORTED" };
   }
 
@@ -70,7 +70,9 @@ async function checkPendingBet(bet) {
   try {
     const game = sport === "football"
       ? await fetchFootballGameResult(bet.matchId)
-      : await fetchRugbyGameResult(bet.matchId);
+      : sport === "nfl"
+        ? await fetchNflGameResult(bet.matchId)
+        : await fetchRugbyGameResult(bet.matchId);
 
     const settlement = evaluateBetResult(bet, game);
     const finalResults = ["WON", "LOST", "PUSH"];
@@ -146,6 +148,17 @@ async function fetchRugbyGameResult(matchId) {
     totalPoints: toNullableNumber(game.totalPoints),
     isDraw: null
   };
+}
+
+async function fetchNflGameResult(matchId) {
+  const payload = await fetchWorkerResult("/nfl/game-result", matchId);
+  const game = payload?.response;
+  if (!game || typeof game !== "object") throw new Error("INVALID_GAME_RESULT");
+  const homePoints = toNullableNumber(game.homePoints ?? game.homeScore);
+  const awayPoints = toNullableNumber(game.awayPoints ?? game.awayScore);
+  const status = String(game.status || "").toUpperCase();
+  const isFinished = game.isFinished === true || ["FT", "AOT"].includes(status);
+  return { id: game.id ?? matchId, sport:"nfl", competition:game.competition||"NFL", date:game.date||null, status:game.status||null, isFinished, home:game.home||null, away:game.away||null, homePoints, awayPoints, totalPoints: Number.isFinite(homePoints) && Number.isFinite(awayPoints) ? homePoints + awayPoints : toNullableNumber(game.totalPoints), isDraw:null };
 }
 
 async function fetchFootballGameResult(matchId) {
