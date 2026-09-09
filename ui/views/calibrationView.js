@@ -85,6 +85,7 @@ export function renderCalibration(calibration = {}) {
   const global = calibration.global || {};
   const drawhunter = calibration.modules?.drawhunter || {};
   const frenchflair = calibration.modules?.frenchflair || {};
+  const nfl = calibration.modules?.nfl || {};
   const updated = calibration.lastUpdatedAt
     ? new Date(calibration.lastUpdatedAt).toLocaleString("fr-FR")
     : "Aucune évaluation";
@@ -108,6 +109,7 @@ export function renderCalibration(calibration = {}) {
         ${summaryCard("Calibration globale", global, "🎯")}
         ${summaryCard("DrawHunter", drawhunter, "⚽")}
         ${summaryCard("FrenchFlair", frenchflair, "🏉")}
+        ${summaryCard("NFL Totals", nfl, "🏈")}
       </div>
 
       <article class="sl-panel">

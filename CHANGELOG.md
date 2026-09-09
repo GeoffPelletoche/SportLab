@@ -1,3 +1,11 @@
+# V11.4.4 — NFL Full Platform Integration
+
+- NFL Totals intégré à Calibration, Performances, Journal et Paris.
+- Évaluation passive NFL via le Bridge 3.11.0 et `/nfl/game-result`.
+- ROI, profit, réussite et calibration NFL isolés des métriques Rugby/Football.
+- Logos NFL pris en charge dans les vues transversales.
+- Aucun changement Cloudflare requis.
+
 # V11.4.3 — NFL Recommendation & Menu Cleanup
 
 - Ajout de la préconisation OVER / UNDER dans NFL Totals, alignée sur FrenchFlair.

@@ -85,7 +85,8 @@ export function renderApplication(app, data = {}) {
   } else if (activePage === "journal" || activePage === "bets") {
     const teamBrandingLookup = buildTeamBrandingLookup({
       drawhunter: data.drawhunterPayload?.matches || [],
-      frenchflair: data.frenchflairPayload?.matches || []
+      frenchflair: data.frenchflairPayload?.matches || [],
+      nfl: data.nflPayload?.matches || []
     });
     if (activePage === "journal") journalHtml = renderJournal(data.journal, teamBrandingLookup);
     if (activePage === "bets") betsHtml = renderBets(data.dashboard?.bets || [], teamBrandingLookup);
@@ -95,6 +96,7 @@ export function renderApplication(app, data = {}) {
     const learningDataset = capturePredictionDataset({
       drawhunter: data.drawhunterPayload?.matches || [],
       frenchflair: data.frenchflairPayload?.matches || [],
+      nfl: data.nflPayload?.matches || [],
       analyses: data.analyses || []
     });
     const learningRecords = getLearningRecords();
@@ -175,7 +177,7 @@ function buildCloudStorageSummary() {
 }
 
 
-function buildTeamBrandingLookup({ drawhunter = [], frenchflair = [] } = {}) {
+function buildTeamBrandingLookup({ drawhunter = [], frenchflair = [], nfl = [] } = {}) {
   const lookup = new Map();
 
   const normalizeTeamKey = value => String(value || "")
@@ -218,6 +220,7 @@ function buildTeamBrandingLookup({ drawhunter = [], frenchflair = [] } = {}) {
 
   drawhunter.forEach(match => register(match, "football"));
   frenchflair.forEach(match => register(match, "rugby"));
+  nfl.forEach(match => register(match, "nfl"));
 
   // Helpers non énumérables pour permettre aux vues de retrouver les
   // anciens paris même lorsque leur matchId n'est plus disponible.
