@@ -513,6 +513,7 @@ function renderModuleCard({
   page
 }) {
   const hasError = meta?.error === true;
+  const isRetrying = meta?.retrying === true;
 
   return `
     <article
@@ -533,8 +534,8 @@ function renderModuleCard({
           </div>
         </div>
 
-        <span class="sl-badge ${hasError ? "sl-badge-danger" : "sl-badge-success"}">
-          ${hasError ? "Erreur" : "À jour"}
+        <span class="sl-badge ${hasError ? "sl-badge-danger" : isRetrying ? "sl-badge-warning" : "sl-badge-success"}">
+          ${hasError ? "Erreur" : isRetrying ? "Connexion…" : "À jour"}
         </span>
       </header>
 
@@ -548,8 +549,10 @@ function renderModuleCard({
       <footer class="sl-card-footer">
         <span class="dashboard-v2-module-status">
           ${hasError
-            ? "La dernière synchronisation a rencontré une erreur."
-            : "Les données du module sont disponibles."}
+            ? "La synchronisation reste indisponible après les nouvelles tentatives."
+            : isRetrying
+              ? `Nouvelle tentative automatique ${Number(meta?.retryAttempt || 1)}/${Number(meta?.retryMax || 2)}…`
+              : "Les données du module sont disponibles."}
         </span>
 
         <button
@@ -755,6 +758,7 @@ function renderSyncPanel({
 
 function renderSyncItem({ icon, label, meta }) {
   const hasError = meta?.error === true;
+  const isRetrying = meta?.retrying === true || meta?.loading === true;
 
   return `
     <article class="dashboard-v2-sync-item">
@@ -765,9 +769,9 @@ function renderSyncItem({ icon, label, meta }) {
         <small>${formatSyncDate(meta?.syncedAt)}</small>
       </span>
 
-      <span class="dashboard-v2-status-dot ${hasError ? "is-error" : "is-success"}">
+      <span class="dashboard-v2-status-dot ${hasError ? "is-error" : isRetrying ? "is-loading" : "is-success"}">
         <span class="sl-visually-hidden">
-          ${hasError ? "Erreur" : "Opérationnel"}
+          ${hasError ? "Erreur" : isRetrying ? "Connexion en cours" : "Opérationnel"}
         </span>
       </span>
     </article>
