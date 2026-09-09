@@ -1,3 +1,10 @@
+# V11.4.3 — NFL Recommendation & Menu Cleanup
+
+- Ajout de la préconisation OVER / UNDER dans NFL Totals, alignée sur FrenchFlair.
+- Présélection automatique du marché NFL recommandé lors de l'analyse VALUE.
+- Suppression de `NFL Data` du menu hamburger ; accès NFL conservé depuis l'accueil.
+- VALUE Guard V11.4.2 et Bridge 3.11.0 inchangés.
+
 # V11.4.2 — NFL VALUE Guard & Dashboard Integration
 
 - Corrige la décision NFL : une EV/Value négative ne peut plus produire une recommandation VALUE, même si le score de qualité dépasse 70.

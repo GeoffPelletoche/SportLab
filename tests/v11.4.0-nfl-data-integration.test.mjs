@@ -29,12 +29,12 @@ test("Bridge 3.11.0 integrates API-NFL without exposing the key", () => {
   assert.match(bridge, /isOfficialNflGame/);
 });
 
-test("NFL Sprint 0.1 has a dedicated data validation view", () => {
-  const nav = read("ui/views/navigationView.js");
+test("NFL Sprint 0.1 keeps a dedicated NFL route and view", () => {
   const render = read("services/renderService.js");
+  const dashboard = read("ui/views/dashboardView.js");
   const view = read("ui/views/nflView.js");
-  assert.match(nav, /page: "nfl"/);
   assert.match(render, /renderNfl/);
+  assert.match(dashboard, /page: "nfl"/);
   assert.match(view, /Sprint 0\.1/);
   assert.doesNotMatch(view, /VALUE OVER|VALUE UNDER/);
 });
