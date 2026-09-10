@@ -67,7 +67,41 @@ async function fetchResult(snapshot) {
   const response = await fetch(url, { headers:{Accept:"application/json"}, cache:"no-store" });
   const payload = await response.json();
   if (!response.ok) throw new Error(payload?.error || `HTTP_${response.status}`);
-  return payload?.response;
+  return normalizeResultPayload(snapshot.moduleId, payload?.response);
+}
+
+/**
+ * V11.4.7 — le Bridge NFL 3.11.0 expose homeScore / awayScore / status.
+ * L'évaluateur passif utilisait historiquement isFinished / homePoints /
+ * awayPoints / totalPoints ; le match NFL terminé était donc ignoré avant
+ * même d'atteindre evaluateSnapshot(). On normalise ici la réponse du Bridge
+ * sans modifier le contrat Cloudflare ni les moteurs sportifs.
+ */
+function normalizeResultPayload(moduleId, game) {
+  if (!game || typeof game !== "object") return game;
+  if (moduleId !== "nfl") return game;
+
+  const homePoints = toFiniteNumber(game.homePoints ?? game.homeScore);
+  const awayPoints = toFiniteNumber(game.awayPoints ?? game.awayScore);
+  const status = String(game.status || "").trim().toUpperCase();
+  const isFinished = game.isFinished === true || ["FT", "AOT", "CLOSED", "FINAL"].includes(status);
+  const totalPoints = Number.isFinite(homePoints) && Number.isFinite(awayPoints)
+    ? homePoints + awayPoints
+    : toFiniteNumber(game.totalPoints);
+
+  return {
+    ...game,
+    homePoints,
+    awayPoints,
+    totalPoints,
+    isFinished
+  };
+}
+
+function toFiniteNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 }
 
 function evaluateSnapshot(snapshot, game, decisionContext = null) {
@@ -136,6 +170,11 @@ function resolveDecisionContext(snapshot = {}) {
 
   if (bet?.placed === true) return { decision: "VALUE BET", explicit: true };
   if (bet && bet?.placed === false) return { decision: "NO BET", explicit: true };
+
+  // V11.4.7 — NFL Totals n'a pas de workflow dédié. Une fois le match
+  // terminé, l'absence de pari/decision sauvegardée est une abstention réelle :
+  // elle doit pouvoir alimenter Bonne abstention / Opportunité manquée.
+  if (snapshot.moduleId === "nfl") return { decision: "NO BET", explicit: true, inferred: true };
 
   return { decision: snapshot.modelDecision || "", explicit: false };
 }
