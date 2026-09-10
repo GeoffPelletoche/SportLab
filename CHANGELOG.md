@@ -1,3 +1,12 @@
+# V11.4.7 — NFL Passive Evaluation Fix
+
+- Correction de l’évaluation automatique des prédictions NFL après la fin des matchs.
+- Normalisation côté client de la réponse Bridge 3.11.0 (`homeScore`, `awayScore`, `status`) vers le format attendu par le moteur de performance.
+- Les snapshots NFL restés en attente sont automatiquement réévalués au prochain lancement, sans migration manuelle.
+- Une NFL sans pari placé est désormais comptabilisée comme abstention réelle après le match : `Bonne abstention` si la préconisation perd, `Opportunité manquée` si elle gagne.
+- Startup Resilience V11.4.6, UI Premium V11.4.5, moteurs sportifs, VALUE Guard, settlement, Cloud Sync et Tombstone Guard inchangés.
+- Aucun changement Cloudflare requis.
+
 # V11.4.6 — Startup Resilience
 
 - Retry automatique ciblé au démarrage pour Football, Rugby et NFL en cas d’échec transitoire.
