@@ -2,9 +2,10 @@
 // Sprint 0.1 data route preserved; visual layer only.
 // Refonte exclusivement visuelle : aucun moteur, calcul, workflow ou settlement n'est modifié.
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
+import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
 
 export function renderNfl(payload = {}) {
-  const matches = Array.isArray(payload?.matches) ? payload.matches : [];
+  const matches = filterUnevaluatedMatches("nfl", payload?.matches || []);
   const meta = payload?.meta || {};
   const diag = meta.historyDiagnostics || {};
   const ready = matches.filter(match => match?.predictionStatus === "OK").length;

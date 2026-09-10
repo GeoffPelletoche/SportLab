@@ -1,3 +1,12 @@
+# V11.4.8 — Evaluated Match Cleanup
+
+- Toute rencontre déjà évaluée quitte automatiquement les ateliers d’analyse DrawHunter, FrenchFlair et NFL Totals.
+- Le retrait est indépendant du parcours : match analysé ou non, pari placé ou non.
+- Le dataset passif évalué devient la référence transversale, ce qui couvre aussi NFL sans workflow store dédié.
+- Les compteurs de l’accueil excluent également les rencontres déjà évaluées.
+- Historique, Journal, Paris, Performances et Calibration restent inchangés.
+- Aucun changement moteur, Cloud Sync ou Cloudflare.
+
 # V11.4.7 — NFL Passive Evaluation Fix
 
 - Correction de l’évaluation automatique des prédictions NFL après la fin des matchs.

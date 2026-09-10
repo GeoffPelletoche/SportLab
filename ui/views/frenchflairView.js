@@ -1,5 +1,6 @@
 import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
+import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
 import {
   deriveFrenchFlairWorkflowState,
   getFrenchFlairMatchWorkflow,
@@ -23,7 +24,7 @@ export function renderFrenchFlair(payload) {
    * affichée dans la liste de travail. Les analyses sans pari (VALUE ou
    * NO VALUE) restent, elles, réouvrables jusqu’au coup d’envoi.
    */
-  const matches = sortByDate((payload?.matches || []).filter(match => {
+  const matches = sortByDate(filterUnevaluatedMatches("frenchflair", payload?.matches || []).filter(match => {
     const workflow = getFrenchFlairMatchWorkflow(match?.id);
     return workflow?.placed !== true;
   }));

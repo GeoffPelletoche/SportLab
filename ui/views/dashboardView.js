@@ -1,3 +1,4 @@
+import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow
@@ -861,12 +862,16 @@ function buildModuleStats({
   bets
 }) {
   const normalizedSource = normalizeText(source);
+  const moduleId = normalizedSource === "drawhunter" ? "drawhunter"
+    : normalizedSource === "frenchflair" ? "frenchflair"
+      : normalizedSource.includes("nfl") ? "nfl" : normalizedSource;
+  const activeMatches = filterUnevaluatedMatches(moduleId, matches);
 
   const sourceBets = bets.filter(
     bet => normalizeText(bet?.source) === normalizedSource
   );
 
-  const states = matches.map(match => {
+  const states = activeMatches.map(match => {
     if (normalizedSource === "drawhunter") {
       return deriveDrawHunterWorkflowState(
         match,
@@ -895,7 +900,7 @@ function buildModuleStats({
   ).length;
 
   return {
-    matches: matches.length,
+    matches: activeMatches.length,
     pending,
     placed
   };

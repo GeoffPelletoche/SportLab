@@ -3,6 +3,7 @@ import { computeValue } from "../../core/engines/valueEngine.js";
 import { CONFIG } from "../../core/config/config.js";
 import { explainDrawHunterPrediction } from "../../core/engines/drawHunterExplainabilityEngine.js";
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
+import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow,
@@ -20,7 +21,7 @@ import {
  */
 
 export function renderDrawHunter(payload) {
-  const matches = Array.isArray(payload?.matches) ? payload.matches : [];
+  const matches = filterUnevaluatedMatches("drawhunter", payload?.matches || []);
   const meta = payload?.meta && typeof payload.meta === "object"
     ? payload.meta
     : null;
