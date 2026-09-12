@@ -865,11 +865,17 @@ function buildModuleStats({
   const moduleId = normalizedSource === "drawhunter" ? "drawhunter"
     : normalizedSource === "frenchflair" ? "frenchflair"
       : normalizedSource.includes("nfl") ? "nfl" : normalizedSource;
-  const activeMatches = filterUnevaluatedMatches(moduleId, matches);
 
   const sourceBets = bets.filter(
     bet => normalizeText(bet?.source) === normalizedSource
   );
+
+  const unevaluatedMatches = filterUnevaluatedMatches(moduleId, matches);
+  const activeMatches = moduleId === "nfl"
+    ? unevaluatedMatches.filter(match => !sourceBets.some(bet =>
+        bet?.placed === true && String(bet?.matchId ?? "") === String(match?.id ?? "")
+      ))
+    : unevaluatedMatches;
 
   const states = activeMatches.map(match => {
     if (normalizedSource === "drawhunter") {
