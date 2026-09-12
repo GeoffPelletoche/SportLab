@@ -6,7 +6,7 @@ const legacy = await readFile(new URL("../legacyApp.js", import.meta.url), "utf8
 const dashboard = await readFile(new URL("../ui/views/dashboardView.js", import.meta.url), "utf8");
 
 test("NFL VALUE exige une value mathématique positive", () => {
-  assert.match(legacy, /const hasPositiveValue = value\.decision === "VALUE" && value\.value > 0 && value\.edge > 0/);
+  assert.match(legacy, /const hasPositiveValue =\s*value\.value > 0 &&\s*value\.edge > 0 &&\s*probability > value\.impliedProbability/);
   assert.match(legacy, /const finalDecision=hasPositiveValue && scoreValue>=70\?"VALUE":"NO VALUE"/);
 });
 

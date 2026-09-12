@@ -3,9 +3,10 @@
 // Refonte exclusivement visuelle : aucun moteur, calcul, workflow ou settlement n'est modifié.
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
 import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
+import { getBets } from "../../core/stores/betsStore.js";
 
 export function renderNfl(payload = {}) {
-  const matches = filterUnevaluatedMatches("nfl", payload?.matches || []);
+  const matches = filterUnevaluatedMatches("nfl", payload?.matches || []).filter(match => !hasPlacedNflBet(match?.id));
   const meta = payload?.meta || {};
   const diag = meta.historyDiagnostics || {};
   const ready = matches.filter(match => match?.predictionStatus === "OK").length;
@@ -47,6 +48,17 @@ export function renderNfl(payload = {}) {
       </div>
     </main>
   </section>`;
+}
+
+function hasPlacedNflBet(matchId) {
+  if (matchId === null || matchId === undefined || matchId === "") return false;
+  const key = String(matchId);
+  return getBets().some(bet => {
+    const sport = String(bet?.sport || "").trim().toLowerCase();
+    const source = String(bet?.source || "").trim().toLowerCase();
+    const isNfl = sport === "nfl" || source.includes("nfl");
+    return isNfl && bet?.placed === true && String(bet?.matchId ?? "") === key;
+  });
 }
 
 function heroKpi(label, value, note, tone) {
