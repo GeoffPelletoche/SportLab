@@ -323,8 +323,10 @@ function renderCurrentApplication(app = document.getElementById("app")) {
 /**
  * DRAWHUNTER
  */
-window.saveDrawHunterBet = function(index) {
-  const match = drawhunterPayload?.matches?.[index];
+window.saveDrawHunterBet = function(matchId) {
+  const match = (drawhunterPayload?.matches || []).find(
+    item => String(item?.id) === String(matchId)
+  );
 
   if (!match) {
     alert("Match introuvable.");

@@ -1,3 +1,10 @@
+# V11.4.12 — DrawHunter Match Identity Fix
+
+- Corrige le verrouillage erroné « match commencé » lors de l’enregistrement d’un pari DrawHunter sur une rencontre future.
+- La sauvegarde cible désormais la rencontre par `matchId` et non plus par sa position dans la liste filtrée.
+- Compatible avec le retrait des rencontres évaluées : filtrer la vue ne peut plus décaler l’index vers un ancien match déjà terminé.
+- Aucun changement du moteur DrawHunter, des probabilités, de la VALUE, du settlement, du Cloud Sync ou du Bridge.
+
 # V11.4.11 — FrenchFlair VALUE Guard Fix
 
 - Corrige une incohérence où FrenchFlair pouvait afficher VALUE malgré une value mathématique et un edge négatifs.
