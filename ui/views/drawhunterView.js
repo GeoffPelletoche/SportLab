@@ -659,7 +659,7 @@ function renderBetForm(index, matchId, editableBeforeKickoff = true) {
       <button
         type="button"
         class="sl-button sl-button-primary dh-save-button"
-        onclick="saveDrawHunterBet(${index})"
+        onclick='saveDrawHunterBet(${JSON.stringify(String(matchId))})'
         ${editableBeforeKickoff ? "" : "disabled"}
       >
         Enregistrer
