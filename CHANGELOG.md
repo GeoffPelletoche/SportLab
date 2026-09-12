@@ -1,3 +1,9 @@
+# V11.4.10 — NFL Dashboard Pending Count Fix
+
+- Le compteur NFL « À analyser » de l’accueil exclut les matchs avec pari déjà placé.
+- Alignement du compteur de l’accueil avec les rencontres réellement affichées dans NFL Totals.
+- Aucun changement de moteur ni de Bridge.
+
 # V11.4.9 — NFL Placed Bet Cleanup
 
 - Un match NFL avec un pari réellement placé disparaît immédiatement de NFL Totals après sauvegarde.
