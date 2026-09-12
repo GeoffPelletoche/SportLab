@@ -573,8 +573,19 @@ window.calculateFrenchFlairAnalysis = function(matchId) {
     mathValue: value.value
   });
 
+  /*
+   * Garde VALUE mathématique : le score qualitatif FrenchFlair ne peut
+   * jamais transformer une espérance négative en pari VALUE.
+   * computeValue() utilise minValue = 0.01, on conserve donc ce seuil
+   * minimum d'un point de probabilité au-dessus de la cote implicite.
+   */
+  const hasPositiveValue =
+    value.value >= 0.01 &&
+    value.edge > 0 &&
+    probability > value.impliedProbability;
+
   const finalDecision =
-    scoreValue >= 70
+    hasPositiveValue && scoreValue >= 70
       ? "VALUE"
       : "NO VALUE";
 

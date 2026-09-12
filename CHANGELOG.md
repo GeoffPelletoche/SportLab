@@ -1,3 +1,9 @@
+# V11.4.11 — FrenchFlair VALUE Guard Fix
+
+- Corrige une incohérence où FrenchFlair pouvait afficher VALUE malgré une value mathématique et un edge négatifs.
+- La décision VALUE exige maintenant une value >= 1 %, un edge positif, une probabilité modèle supérieure à l'implicite et un score >= 70.
+- Aucun changement des moteurs de projection, du settlement, du Cloud Sync ou du Bridge.
+
 # V11.4.10 — NFL Dashboard Pending Count Fix
 
 - Le compteur NFL « À analyser » de l’accueil exclut les matchs avec pari déjà placé.
