@@ -1,3 +1,11 @@
+# V11.4.9 — NFL Placed Bet Cleanup
+
+- Un match NFL avec un pari réellement placé disparaît immédiatement de NFL Totals après sauvegarde.
+- Paris, Journal, settlement, Performances et Calibration conservent la rencontre.
+- Les analyses sans pari restent réouvrables avant le coup d’envoi.
+- Correction VALUE locale conservée.
+- Aucun changement Cloudflare requis.
+
 # V11.4.8 — Evaluated Match Cleanup
 
 - Toute rencontre déjà évaluée quitte automatiquement les ateliers d’analyse DrawHunter, FrenchFlair et NFL Totals.
