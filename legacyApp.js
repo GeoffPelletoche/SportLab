@@ -1209,3 +1209,19 @@ window.clearSportLabResolvedConflicts = async function() {
   await refreshRecoveryCenter();
 };
 window.addEventListener("sportlab:recovery-updated", () => { if (currentPage === "recovery" || currentPage === "cloud") renderCurrentApplication(); });
+
+// SPORTLAB V11.5.0 — Capital initial du Portfolio.
+// Stocké dans les réglages déjà synchronisés par SportLab Cloud.
+window.savePortfolioInitialCapital = async function() {
+  const input = document.getElementById("portfolio-initial-capital");
+  const value = Number(input?.value || 0);
+  if (!Number.isFinite(value) || value <= 0) {
+    alert("Saisis un capital initial supérieur à 0 €.");
+    return;
+  }
+  let settings = {};
+  try { settings = JSON.parse(localStorage.getItem("sportlab.v7.settings") || "{}"); } catch { settings = {}; }
+  localStorage.setItem("sportlab.v7.settings", JSON.stringify({ ...settings, portfolioInitialCapital: value }));
+  window.SportLabCore?.cloud?.markDirty?.("sportlab.v7.settings");
+  await init();
+};

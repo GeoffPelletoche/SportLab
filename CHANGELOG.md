@@ -1,3 +1,12 @@
+# V11.5.0 — Portfolio Dashboard
+
+- Refonte Premium de Portfolio.
+- Courbe périodique du profit cumulé : 7j, 30j, 3m, 1an, Tout.
+- KPIs principaux : paris, profit net, ROI réel et progression du capital.
+- Capital initial configurable et stocké dans les réglages SportLab synchronisés.
+- Conservation des tableaux ROI existants par sport, module, compétition et marché.
+- Aucun changement des moteurs sportifs, VALUE, settlement ou Bridge.
+
 # V11.4.12 — DrawHunter Match Identity Fix
 
 - Corrige le verrouillage erroné « match commencé » lors de l’enregistrement d’un pari DrawHunter sur une rencontre future.
