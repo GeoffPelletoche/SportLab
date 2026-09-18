@@ -1,6 +1,7 @@
 import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
 import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
+import { getBets } from "../../core/stores/betsStore.js";
 import {
   deriveFrenchFlairWorkflowState,
   getFrenchFlairMatchWorkflow,
@@ -266,6 +267,8 @@ function renderMatchCard(match, index) {
           ${renderTeamLogo({ sport: "rugby", teamId: match.awayId, teamName: match.away, logo: match.awayLogo, className: "sl-team-logo ff-team-logo" })}
         </div>
       </section>
+
+      ${renderRecentBetContext(match, "rugby", "ff")}
 
       ${predictionAvailable ? `
         <section class="ff-premium-recommendation ff-premium-recommendation--${trend.toLowerCase()}">
@@ -555,3 +558,45 @@ function safeAttribute(value) {
     .replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("'", "&#039;")
     .replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
+
+
+// V11.5.2 — Unified Recent Bet Context (FrenchFlair)
+function renderRecentBetContext(match, sport, prefix) {
+  const bets = getBets();
+  const homeBet = findLatestTeamBet(bets, sport, match?.homeId, match?.home);
+  const awayBet = findLatestTeamBet(bets, sport, match?.awayId, match?.away);
+  return `<section class="sl-recent-bet-context ${prefix}-recent-bet-context" aria-label="Derniers paris SportLab des équipes">
+    <div class="sl-recent-bet-context__heading"><span>REPÈRES DE MISE</span><h3>Derniers paris des équipes</h3></div>
+    <p class="sl-recent-bet-context__summary">Ta dernière mise SportLab impliquant chacune des deux équipes, affichée comme repère uniquement.</p>
+    <div class="sl-recent-bet-context__grid">
+      ${renderRecentBetCard(match?.home, homeBet)}
+      ${renderRecentBetCard(match?.away, awayBet)}
+    </div>
+    <small class="sl-recent-bet-context__notice">Ces montants n’interviennent ni dans la VALUE ni dans le calcul de la mise actuelle.</small>
+  </section>`;
+}
+
+function findLatestTeamBet(bets, sport, teamId, teamName) {
+  const target = normalizeRecentBetTeam(teamName);
+  return [...(Array.isArray(bets) ? bets : [])]
+    .filter(bet => bet?.placed === true && isRecentBetSport(bet, sport) && (
+      (teamId != null && [bet?.homeId, bet?.awayId].some(id => id != null && String(id) === String(teamId))) ||
+      (target && [bet?.home, bet?.away, bet?.homeTeam, bet?.awayTeam].some(name => normalizeRecentBetTeam(name) === target))
+    ))
+    .sort((a,b) => Number(b?.createdAt || 0) - Number(a?.createdAt || 0))[0] || null;
+}
+
+function isRecentBetSport(bet, sport) {
+  const betSport = String(bet?.sport || "").toLowerCase();
+  const source = String(bet?.source || "").toLowerCase();
+  return sport === "rugby" ? (betSport === "rugby" || source.includes("frenchflair") || source.includes("french")) : false;
+}
+function normalizeRecentBetTeam(value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim(); }
+function renderRecentBetCard(teamName, bet) {
+  const stake = bet ? `${formatRecentBetMoney(bet.stake)} €` : "Aucun pari précédent";
+  const result = bet ? formatRecentBetResult(bet.result) : "";
+  const match = bet ? safe(bet.match || `${bet.home || ""} – ${bet.away || ""}`) : "";
+  return `<article class="sl-recent-bet-card"><strong class="sl-recent-bet-card__team">${safe(teamName || "Équipe")}</strong><span>Dernier pari SportLab</span><b>${stake}</b>${bet ? `<small>${match}${result ? ` · ${safe(result)}` : ""}</small>` : ""}</article>`;
+}
+function formatRecentBetResult(value) { const r=String(value||"").toUpperCase(); return ({WON:"Gagné",LOST:"Perdu",PUSH:"Push",VOID:"Push",PENDING:"En attente"})[r] || "En attente"; }
+function formatRecentBetMoney(value) { const n=Number(value); return Number.isFinite(n) ? n.toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2}) : "0,00"; }

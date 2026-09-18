@@ -94,6 +94,8 @@ function renderGame(m, index) {
       </div>
     </section>
 
+    ${renderNflRecentBetContext(m)}
+
     ${ok ? `<section class="nfl-recommendation nfl-recommendation--${trend.toLowerCase()}">
       <div class="nfl-recommendation__top"><span>✦ Préconisation SportLab</span><b>Confiance ${num(confidence)}%</b></div>
       <div class="nfl-recommendation__main"><i>${trendArrow}</i><div><strong>${trend}</strong><p>Total modèle <b>${fmt(total)} pts</b> vs référence historique ${fmt(reference)} pts</p></div></div>
@@ -132,3 +134,22 @@ function fmt(v){const n=Number(v);return Number.isFinite(n)?n.toFixed(1).replace
 function num(v){return Number(v||0).toLocaleString("fr-FR");}
 function safe(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 function attr(v){return safe(v);}
+
+
+// V11.5.2 — Unified Recent Bet Context (NFL Totals)
+function renderNflRecentBetContext(match) {
+  const bets=getBets();
+  const homeBet=findLatestNflTeamBet(bets,match?.homeId,match?.home);
+  const awayBet=findLatestNflTeamBet(bets,match?.awayId,match?.away);
+  return `<section class="sl-recent-bet-context nfl-recent-bet-context" aria-label="Derniers paris SportLab des équipes">
+    <div class="sl-recent-bet-context__heading"><span>REPÈRES DE MISE</span><h3>Derniers paris des équipes</h3></div>
+    <p class="sl-recent-bet-context__summary">Ta dernière mise SportLab impliquant chacune des deux équipes, affichée comme repère uniquement.</p>
+    <div class="sl-recent-bet-context__grid">${renderNflRecentBetCard(match?.away,awayBet)}${renderNflRecentBetCard(match?.home,homeBet)}</div>
+    <small class="sl-recent-bet-context__notice">Ces montants n’interviennent ni dans la VALUE ni dans le calcul de la mise actuelle.</small>
+  </section>`;
+}
+function findLatestNflTeamBet(bets,teamId,teamName){const target=normalizeNflBetTeam(teamName);return [...(Array.isArray(bets)?bets:[])].filter(bet=>{const sport=String(bet?.sport||"").toLowerCase();const source=String(bet?.source||"").toLowerCase();const nfl=sport==="nfl"||source.includes("nfl");const byId=teamId!=null&&[bet?.homeId,bet?.awayId].some(id=>id!=null&&String(id)===String(teamId));const byName=target&&[bet?.home,bet?.away,bet?.homeTeam,bet?.awayTeam].some(name=>normalizeNflBetTeam(name)===target);return bet?.placed===true&&nfl&&(byId||byName);}).sort((a,b)=>Number(b?.createdAt||0)-Number(a?.createdAt||0))[0]||null;}
+function normalizeNflBetTeam(value){return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();}
+function renderNflRecentBetCard(teamName,bet){const stake=bet?`${nflBetMoney(bet.stake)} €`:"Aucun pari précédent";const result=bet?nflBetResult(bet.result):"";const match=bet?safe(bet.match||`${bet.home||""} – ${bet.away||""}`):"";return `<article class="sl-recent-bet-card"><strong class="sl-recent-bet-card__team">${safe(teamName||"Équipe")}</strong><span>Dernier pari SportLab</span><b>${stake}</b>${bet?`<small>${match}${result?` · ${safe(result)}`:""}</small>`:""}</article>`;}
+function nflBetResult(value){const r=String(value||"").toUpperCase();return ({WON:"Gagné",LOST:"Perdu",PUSH:"Push",VOID:"Push",PENDING:"En attente"})[r]||"En attente";}
+function nflBetMoney(value){const n=Number(value);return Number.isFinite(n)?n.toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2}):"0,00";}
