@@ -1,3 +1,12 @@
+# V11.5.1 — DrawHunter Recent Team Context
+
+- Remplace le bloc Explainable AI visible dans DrawHunter par un contexte récent directement utile à la saisie de mise.
+- Affiche le dernier résultat disponible de chacune des deux équipes depuis les historiques Football déjà chargés.
+- Affiche la dernière mise SportLab placée sur un match impliquant chaque équipe, avec le statut du pari lorsqu’il existe.
+- Aucun pari précédent est indiqué explicitement quand aucune référence n’existe.
+- La mise précédente reste purement informative et ne modifie ni la VALUE, ni le score, ni le moteur DH-11.3.4.
+- Aucun changement Bridge, Cloud Sync, settlement, FrenchFlair ou NFL Totals.
+
 # V11.5.0 — Portfolio Dashboard
 
 - Refonte Premium de Portfolio.
