@@ -27,10 +27,10 @@ test("le facteur bookmaker est mis en attente sans cote", () => {
   assert.equal(factor.stars, 0);
 });
 
-test("l'interface contient le bloc Explainable AI uniquement dans DrawHunter", async () => {
+test("l'ancien moteur Explainable AI reste isolé et la vue DrawHunter utilise le contexte récent", async () => {
   const drawView = await readFile(new URL("../ui/views/drawhunterView.js", import.meta.url), "utf8");
   const frenchView = await readFile(new URL("../ui/views/frenchflairView.js", import.meta.url), "utf8");
-  assert.equal(drawView.includes("Pourquoi cette estimation ?"), true);
-  assert.equal(drawView.includes("data-dh-explain-factor"), true);
+  assert.equal(drawView.includes("Derniers résultats & paris"), true);
+  assert.equal(drawView.includes("Pourquoi cette estimation ?"), false);
   assert.equal(frenchView.includes("Explainable AI"), false);
 });

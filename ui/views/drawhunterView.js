@@ -1,9 +1,9 @@
 import { scoreAnalysis } from "../../core/scoring/unifiedScoringEngine.js";
 import { computeValue } from "../../core/engines/valueEngine.js";
 import { CONFIG } from "../../core/config/config.js";
-import { explainDrawHunterPrediction } from "../../core/engines/drawHunterExplainabilityEngine.js";
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
 import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
+import { getBets } from "../../core/stores/betsStore.js";
 import {
   deriveDrawHunterWorkflowState,
   getDrawHunterMatchWorkflow,
@@ -469,7 +469,7 @@ function renderMatchCard(match, index) {
         ${renderTimelineStep("Résultat", ["resulted","archived"].includes(workflowState))}
       </div>
 
-      ${renderExplainability(analyzedMatch)}
+      ${renderRecentTeamContext(match)}
       ${renderAnalysisDetails(analyzedMatch, state, confidence)}
       ${renderHistory(storedWorkflow, match)}
 
@@ -487,66 +487,108 @@ function renderMatchCard(match, index) {
 }
 
 
-function renderExplainability(match) {
-  const explanation = explainDrawHunterPrediction(match, match?.odds);
-
-  if (!explanation.available) {
-    return `
-      <section class="dh-explain dh-explain--unavailable" aria-label="Explication de la prédiction">
-        <div class="dh-explain__heading">
-          <div>
-            <p class="dh-section-eyebrow">Explainable AI</p>
-            <h3>Pourquoi cette estimation ?</h3>
-          </div>
-        </div>
-        <p class="dh-explain__summary">${safe(explanation.summary)}</p>
-      </section>
-    `;
-  }
+function renderRecentTeamContext(match) {
+  const bets = getBets();
+  const home = buildTeamRecentContext(match, "home", bets);
+  const away = buildTeamRecentContext(match, "away", bets);
 
   return `
-    <section class="dh-explain" aria-label="Explication de la prédiction">
-      <div class="dh-explain__heading">
+    <section class="dh-team-context" aria-label="Résultats et mises récentes">
+      <div class="dh-team-context__heading">
         <div>
-          <p class="dh-section-eyebrow">Explainable AI</p>
-          <h3>Pourquoi cette estimation ?</h3>
+          <p class="dh-section-eyebrow">Repères de mise</p>
+          <h3>Derniers résultats & paris</h3>
         </div>
-        <span class="dh-explain__fair-odds">Cote juste ${formatOdds(explanation.fairOdds)}</span>
       </div>
-
-      <p class="dh-explain__summary">${safe(explanation.summary)}</p>
-
-      <div class="dh-explain__factors">
-        ${explanation.factors.map(renderExplanationFactor).join("")}
+      <p class="dh-team-context__summary">
+        Retrouve le dernier résultat de chaque équipe et ta dernière mise SportLab impliquant cette équipe.
+      </p>
+      <div class="dh-team-context__grid">
+        ${renderTeamRecentContext(home)}
+        ${renderTeamRecentContext(away)}
       </div>
-
-      <small class="dh-explain__notice">
-        Ces explications décrivent les données déjà utilisées par le modèle. Elles ne changent pas la prédiction.
+      <small class="dh-team-context__notice">
+        La mise précédente est affichée comme repère uniquement : elle ne modifie ni la VALUE ni la mise actuelle.
       </small>
     </section>
   `;
 }
 
-function renderExplanationFactor(factor) {
+function buildTeamRecentContext(match, side, bets) {
+  const isHome = side === "home";
+  const teamId = isHome ? match?.homeId : match?.awayId;
+  const teamName = isHome ? match?.home : match?.away;
+  const history = Array.isArray(isHome ? match?.homeHistory : match?.awayHistory)
+    ? (isHome ? match.homeHistory : match.awayHistory)
+    : [];
+  const lastGame = [...history]
+    .filter(game => Number.isFinite(Number(game?.homeGoals)) && Number.isFinite(Number(game?.awayGoals)))
+    .sort((a, b) => new Date(b?.date || 0) - new Date(a?.date || 0))[0] || null;
+  const lastBet = [...(Array.isArray(bets) ? bets : [])]
+    .filter(bet => bet?.placed === true && isDrawHunterBet(bet) && betInvolvesTeam(bet, teamId, teamName))
+    .sort((a, b) => Number(b?.createdAt || 0) - Number(a?.createdAt || 0))[0] || null;
+
+  return { teamId, teamName, lastGame, lastBet };
+}
+
+function isDrawHunterBet(bet) {
+  const sport = String(bet?.sport || "").toLowerCase();
+  const source = String(bet?.source || "").toLowerCase();
+  return sport === "football" || source.includes("drawhunter") || source.includes("draw");
+}
+
+function betInvolvesTeam(bet, teamId, teamName) {
+  if (teamId != null && [bet?.homeId, bet?.awayId].some(id => id != null && String(id) === String(teamId))) return true;
+  const target = normalizeTeamLabel(teamName);
+  if (!target) return false;
+  return [bet?.home, bet?.away, bet?.homeTeam, bet?.awayTeam]
+    .some(name => normalizeTeamLabel(name) === target);
+}
+
+function normalizeTeamLabel(value) {
+  return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function renderTeamRecentContext(context) {
+  const game = context.lastGame;
+  const bet = context.lastBet;
+  const score = game
+    ? `${safe(game.home || "-")} ${safe(game.homeGoals)}–${safe(game.awayGoals)} ${safe(game.away || "-")}`
+    : "Aucun résultat récent disponible";
+  const stake = bet ? `${formatMoney(bet.stake)} €` : "Aucun pari précédent";
+  const result = bet ? formatBetResult(bet.result) : "";
+  const betMatch = bet ? safe(bet.match || `${bet.home || ""} – ${bet.away || ""}`) : "";
+
   return `
-    <article
-      class="dh-explain-factor dh-explain-factor--${safe(factor.tone)}"
-      data-dh-explain-factor="${safe(factor.key)}"
-    >
-      <div class="dh-explain-factor__top">
-        <strong>${safe(factor.label)}</strong>
-        <span class="dh-explain-stars" aria-label="Influence ${factor.stars} sur 5">
-          ${renderStars(factor.stars)}
-        </span>
+    <article class="dh-team-context-card">
+      <strong class="dh-team-context-card__team">${safe(context.teamName || "Équipe")}</strong>
+      <div class="dh-team-context-card__block">
+        <span class="dh-team-context-card__label">Dernier résultat</span>
+        <strong>${score}</strong>
+        ${game?.date ? `<small>${safe(formatShortDate(game.date))}</small>` : ""}
       </div>
-      <p>${safe(factor.detail)}</p>
+      <div class="dh-team-context-card__block dh-team-context-card__block--bet">
+        <span class="dh-team-context-card__label">Dernier pari SportLab</span>
+        <strong>${stake}</strong>
+        ${bet ? `<small>${betMatch}${result ? ` · ${safe(result)}` : ""}</small>` : ""}
+      </div>
     </article>
   `;
 }
 
-function renderStars(count) {
-  const safeCount = Math.max(0, Math.min(5, Number(count) || 0));
-  return `${"★".repeat(safeCount)}${"☆".repeat(5 - safeCount)}`;
+function formatBetResult(value) {
+  const result = String(value || "").toUpperCase();
+  return ({ WON: "Gagné", LOST: "Perdu", PUSH: "Push", PENDING: "En attente" })[result] || result;
+}
+
+function formatMoney(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00";
+}
+
+function formatShortDate(value) {
+  try { return new Date(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" }); }
+  catch { return String(value || ""); }
 }
 
 function renderAnalysisDetails(match, state, confidence) {
