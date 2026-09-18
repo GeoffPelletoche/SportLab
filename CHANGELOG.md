@@ -1,3 +1,10 @@
+# V11.5.2 — Unified Recent Bet Context
+
+- FrenchFlair et NFL Totals affichent désormais, pour chacune des deux équipes, le dernier pari SportLab réellement placé.
+- Montant et résultat (Gagné / Perdu / Push / En attente) sont affichés ; « Aucun pari précédent » est explicite sans historique.
+- Recherche robuste par ID d’équipe avec fallback sur le nom.
+- Contexte informatif uniquement : aucun moteur, calcul VALUE ou logique de mise n’est modifié.
+
 # V11.5.1 — DrawHunter Recent Team Context
 
 - Remplace le bloc Explainable AI visible dans DrawHunter par un contexte récent directement utile à la saisie de mise.
