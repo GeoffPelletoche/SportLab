@@ -39,9 +39,15 @@ function write(items) {
     return items;
   } catch (error) {
     if (isQuotaExceeded(error)) {
-      error.code = error.code || "local_storage_quota_exceeded";
-      error.storage = "localStorage";
-      error.storageKey = QUEUE_KEY;
+      // Safari/iOS expose DOMException.code/name as readonly properties.
+      // Never mutate the native exception: wrap it in a normal Error instead.
+      const wrapped = new Error(String(error?.message || "Quota de stockage local dépassé."));
+      wrapped.name = "SportLabLocalStorageQuotaError";
+      wrapped.code = "local_storage_quota_exceeded";
+      wrapped.storage = "localStorage";
+      wrapped.storageKey = QUEUE_KEY;
+      wrapped.cause = error;
+      throw wrapped;
     }
     throw error;
   }
