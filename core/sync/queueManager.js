@@ -24,7 +24,28 @@ function normalize(item) {
     lastError: String(item.lastError || "")
   };
 }
-function write(items) { localStorage.setItem(QUEUE_KEY, JSON.stringify(items)); return items; }
+function isQuotaExceeded(error) {
+  const name = String(error?.name || "");
+  const message = String(error?.message || "");
+  return name === "QuotaExceededError" || /quota.*exceed/i.test(message);
+}
+function write(items) {
+  const serialized = JSON.stringify(items);
+  // Evite de réécrire inutilement plusieurs Mo dans Safari/iOS lorsque la file
+  // n'a pas réellement changé.
+  if (localStorage.getItem(QUEUE_KEY) === serialized) return items;
+  try {
+    localStorage.setItem(QUEUE_KEY, serialized);
+    return items;
+  } catch (error) {
+    if (isQuotaExceeded(error)) {
+      error.code = error.code || "local_storage_quota_exceeded";
+      error.storage = "localStorage";
+      error.storageKey = QUEUE_KEY;
+    }
+    throw error;
+  }
+}
 function isSafeQueueItem(item) {
   // V11.3.12 — aucune ancienne entrée deleted=true ne doit survivre dans la
   // file. Seule une future action métier explicitement marquée peut créer un

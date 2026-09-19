@@ -11,6 +11,11 @@ function platformLabel() { return [navigator.userAgentData?.platform, navigator.
 function deviceName() { return `${platformLabel()} · ${navigator.userAgent.includes("Mobile") ? "Mobile" : "Navigateur"}`; }
 function randomId() { return crypto.randomUUID ? crypto.randomUUID() : `device-${Date.now()}-${Math.random().toString(16).slice(2)}`; }
 function chunks(items, size = 250) { const result = []; for (let i = 0; i < items.length; i += size) result.push(items.slice(i, i + size)); return result; }
+function isLocalStorageQuotaError(error) {
+  return error?.code === "local_storage_quota_exceeded"
+    || error?.name === "QuotaExceededError"
+    || /quota.*exceed/i.test(String(error?.message || ""));
+}
 
 export function createSyncEngine({ eventBus, logger, notifications }) {
   const api = createCloudApi({ getConfig: syncConfigStore.get });
@@ -123,7 +128,9 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
       logger.warn("Tombstones Sync V2 obsolètes neutralisés", { count: purgedTombstones, reason });
       emitEvent(SYNC_EVENTS.QUEUE, { purgedTombstones, queueSize: queueManager.size() });
     }
-    captureChanges({ force: reason === "startup" || reason === "manual" });
+    // V11.5.3 — la capture peut dépasser le quota localStorage de Safari/iOS.
+    // Elle est effectuée dans le bloc protégé plus bas afin qu'une file déjà
+    // persistée puisse d'abord être envoyée et libérer de l'espace.
     // V11.3.10: une protection quota héritée de V11.3.9 sans code D1 explicite
     // est considérée comme ambiguë. On la libère et on laisse le Worker confirmer
     // une éventuelle vraie limite D1 via le code d1_daily_quota_exceeded.
@@ -149,10 +156,36 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     emit("syncing", { reason });
     emitEvent(SYNC_EVENTS.START, { reason });
     try {
+      let localCaptureDeferred = false;
+      try {
+        captureChanges({ force: reason === "startup" || reason === "manual" });
+      } catch (error) {
+        if (!isLocalStorageQuotaError(error)) throw error;
+        localCaptureDeferred = true;
+        diff.markDirty();
+        logger.warn("Quota local Safari/iOS pendant la capture Sync V2 — envoi de la file existante en priorité", {
+          code: "local_storage_quota_exceeded",
+          queueSize: queueManager.size(),
+          reason
+        });
+      }
+
       const deviceId = await ensureDevice();
       await initialReconcile();
-      captureChanges({ force: true });
-      const pushed = await pushQueue(deviceId);
+
+      // Si localStorage était plein, on pousse d'abord les éléments déjà sûrs
+      // et persistés. Leur acquittement réduit la file avant une nouvelle capture.
+      let pushed = await pushQueue(deviceId);
+      if (localCaptureDeferred) {
+        diff.markDirty();
+        captureChanges({ force: true });
+        const retryPush = await pushQueue(deviceId);
+        pushed = {
+          accepted: Number(pushed.accepted || 0) + Number(retryPush.accepted || 0),
+          conflicts: Number(pushed.conflicts || 0) + Number(retryPush.conflicts || 0)
+        };
+      }
+
       const pulled = await pullRemote();
       const now = Date.now();
       syncConfigStore.set({ lastSyncAt: now, lastError: "", lastErrorCode: "", consecutiveErrors: 0, cloudBlockedUntil: 0, cloudBlockedReason: "" });
@@ -189,16 +222,26 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     }
   }
 
+  function captureOrDefer(options = {}) {
+    try { return captureChanges(options); }
+    catch (error) {
+      if (!isLocalStorageQuotaError(error)) throw error;
+      diff.markDirty();
+      logger.warn("Capture Sync V2 différée : stockage local saturé", { code: "local_storage_quota_exceeded" });
+      return [];
+    }
+  }
+
   const scheduler = createSyncScheduler({
     run: reason => syncNow({ silent: true, reason }).catch(() => {}),
-    onOffline: () => { diff.markDirty(); captureChanges({ force: true }); emit("offline"); },
+    onOffline: () => { diff.markDirty(); captureOrDefer({ force: true }); emit("offline"); },
     intervalMs: Number(syncConfigStore.get().intervalMs || 300_000)
   });
   const watchedEvents = ["sportlab:bets-updated", "sportlab:drawhunter-workflow-updated", "sportlab:frenchflair-workflow-updated"];
-  const onDomainChange = () => { diff.markDirty(); captureChanges(); scheduler.schedule("change"); };
+  const onDomainChange = () => { diff.markDirty(); captureOrDefer(); scheduler.schedule("change"); };
   const onStorage = event => {
     if (!event.key || event.key.startsWith("sportlab.v7.cloud")) return;
-    diff.markDirty(); captureChanges(); scheduler.schedule("storage");
+    diff.markDirty(); captureOrDefer(); scheduler.schedule("storage");
   };
 
   function start() {
