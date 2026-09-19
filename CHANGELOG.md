@@ -1,3 +1,11 @@
+# V11.5.3 — Sync V2 Safari Storage Recovery
+
+- Corrige le faux « Erreur Cloud » lorsque Safari/iOS refuse une écriture de la file Sync V2 pour quota localStorage.
+- Évite les réécritures identiques de la file locale.
+- Si le stockage local est saturé, Sync V2 envoie d’abord la file déjà persistée, puis recapture les changements et effectue un second push.
+- Les captures déclenchées par les événements métier sont différées proprement au lieu de casser le cycle de synchronisation.
+- Aucun effacement automatique des données métier ou de la file locale.
+
 # V11.5.2 — Unified Recent Bet Context
 
 - FrenchFlair et NFL Totals affichent désormais, pour chacune des deux équipes, le dernier pari SportLab réellement placé.
