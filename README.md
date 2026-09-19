@@ -1,3 +1,12 @@
+# SportLab V11.5.4
+
+**Sync Safari/iOS Fix 2 — DOMException readonly-safe.**
+
+- Corrige `Attempted to assign to readonly property` sur Safari/iOS.
+- N'essaie plus de modifier les propriétés readonly de `QuotaExceededError` / `DOMException`.
+- Conserve la stratégie V11.5.3 : pousser la file existante avant une nouvelle capture lorsque le stockage local est saturé.
+- Aucune suppression automatique des données locales ou de la file Sync V2.
+
 # SportLab V11.4.1
 
 NFL Sprint 0.2 — Totals Engine.
