@@ -1,3 +1,18 @@
+## V11.6.1 — Background Refresh & Stable Workflow
+- Rafraîchissements sportifs non intrusifs pendant la saisie.
+- Navigation automatique vers l’analyse suivante/précédente après validation.
+- NO VALUE définitif dans FrenchFlair et NFL Totals.
+- Safe Recovery V11.6.0 conservé.
+
+# SportLab V11.6.0 — Safe Recovery
+
+- Snapshot automatique avant fusion Cloud mutante.
+- Anti-écrasement des divergences locales ambiguës.
+- Conflits explicites en attente de décision, sans LWW silencieux.
+- Protection quota : pas d’application Cloud si le snapshot de sécurité échoue.
+- Recovery Center V11.6.0 et conservation des conflits en attente lors du nettoyage.
+- Worker Cloudflare V7.0.4 inchangé.
+
 # V11.5.3 — Sync V2 Safari Storage Recovery
 
 - Corrige le faux « Erreur Cloud » lorsque Safari/iOS refuse une écriture de la file Sync V2 pour quota localStorage.
