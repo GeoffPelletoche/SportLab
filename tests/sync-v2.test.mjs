@@ -62,12 +62,12 @@ test("capture locale conserve le même timestamp tant que le fingerprint en atte
   assert.ok(third.clientUpdatedAt >= first.clientUpdatedAt);
 });
 
-test("résolution LWW choisit la donnée la plus récente", () => {
+test("V11.6.0 conserve une divergence 409 en décision explicite", () => {
   const result = resolveConflicts([{
     server: { namespace: "bets", key: "a", clientUpdatedAt: 10, version: 2 },
     client: { namespace: "bets", key: "a", clientUpdatedAt: 20, baseVersion: 1 }
   }]);
-  assert.equal(result.localToRetry.length, 1);
-  assert.equal(result.localToRetry[0].baseVersion, 2);
-  assert.equal(result.decisions[0].winner, "client");
+  assert.equal(result.localToRetry.length, 0);
+  assert.equal(result.recordsToApply.length, 0);
+  assert.equal(result.decisions[0].winner, "pending");
 });
