@@ -49,6 +49,47 @@ export function collectLocalChanges() {
   if (changes.length) saveMeta(state);
   return changes;
 }
+
+export function inspectRemoteRecords(records = []) {
+  const state = meta();
+  const latest = new Map();
+  for (const record of records) {
+    const key = record?.payload?.storageKey || record?.key || record?.record_key;
+    if (!SYNCED_KEYS.includes(key)) continue;
+    const previous = latest.get(key);
+    const version = Number(record?.version || 0);
+    if (!previous || version >= Number(previous?.version || 0)) latest.set(key, record);
+  }
+  const safeRecords = [];
+  const conflicts = [];
+  let mutations = 0;
+  for (const [key, record] of latest) {
+    const localRaw = localStorage.getItem(key);
+    const remoteDeleted = Boolean(record?.deleted);
+    const remoteRaw = record?.payload?.raw ?? null;
+    const entry = state[key] || null;
+    const localFingerprint = hash(localRaw ?? "__deleted__");
+    const trackedAndClean = Boolean(entry?.hash) && entry.hash === localFingerprint;
+    const identical = remoteDeleted ? localRaw === null : typeof remoteRaw === "string" && localRaw === remoteRaw;
+    const localEmpty = localRaw === null;
+
+    // Safe Recovery: a clean tracked value may follow Cloud; an empty browser may
+    // bootstrap from Cloud; identical values only refresh sync metadata. Any other
+    // divergence is preserved locally and surfaced as an explicit conflict.
+    if (identical || localEmpty || trackedAndClean) {
+      safeRecords.push(record);
+      if (!identical) mutations += 1;
+    } else {
+      conflicts.push({
+        namespace: record?.namespace || namespaceFor(key), key, reason: "ambiguous-divergence",
+        current: record,
+        client: { namespace: namespaceFor(key), key, payload: { storageKey: key, raw: localRaw }, deleted: false, clientUpdatedAt: Number(entry?.pendingClientUpdatedAt || 0), fingerprint: localFingerprint }
+      });
+    }
+  }
+  return { safeRecords, conflicts, mutations };
+}
+
 export function applyRemoteRecords(records = []) {
   const state = meta(); let changed = false;
   for (const record of records) {

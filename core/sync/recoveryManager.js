@@ -1,5 +1,6 @@
 import { applyRemoteRecords, exportLocalSnapshot, SYNCED_KEYS } from "./localDataAdapter.js";
 import { SYNC_EVENTS } from "./syncEvents.js";
+import { createRecoverySnapshot } from "./recoverySnapshotStore.js";
 
 const SNAPSHOTS_KEY = "sportlab.v7.cloud.recovery.snapshots";
 const JOURNAL_KEY = "sportlab.v7.cloud.recovery.journal";
@@ -75,11 +76,7 @@ export function createRecoveryManager({ syncEngine, eventBus, logger, notificati
   }
 
   function createSnapshot(reason = "manual", records = exportLocalSnapshot()) {
-    const snapshots = read(SNAPSHOTS_KEY);
-    const snapshot = { id: uid("snapshot"), createdAt: now(), reason, records: clone(records), summary: summarize(records) };
-    write(SNAPSHOTS_KEY, [snapshot, ...snapshots].slice(0, MAX_SNAPSHOTS));
-    journal("snapshot", "Snapshot local créé", { snapshotId: snapshot.id, reason });
-    return snapshot;
+    return createRecoverySnapshot(records, reason);
   }
 
   function listSnapshots() { return read(SNAPSHOTS_KEY); }
@@ -142,7 +139,7 @@ export function createRecoveryManager({ syncEngine, eventBus, logger, notificati
     const conflicts = (payload.conflicts || payload.decisions || []).map((conflict, index) => {
       const decision = payload.decisions?.[index] || conflict;
       return {
-        id: uid(`conflict-${index}`), at: payload.at || now(), status: "resolved-auto",
+        id: uid(`conflict-${index}`), at: payload.at || now(), status: decision.winner === "pending" ? "pending" : "resolved-auto",
         namespace: conflict.namespace || conflict.current?.namespace || decision.namespace || "unknown",
         key: conflict.key || conflict.current?.key || conflict.current?.record_key || decision.key || "unknown",
         winner: decision.winner || conflict.winner || "lww",
@@ -157,18 +154,20 @@ export function createRecoveryManager({ syncEngine, eventBus, logger, notificati
     ].join("|")));
     if (conflicts.length) {
       write(CONFLICTS_KEY, [...conflicts, ...existing].slice(0, MAX_CONFLICTS));
-      journal("conflict", `${conflicts.length} nouveau(x) conflit(s) traité(s)`, { count: conflicts.length });
+      journal("conflict", `${conflicts.length} nouveau(x) conflit(s) détecté(s)`, { count: conflicts.length, pending: conflicts.filter(item => item.status === "pending").length });
     }
   }
 
 
   function clearResolvedConflictHistory() {
-    write(CONFLICTS_KEY, []);
+    const conflicts = read(CONFLICTS_KEY);
+    const pending = conflicts.filter(item => item?.status === "pending");
+    write(CONFLICTS_KEY, pending);
     const keptJournal = read(JOURNAL_KEY).filter(item => item?.type !== "conflict");
     write(JOURNAL_KEY, keptJournal);
-    journal("cleanup", "Historique des conflits résolus effacé", { preservedJournalEntries: keptJournal.length });
+    journal("cleanup", "Historique des conflits résolus effacé", { preservedPendingConflicts: pending.length, preservedJournalEntries: keptJournal.length });
     window.dispatchEvent(new CustomEvent("sportlab:recovery-updated"));
-    return { ok: true, preservedJournalEntries: keptJournal.length };
+    return { ok: true, preservedPendingConflicts: pending.length, preservedJournalEntries: keptJournal.length };
   }
 
   eventBus.on?.(SYNC_EVENTS.CONFLICT, recordConflicts);

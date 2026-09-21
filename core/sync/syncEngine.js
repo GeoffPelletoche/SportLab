@@ -1,6 +1,7 @@
 import { syncConfigStore } from "./syncConfigStore.js";
 import { createCloudApi } from "./cloudApi.js";
-import { collectLocalChanges, applyRemoteRecords, acknowledgeChanges, hasLocalSportLabData } from "./localDataAdapter.js";
+import { collectLocalChanges, applyRemoteRecords, acknowledgeChanges, hasLocalSportLabData, exportLocalSnapshot, inspectRemoteRecords } from "./localDataAdapter.js";
+import { createRecoverySnapshot } from "./recoverySnapshotStore.js";
 import { queueManager } from "./queueManager.js";
 import { resolveConflicts } from "./conflictResolver.js";
 import { createDiffEngine } from "./diffEngine.js";
@@ -40,12 +41,28 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     return config.deviceId;
   }
 
+  function applyRemoteSafely(records = [], reason = "cloud-pull") {
+    const inspection = inspectRemoteRecords(records);
+    if (inspection.mutations > 0) createRecoverySnapshot(exportLocalSnapshot(), `safe-recovery:${reason}`);
+    if (inspection.safeRecords.length) applyRemoteRecords(inspection.safeRecords);
+    if (inspection.conflicts.length) {
+      const decisions = inspection.conflicts.map(conflict => ({
+        namespace: conflict.namespace, key: conflict.key, winner: "pending", reason: conflict.reason,
+        serverTimestamp: Number(conflict.current?.clientUpdatedAt || conflict.current?.serverUpdatedAt || 0),
+        clientTimestamp: Number(conflict.client?.clientUpdatedAt || 0),
+        serverVersion: Number(conflict.current?.version || 0), localFingerprint: conflict.client?.fingerprint || ""
+      }));
+      emitEvent(SYNC_EVENTS.CONFLICT, { count: inspection.conflicts.length, conflicts: inspection.conflicts, decisions, status: "pending" });
+    }
+    return inspection;
+  }
+
   async function initialReconcile() {
     const config = syncConfigStore.get();
     if (config.initialMigrationDone) return;
     const snapshot = await api.snapshot();
     const remote = snapshot.records || [];
-    if (remote.length) applyRemoteRecords(remote);
+    if (remote.length) applyRemoteSafely(remote, "initial-reconcile");
     else if (hasLocalSportLabData()) { diff.markDirty(); queueManager.enqueue(diff.scan({ force: true })); }
     syncConfigStore.set({ initialMigrationDone: true });
   }
@@ -82,14 +99,14 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
         if (accepted.length) { acknowledgeChanges(accepted); queueManager.acknowledge(accepted); acceptedCount += accepted.length; }
         const conflicts = payload.conflicts || error.details?.conflicts || [];
         const resolution = resolveConflicts(conflicts, batch);
-        applyRemoteRecords(resolution.recordsToApply);
-        queueManager.acknowledgeKeys(resolution.recordsToApply.map(item => `${item.namespace}:${item.key || item.record_key}`));
-        if (resolution.localToRetry.length) {
-          queueManager.enqueue(resolution.localToRetry);
-          queueManager.defer(resolution.localToRetry, "Conflit cloud — nouvelle tentative différée");
-        }
+        // V11.6.0 Safe Recovery — aucun conflit ambigu ne choisit silencieusement
+        // Cloud ou Local. On conserve le local, retire l'élément de la boucle de
+        // retry et on expose le conflit dans Recovery Center pour décision humaine.
+        if (resolution.recordsToApply.length) applyRemoteSafely(resolution.recordsToApply, "authoritative-conflict");
+        const conflictKeys = conflicts.map(item => `${item.namespace || item.current?.namespace || ""}:${item.key || item.current?.key || item.current?.record_key || ""}`);
+        queueManager.acknowledgeKeys(conflictKeys);
         conflictCount += conflicts.length;
-        emitEvent(SYNC_EVENTS.CONFLICT, { count: conflicts.length, conflicts, decisions: resolution.decisions });
+        emitEvent(SYNC_EVENTS.CONFLICT, { count: conflicts.length, conflicts, decisions: resolution.decisions, status: resolution.decisions.some(item => item.winner === "pending") ? "pending" : "resolved" });
       }
       emitEvent(SYNC_EVENTS.PUSH, { phase: "complete", accepted: acceptedCount, conflicts: conflictCount });
     }
@@ -106,8 +123,8 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
       emitEvent(SYNC_EVENTS.PULL, { phase: "start", cursor });
       const pulled = await api.pull(cursor, 500);
       const records = pulled.records || pulled.changes || [];
-      applyRemoteRecords(records);
-      applied += records.length;
+      const inspection = applyRemoteSafely(records, `pull:${cursor}`);
+      applied += inspection.safeRecords.length;
       cursor = Number(pulled.cursor ?? pulled.nextCursor ?? cursor);
       more = Boolean(pulled.hasMore);
     }
