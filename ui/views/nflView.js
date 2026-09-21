@@ -4,9 +4,14 @@
 import { renderTeamLogo } from "../../core/ui/teamBranding.js";
 import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchRegistry.js";
 import { getBets } from "../../core/stores/betsStore.js";
+import { getAnalysisForMatch } from "../../core/stores/analysisStore.js";
 
 export function renderNfl(payload = {}) {
-  const matches = filterUnevaluatedMatches("nfl", payload?.matches || []).filter(match => !hasPlacedNflBet(match?.id));
+  const matches = filterUnevaluatedMatches("nfl", payload?.matches || []).filter(match => {
+    if (hasPlacedNflBet(match?.id)) return false;
+    const analysis = getAnalysisForMatch(match?.id);
+    return String(analysis?.finalDecision || analysis?.decision || "").toUpperCase() !== "NO VALUE";
+  });
   const meta = payload?.meta || {};
   const diag = meta.historyDiagnostics || {};
   const ready = matches.filter(match => match?.predictionStatus === "OK").length;

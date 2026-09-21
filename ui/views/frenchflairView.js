@@ -22,12 +22,12 @@ export function renderFrenchFlair(payload) {
    * Une fois un pari réellement placé, la rencontre quitte l’atelier
    * FrenchFlair. Elle reste disponible dans Paris / Journal et continue
    * d’être suivie par le settlement engine, mais l’analyse n’est plus
-   * affichée dans la liste de travail. Les analyses sans pari (VALUE ou
-   * NO VALUE) restent, elles, réouvrables jusqu’au coup d’envoi.
+   * affichée dans la liste de travail. V11.6.1 : une décision NO VALUE est
+   * définitive et quitte également l’atelier ; une VALUE sans pari reste disponible.
    */
   const matches = sortByDate(filterUnevaluatedMatches("frenchflair", payload?.matches || []).filter(match => {
     const workflow = getFrenchFlairMatchWorkflow(match?.id);
-    return workflow?.placed !== true;
+    return workflow?.placed !== true && String(workflow?.decision || "").toUpperCase() !== "NO VALUE";
   }));
   const meta = payload?.meta || {};
   const stats = computePageStats(matches, meta);

@@ -164,6 +164,11 @@ export function initFrenchFlairWorkflow() {
       saveFrenchFlairMatchWorkflow(matchId, { status: nextState, event: { type:nextState, label:nextState === "pending" ? "Analyse commencée" : "Analyse terminée · en attente du résultat" } });
       updateCardState(card, nextState);
       apply();
+      if (kind === "complete") {
+        const remaining = cards().filter(candidate => candidate !== card && !candidate.hidden && ["new", "pending"].includes(String(candidate.dataset.workflowState || "")));
+        const target = remaining[0];
+        if (target) window.setTimeout(() => target.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+      }
     }
   });
 
