@@ -1,3 +1,16 @@
+## V11.7.4 — Affiches verticales unifiées
+
+- DrawHunter : affiche du match verticale avec logos agrandis.
+- NFL Totals : affiche du match verticale avec logos agrandis et date/heure toujours visible.
+- DrawHunter : bloc Derniers résultats & paris compacté pour rester un repère secondaire.
+- FrenchFlair : présentation V11.7.3 conservée.
+- Aucun changement des moteurs de calcul, de VALUE, de mise ou de synchronisation Cloud.
+
+## V11.7.3 — Affiche verticale et repères de mise compacts
+- FrenchFlair : équipes et logos empilés verticalement autour de VS, noms complets lisibles.
+- FrenchFlair et NFL Totals : derniers paris condensés, suppression du texte explicatif redondant.
+- Aucun changement aux modèles, paris, données, API ni à la synchronisation cloud.
+
 # SportLab V11.7.1 — API Request Scheduler
 
 - File centrale unique pour les appels API-Sports Football, Rugby et NFL.
