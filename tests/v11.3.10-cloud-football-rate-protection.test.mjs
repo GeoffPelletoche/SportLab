@@ -41,7 +41,7 @@ test("V11.3.10 persiste le fingerprint pending pour stabiliser le timestamp Sync
   assert.match(code, /if \(changes\.length\) saveMeta\(state\)/);
 });
 
-test("V11.3.10 ne répète pas agressivement un HTTP 429 côté navigateur", async () => {
+test("V11.7.1 temporise puis effectue une seule reprise contrôlée après HTTP 429", async () => {
   const { fetchFromWorker } = await import("../core/api/apiClient.js");
   const previousFetch = globalThis.fetch;
   let calls = 0;
@@ -59,7 +59,7 @@ test("V11.3.10 ne répète pas agressivement un HTTP 429 côté navigateur", asy
       () => fetchFromWorker("/football/fixtures", { league: 61, from: "2026-09-05", to: "2026-09-06" }),
       error => error?.status === 429 && error?.code === "API_SPORTS_RATE_LIMIT"
     );
-    assert.equal(calls, 1);
+    assert.equal(calls, 2);
   } finally {
     globalThis.fetch = previousFetch;
   }
