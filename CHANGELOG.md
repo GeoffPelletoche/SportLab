@@ -1,3 +1,11 @@
+# SportLab V11.7.0 — FrenchFlair competitions
+
+- Ajout de Premiership Rugby (API-Sports Rugby league ID 13).
+- Ajout de United Rugby Championship (API-Sports Rugby league ID 76).
+- Les deux compétitions utilisent le pipeline FrenchFlair existant : fixtures, historique équipes, modèle O/U, Value/No Value, suivi et règlement.
+- V11.6.2 Atomic Background Refresh et V11.6.0 Safe Recovery conservés.
+- Aucun changement du Worker Cloud Sync V7.0.4.
+
 ## V11.6.2 — Atomic Background Refresh
 
 - Chargements Football, Rugby et NFL réellement silencieux pendant les étapes progressives.
