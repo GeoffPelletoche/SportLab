@@ -1172,3 +1172,11 @@
 .dh-matchup--vertical .dh-matchup__center{width:100%;align-items:center;justify-content:center;gap:0;text-align:center}
 .dh-matchup--vertical .dh-matchup__center>span{display:block;width:100%;font-size:.78rem!important;line-height:1;text-align:center}
 @media(max-width:620px){.dh-matchup--vertical .dh-team__identity img{width:84px!important;height:84px!important}}
+
+/* V11.7.6 — Compact vertical poster: larger crests, tighter rhythm */
+.dh-matchup--vertical{gap:3px;padding-top:12px;padding-bottom:12px}
+.dh-matchup--vertical .dh-team__identity,.dh-matchup--vertical .dh-team__identity--away{gap:3px}
+.dh-matchup--vertical .dh-team__identity img{width:110px!important;height:110px!important}
+.dh-matchup--vertical .dh-team__identity strong{line-height:1.12}
+.dh-matchup--vertical .dh-matchup__center{gap:2px}
+@media(max-width:620px){.dh-matchup--vertical{gap:2px;padding-top:10px;padding-bottom:10px}.dh-matchup--vertical .dh-team__identity img{width:104px!important;height:104px!important}}

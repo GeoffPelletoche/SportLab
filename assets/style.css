@@ -2494,3 +2494,24 @@ body.sportlab-navigation-open {
   .ff-match-card__teams--vertical .ff-team-logo{width:84px!important;height:84px!important;flex-basis:84px!important}
   .nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:84px;height:84px}
 }
+
+/* V11.7.6 — Compact vertical posters: larger crests, tighter rhythm */
+.ff-match-card__teams.ff-match-card__teams--vertical{gap:3px;padding:12px 12px 13px}
+.ff-match-card__teams--vertical .ff-team,.ff-match-card__teams--vertical .ff-team--away{gap:3px}
+.ff-match-card__teams--vertical .ff-team-logo{width:110px!important;height:110px!important;flex:0 0 110px!important}
+.ff-match-card__teams--vertical .ff-team small{line-height:1.05;margin:0}
+.ff-match-card__teams--vertical .ff-team strong{line-height:1.12;margin:0}
+.ff-match-card__teams--vertical .ff-versus{min-height:18px;margin:1px 0;font-size:.78rem}
+
+.nfl-matchup--vertical{gap:3px;padding:12px}
+.nfl-matchup--vertical .nfl-team,.nfl-matchup--vertical .nfl-team--home{gap:3px}
+.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:110px;height:110px}
+.nfl-matchup--vertical .nfl-team strong,.nfl-matchup--vertical .nfl-team--home strong{line-height:1.12}
+.nfl-matchup--vertical .nfl-matchup__center{gap:2px}
+
+@media(max-width:620px){
+  .ff-match-card__teams.ff-match-card__teams--vertical{gap:2px;padding:10px 10px 12px}
+  .ff-match-card__teams--vertical .ff-team-logo{width:104px!important;height:104px!important;flex-basis:104px!important}
+  .nfl-matchup--vertical{gap:2px;padding:10px}
+  .nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:104px;height:104px}
+}
