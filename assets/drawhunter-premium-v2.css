@@ -1165,3 +1165,10 @@
 .dh-team-context__notice{font-size:.68rem;line-height:1.3;margin-top:.55rem}
 @media(max-width:620px){.dh-team-context{padding:.8rem}.dh-team-context__grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dh-matchup--vertical .dh-team__identity img{width:58px!important;height:58px!important}}
 @media(max-width:380px){.dh-team-context__grid{grid-template-columns:1fr}}
+
+/* V11.7.5 — Match poster proportions & centered VS */
+.dh-matchup--vertical{gap:.55rem}
+.dh-matchup--vertical .dh-team__identity img{width:92px!important;height:92px!important}
+.dh-matchup--vertical .dh-matchup__center{width:100%;align-items:center;justify-content:center;gap:0;text-align:center}
+.dh-matchup--vertical .dh-matchup__center>span{display:block;width:100%;font-size:.78rem!important;line-height:1;text-align:center}
+@media(max-width:620px){.dh-matchup--vertical .dh-team__identity img{width:84px!important;height:84px!important}}

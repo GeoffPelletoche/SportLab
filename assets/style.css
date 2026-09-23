@@ -2477,3 +2477,20 @@ body.sportlab-navigation-open {
 .nfl-matchup--vertical .nfl-matchup__center span{width:auto;height:auto;border:0;background:none;font-size:1rem}
 .nfl-matchup--vertical .nfl-matchup__center time{display:block!important;margin:0;font-size:.72rem;white-space:normal;color:#a9c6d9}
 @media(max-width:620px){.nfl-matchup--vertical{padding:16px 12px}.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:58px;height:58px}}
+
+/* V11.7.5 — Match poster proportions & centered VS */
+.ff-match-card__teams--vertical{gap:10px;padding:16px 14px}
+.ff-match-card__teams--vertical .ff-team-logo{width:92px!important;height:92px!important;flex:0 0 92px!important}
+.ff-match-card__teams--vertical .ff-versus{display:flex;width:100%;min-height:24px;margin:0;align-items:center;justify-content:center;gap:0;text-align:center;color:#83b7a2;font-size:.78rem;font-weight:850;line-height:1}
+.ff-match-card__teams--vertical .ff-versus span{display:block;width:100%;font-size:.78rem;line-height:1;text-align:center}
+.ff-match-card__teams--vertical .ff-versus i{display:none!important}
+
+.nfl-matchup--vertical{gap:.55rem}
+.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:92px;height:92px}
+.nfl-matchup--vertical .nfl-matchup__center{width:100%;align-items:center;justify-content:center;gap:.25rem;text-align:center}
+.nfl-matchup--vertical .nfl-matchup__center span{display:block;width:100%;font-size:.78rem!important;line-height:1;text-align:center}
+
+@media(max-width:620px){
+  .ff-match-card__teams--vertical .ff-team-logo{width:84px!important;height:84px!important;flex-basis:84px!important}
+  .nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:84px;height:84px}
+}
