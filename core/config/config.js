@@ -1,5 +1,5 @@
 export const CONFIG = {
-  appName: "SportLab V11.6.2",
+  appName: "SportLab V11.7.0",
 
   analysisWindowDays: 1,
 
@@ -33,6 +33,8 @@ export const CONFIG = {
     competitions: [
       { id: 16, name: "Top 14", active: true },
       { id: 17, name: "Pro D2", active: true },
+      { id: 13, name: "Premiership Rugby", active: true },
+      { id: 76, name: "United Rugby Championship", active: true },
       { id: 54, name: "Champions Cup", active: true },
       { id: 80, name: "Bunnings NPC", active: true },
       { id: 71, name: "Super Rugby Pacific", active: true },

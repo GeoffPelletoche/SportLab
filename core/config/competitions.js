@@ -11,6 +11,8 @@ export const COMPETITIONS = {
   frenchflair: [
     { id: "top14", name: "Top 14", active: true },
     { id: "prod2", name: "Pro D2", active: true },
+    { id: "premiership_rugby", name: "Premiership Rugby", active: true },
+    { id: "united_rugby_championship", name: "United Rugby Championship", active: true },
     { id: "super_rugby_pacific", name: "Super Rugby Pacific", active: true },
     { id: "npc", name: "Bunnings NPC", active: true },
     { id: "champions_cup", name: "Champions Cup", active: true },
