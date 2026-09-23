@@ -1,3 +1,5 @@
+# SportLab V11.7.1 — API Request Scheduler
+
 # SportLab V11.7.0
 
 **Sync Safari/iOS Fix 2 — DOMException readonly-safe.**

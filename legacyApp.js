@@ -219,7 +219,7 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
 }
 
 async function refreshDrawHunterData({ force = false, reason = "background" } = {}) {
-  if (drawHunterRefreshPromise && !force) return drawHunterRefreshPromise;
+  if (drawHunterRefreshPromise) return drawHunterRefreshPromise;
   const generation = ++drawHunterRefreshGeneration;
   drawHunterReady = false;
   publishSportPayload("drawhunter", withSportLoadingState(drawhunterPayload, false, "football"), { ready: false, reason });
@@ -250,7 +250,7 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
 }
 
 async function refreshFrenchFlairData({ force = false, reason = "background" } = {}) {
-  if (frenchFlairRefreshPromise && !force) return frenchFlairRefreshPromise;
+  if (frenchFlairRefreshPromise) return frenchFlairRefreshPromise;
   const generation = ++frenchFlairRefreshGeneration;
   frenchFlairReady = false;
   publishSportPayload("frenchflair", withSportLoadingState(frenchflairPayload, false, "rugby"), { ready: false, reason });
@@ -281,7 +281,7 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
 }
 
 async function refreshNflData({ force = false, reason = "background" } = {}) {
-  if (nflRefreshPromise && !force) return nflRefreshPromise;
+  if (nflRefreshPromise) return nflRefreshPromise;
   const generation = ++nflRefreshGeneration;
   nflReady = false;
   publishSportPayload("nfl", withSportLoadingState(nflPayload, false, "nfl"), { ready: false, reason });

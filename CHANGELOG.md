@@ -1,3 +1,13 @@
+# SportLab V11.7.1 — API Request Scheduler
+
+- File centrale unique pour les appels API-Sports Football, Rugby et NFL.
+- Espacement des requêtes pour supprimer les rafales responsables des HTTP 429.
+- Priorité aux fixtures visibles avant les historiques équipes.
+- En cas de HTTP 429 : pause globale, puis reprise automatique contrôlée.
+- Un rafraîchissement manuel ne peut plus lancer une seconde série pendant un chargement déjà actif.
+- Un 429 persistant est diagnostiqué comme `RATE_LIMITED` / « Différé — limite API » et non comme compétition défectueuse.
+- V11.6.2 Atomic Background Refresh, V11.6.0 Safe Recovery et Worker Cloud Sync V7.0.4 inchangés.
+
 # SportLab V11.7.0 — FrenchFlair competitions
 
 - Ajout de Premiership Rugby (API-Sports Rugby league ID 13).
