@@ -28,7 +28,8 @@ export async function fetchUpcomingNflFixtures({ onProgress } = {}) {
     emitProgress(onProgress, enriched, range, syncLog, diagnostics, false, "complete", data?.season);
     return { fixtures: enriched, meta: buildMeta(range, enriched, syncLog, diagnostics, false, "complete", data?.season) };
   } catch (error) {
-    const syncLog = [{ competition: "NFL", leagueId, status: "ERROR", source: "api", count: 0, message: error?.message || String(error), code: error?.code || null, httpStatus: error?.status || null }];
+    const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
+    const syncLog = [{ competition: "NFL", leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error?.message || String(error), code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null }];
     emitProgress(onProgress, [], range, syncLog, diagnostics, false, "error", null);
     throw error;
   }

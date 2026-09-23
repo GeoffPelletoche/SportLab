@@ -63,9 +63,11 @@ export async function fetchUpcomingFootballFixtures({ onProgress } = {}) {
       logEntry.message = null;
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
     } catch (error) {
+      const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
       syncLog.push({
-        competition: competition.name, leagueId: competition.id, status: "ERROR", source: "api", count: 0,
-        message: error.message, code: error?.code || null, httpStatus: error?.status || null, detail: classifyFootballError(error)
+        competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0,
+        message: error.message, code: error?.code || null, httpStatus: error?.status || null,
+        detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : classifyFootballError(error)
       });
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "error");
     }

@@ -1,5 +1,5 @@
 export const CONFIG = {
-  appName: "SportLab V11.7.0",
+  appName: "SportLab V11.7.1",
 
   analysisWindowDays: 1,
 
