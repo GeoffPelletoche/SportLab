@@ -1,4 +1,10 @@
-## V11.7.4 — Affiches verticales unifiées
+## V11.7.5 — Proportions des affiches
+- Logos agrandis sur FrenchFlair, DrawHunter et NFL Totals.
+- VS réduit et centré sur l’axe de la carte.
+- Trait décoratif du VS supprimé dans FrenchFlair.
+- Aucun changement des moteurs, VALUE, mises ou synchronisation Cloud.
+
+## V11.7.5 — Affiches verticales unifiées
 
 - DrawHunter : affiche du match verticale avec logos agrandis.
 - NFL Totals : affiche du match verticale avec logos agrandis et date/heure toujours visible.
