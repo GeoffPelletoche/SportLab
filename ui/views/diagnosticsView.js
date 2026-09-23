@@ -14,6 +14,7 @@ function escapeHtml(value) {
 function statusLabel(item) {
   if (item?.status === "OK") return "✅ Opérationnel";
   if (item?.status === "EMPTY") return "ℹ️ Aucun match sur la période";
+  if (item?.status === "RATE_LIMITED") return "⏳ Différé — limite API";
   return "❌ Erreur";
 }
 
@@ -48,6 +49,7 @@ function moduleCard(label, meta = {}) {
   const ok = log.filter(x => x.status === "OK").length;
   const empty = log.filter(x => x.status === "EMPTY").length;
   const errors = log.filter(x => x.status === "ERROR").length;
+  const deferred = log.filter(x => x.status === "RATE_LIMITED").length;
 
   return `
     <article class="sl-panel">
@@ -55,6 +57,7 @@ function moduleCard(label, meta = {}) {
       <p>Rencontres chargées : <strong>${n(meta.total)}</strong></p>
       <p>Compétitions opérationnelles : <strong>${ok}</strong></p>
       <p>Compétitions sans match : <strong>${empty}</strong></p>
+      <p>Compétitions différées (limite API) : <strong>${deferred}</strong></p>
       <p>Compétitions en erreur : <strong>${errors}</strong></p>
       <p>Historiques demandés : <strong>${n(h.requested)}</strong></p>
       <p>Historiques API valides : <strong>${n(h.apiSuccess)}</strong></p>
