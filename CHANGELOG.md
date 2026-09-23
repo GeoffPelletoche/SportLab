@@ -1,3 +1,11 @@
+## V11.7.6 — Affiches verticales compactes
+
+- Logos agrandis à 110 px (104 px sur mobile).
+- Espacements verticaux fortement réduits entre logo, libellé, équipe et VS.
+- VS conservé dans ses proportions et son centrage V11.7.5.
+- Harmonisation FrenchFlair, DrawHunter et NFL Totals.
+- Aucun changement des moteurs métier, du cloud ou des calculs.
+
 ## V11.7.5 — Proportions des affiches
 - Logos agrandis sur FrenchFlair, DrawHunter et NFL Totals.
 - VS réduit et centré sur l’axe de la carte.
