@@ -1,4 +1,4 @@
-# SportLab V11.7.6 — Analysis UI
+# SportLab V11.7.7 — Analysis UI
 
 # SportLab V11.7.0
 

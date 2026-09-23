@@ -1,3 +1,13 @@
+## V11.7.7 — Compact Team Rows
+
+- Présentation des matchs raccourcie dans FrenchFlair, DrawHunter et NFL Totals.
+- Logo replacé à côté du nom de chaque équipe au lieu d’occuper une ligne dédiée.
+- Logos ramenés à une taille compacte (44 px sur mobile).
+- Mentions DOMICILE / EXTÉRIEUR masquées dans l’affiche compacte.
+- VS conservé discret et centré.
+- Heure théorique NFL conservée sous le séparateur.
+- Aucun changement des moteurs, analyses, mises ou synchronisation Cloud.
+
 ## V11.7.6 — Affiches verticales compactes
 
 - Logos agrandis à 110 px (104 px sur mobile).
