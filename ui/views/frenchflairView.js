@@ -293,7 +293,6 @@ function renderMatchCard(match, index) {
         <section class="ff-indicator-grid">
           ${renderMetric("Zone probable", `${formatNumber(match.predictedRangeLow)} – ${formatNumber(match.predictedRangeHigh)}`, "points")}
           ${renderMetric("Sigma", sigma, "dispersion")}
-          ${renderMetric("Confiance", `${confidence}%`, confidenceLabel(confidence))}
           ${renderMetric("Score unifié", `${scoring.unifiedScore}/100`, "qualité statistique")}
         </section>
 
