@@ -379,7 +379,7 @@ function renderMatchCard(match, index) {
         </span>
       </header>
 
-      <div class="dh-matchup">
+      <div class="dh-matchup dh-matchup--vertical">
         <div class="dh-team">
           <span>Domicile</span>
           <div class="dh-team__identity">
@@ -500,9 +500,6 @@ function renderRecentTeamContext(match) {
           <h3>Derniers résultats & paris</h3>
         </div>
       </div>
-      <p class="dh-team-context__summary">
-        Retrouve le dernier résultat de chaque équipe et ta dernière mise SportLab impliquant cette équipe.
-      </p>
       <div class="dh-team-context__grid">
         ${renderTeamRecentContext(home)}
         ${renderTeamRecentContext(away)}

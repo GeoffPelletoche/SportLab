@@ -2443,3 +2443,37 @@ body.sportlab-navigation-open {
 .sl-recent-bet-context{margin:1.2rem 0;padding:1.2rem;border:1px solid rgba(84,181,255,.2);border-radius:1.45rem;background:linear-gradient(145deg,rgba(9,25,42,.94),rgba(7,17,30,.96));box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
 .sl-recent-bet-context__heading span{display:block;color:#7fdcff;font-size:.72rem;font-weight:900;letter-spacing:.14em}.sl-recent-bet-context__heading h3{margin:.25rem 0 0;font-size:1.25rem}.sl-recent-bet-context__summary{color:#96a8bf;line-height:1.5;margin:.7rem 0 .9rem}.sl-recent-bet-context__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.sl-recent-bet-card{padding:1rem;border:1px solid rgba(100,145,195,.2);border-radius:1.15rem;background:rgba(7,17,30,.72);min-width:0}.sl-recent-bet-card__team{display:block;color:#f7f9fc;font-size:1.02rem;margin-bottom:.75rem;overflow-wrap:anywhere}.sl-recent-bet-card span{display:block;color:#8fa4bf;text-transform:uppercase;letter-spacing:.08em;font-size:.68rem;font-weight:800;margin-bottom:.35rem}.sl-recent-bet-card b{display:block;color:#ffd15a;font-size:1.15rem;overflow-wrap:anywhere}.sl-recent-bet-card small{display:block;color:#8fa4bf;margin-top:.35rem;line-height:1.4;overflow-wrap:anywhere}.sl-recent-bet-context__notice{display:block;color:#8295ad;line-height:1.45;margin-top:.9rem}.ff-recent-bet-context{border-color:rgba(56,224,167,.22)}.ff-recent-bet-context .sl-recent-bet-context__heading span{color:#58e3b3}.nfl-recent-bet-context{border-color:rgba(69,209,255,.22)}
 @media(max-width:620px){.sl-recent-bet-context{padding:1rem}.sl-recent-bet-context__grid{grid-template-columns:1fr}}
+
+/* V11.7.3 — vertical FrenchFlair match poster and compact recent-bet references. */
+.ff-match-card__teams.ff-match-card__teams--vertical{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin:15px 0 18px;padding:18px 14px;border:1px solid rgba(85,227,164,.14);border-radius:20px;background:rgba(3,19,16,.36)}
+.ff-match-card__teams--vertical .ff-team,.ff-match-card__teams--vertical .ff-team--away{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:7px;width:100%}
+.ff-match-card__teams--vertical .ff-team--away{flex-direction:column-reverse}
+.ff-match-card__teams--vertical .ff-team div{width:100%;min-width:0}
+.ff-match-card__teams--vertical .ff-team strong{font-size:clamp(1.12rem,4.2vw,1.5rem);line-height:1.25;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+.ff-match-card__teams--vertical .ff-team small{font-size:.65rem;letter-spacing:.14em}
+.ff-match-card__teams--vertical .ff-team-logo{width:68px!important;height:68px!important;flex:0 0 68px!important;object-fit:contain}
+.ff-match-card__teams--vertical .ff-versus{display:flex;align-items:center;justify-content:center;gap:12px;margin:2px 0;font-size:1rem;font-weight:900;color:#83b7a2}
+.ff-match-card__teams--vertical .ff-versus span{font-size:1rem}.ff-match-card__teams--vertical .ff-versus i{width:28px;margin:0}
+.ff-recent-bet-context,.nfl-recent-bet-context{padding:.85rem 1rem;margin:.75rem 0 1rem;border-radius:1.1rem}
+.ff-recent-bet-context .sl-recent-bet-context__heading,.nfl-recent-bet-context .sl-recent-bet-context__heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:.4rem .7rem}
+.ff-recent-bet-context .sl-recent-bet-context__heading h3,.nfl-recent-bet-context .sl-recent-bet-context__heading h3{margin:0;font-size:1rem}
+.ff-recent-bet-context .sl-recent-bet-context__grid,.nfl-recent-bet-context .sl-recent-bet-context__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem;margin-top:.65rem}
+.ff-recent-bet-context .sl-recent-bet-card,.nfl-recent-bet-context .sl-recent-bet-card{padding:.65rem .7rem;border-radius:.85rem}
+.ff-recent-bet-context .sl-recent-bet-card__team,.nfl-recent-bet-context .sl-recent-bet-card__team{font-size:.86rem;line-height:1.25;margin-bottom:.35rem}
+.ff-recent-bet-context .sl-recent-bet-card b,.nfl-recent-bet-context .sl-recent-bet-card b{font-size:1rem}
+.ff-recent-bet-context .sl-recent-bet-card small,.nfl-recent-bet-context .sl-recent-bet-card small{font-size:.73rem;line-height:1.3;margin-top:.25rem}
+.ff-recent-bet-context .sl-recent-bet-context__notice,.nfl-recent-bet-context .sl-recent-bet-context__notice{font-size:.7rem;line-height:1.3;margin-top:.55rem}
+@media(max-width:620px){.ff-recent-bet-context .sl-recent-bet-context__grid,.nfl-recent-bet-context .sl-recent-bet-context__grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:380px){.ff-recent-bet-context .sl-recent-bet-context__grid,.nfl-recent-bet-context .sl-recent-bet-context__grid{grid-template-columns:1fr}}
+
+
+/* V11.7.4 — Unified vertical match presentation */
+.nfl-matchup--vertical{display:flex;flex-direction:column;align-items:stretch;gap:.5rem;text-align:center}
+.nfl-matchup--vertical .nfl-team,.nfl-matchup--vertical .nfl-team--home{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.25rem}
+.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:64px;height:64px;grid-column:auto;grid-row:auto}
+.nfl-matchup--vertical .nfl-team strong,.nfl-matchup--vertical .nfl-team--home strong{font-size:1.15rem;line-height:1.2;white-space:normal;overflow:visible;text-overflow:clip}
+.nfl-matchup--vertical .nfl-team small,.nfl-matchup--vertical .nfl-team--home small{order:-1;font-size:.64rem;letter-spacing:.14em}
+.nfl-matchup--vertical .nfl-matchup__center{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.nfl-matchup--vertical .nfl-matchup__center span{width:auto;height:auto;border:0;background:none;font-size:1rem}
+.nfl-matchup--vertical .nfl-matchup__center time{display:block!important;margin:0;font-size:.72rem;white-space:normal;color:#a9c6d9}
+@media(max-width:620px){.nfl-matchup--vertical{padding:16px 12px}.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:58px;height:58px}}
