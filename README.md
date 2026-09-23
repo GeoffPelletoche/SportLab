@@ -1,4 +1,4 @@
-# SportLab V11.6.1
+# SportLab V11.6.2
 
 **Sync Safari/iOS Fix 2 — DOMException readonly-safe.**
 

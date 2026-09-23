@@ -47,6 +47,7 @@ let frenchFlairReady = false;
 let nflReady = false;
 let postLoadTasksStarted = false;
 
+// V11.6.2 — Atomic Background Refresh
 // V11.6.1 — Background Refresh & Stable Input
 // Les données peuvent continuer à évoluer en arrière-plan sans reconstruire la vue
 // pendant une saisie. Le rendu différé est appliqué dès que l’interaction se termine.
@@ -185,15 +186,24 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
     nflPayload: withSportLoadingState(nflPayload, nflReady, "nfl")
   };
   const isProgressUpdate = String(reason).includes(":progress") || String(reason).includes(":retry");
-  const activeSportPage = (kind === "drawhunter" && currentPage === "drawhunter") ||
-    (kind === "frenchflair" && currentPage === "frenchflair") ||
-    (kind === "nfl" && currentPage === "nfl");
+  const activeSportKind = currentPage === "drawhunter" ? "drawhunter"
+    : currentPage === "frenchflair" ? "frenchflair"
+      : currentPage === "nfl" ? "nfl" : null;
+  const isActiveSport = activeSportKind === kind;
 
-  // Les chargements progressifs restent en arrière-plan lorsque l’atelier est déjà affiché.
-  // Le rendu final sera publié à la fin du chargement.
-  if (!(isProgressUpdate && activeSportPage && document.querySelector('[data-match-id]'))) {
-    requestStableRender();
-  }
+  // V11.6.2 — Atomic Background Refresh
+  // Un cycle sportif ne doit jamais reconstruire une autre vue ni publier ses étapes
+  // intermédiaires dans l'atelier. Les payloads progressifs restent uniquement en mémoire.
+  // Sur le dashboard, on attend que les trois sports aient terminé afin de publier un seul
+  // état cohérent au lieu de trois rendus successifs qui déplacent le viewport.
+  const shouldRender = (() => {
+    if (isProgressUpdate) return false;
+    if (activeSportKind) return isActiveSport && ready;
+    if (currentPage === "home") return drawHunterReady && frenchFlairReady && nflReady;
+    return false;
+  })();
+
+  if (shouldRender) requestStableRender();
   window.dispatchEvent(new CustomEvent("sportlab:sports-data-updated", {
     detail: {
       reason,

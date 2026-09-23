@@ -1,3 +1,11 @@
+## V11.6.2 — Atomic Background Refresh
+
+- Chargements Football, Rugby et NFL réellement silencieux pendant les étapes progressives.
+- Une vue sportive n’est plus reconstruite lorsqu’un autre sport termine son chargement.
+- Le Dashboard attend la fin des trois chargements et publie un seul rendu atomique.
+- Conservation de Stable Input, navigation vers l’analyse suivante et NO VALUE définitif de V11.6.1.
+- Safe Recovery V11.6.0 et Worker Cloud V7.0.4 inchangés.
+
 ## V11.6.1 — Background Refresh & Stable Workflow
 - Rafraîchissements sportifs non intrusifs pendant la saisie.
 - Navigation automatique vers l’analyse suivante/précédente après validation.
