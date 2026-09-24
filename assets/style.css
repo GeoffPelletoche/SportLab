@@ -2546,3 +2546,17 @@ body.sportlab-navigation-open {
   .nfl-matchup.nfl-matchup--vertical{gap:4px;padding:10px 12px}
   .nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo{width:44px;height:44px;flex-basis:44px}
 }
+
+
+/* V11.7.8 — Fast Fixtures + unified compact match posters */
+.ff-match-card__teams.ff-match-card__teams--vertical{background:linear-gradient(145deg,rgba(13,47,39,.72),rgba(7,34,29,.78));border-color:rgba(101,235,181,.20)}
+.nfl-matchup.nfl-matchup--vertical{background:linear-gradient(145deg,rgba(13,47,62,.72),rgba(7,31,45,.80));border-color:rgba(89,190,240,.20)}
+.nfl-match-card__meta{min-width:0}
+.nfl-kickoff{display:block;margin-top:4px;color:#7899b1;font-size:.66rem;text-transform:capitalize}
+.nfl-matchup--vertical .nfl-team,.nfl-matchup--vertical .nfl-team--home,.nfl-matchup--vertical .nfl-team--away{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;min-height:48px;text-align:center}
+.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo,.nfl-matchup--vertical .nfl-team--away .nfl-team-logo{width:46px;height:46px;flex:0 0 46px;object-fit:contain;grid-column:auto;grid-row:auto}
+.nfl-matchup--vertical .nfl-team strong,.nfl-matchup--vertical .nfl-team--home strong,.nfl-matchup--vertical .nfl-team--away strong{font-size:1.05rem;line-height:1.15;white-space:normal;overflow:visible;text-overflow:clip}
+.nfl-matchup--vertical .nfl-team small{display:none}
+.nfl-matchup--vertical .nfl-matchup__center{display:flex;width:100%;align-items:center;justify-content:center;text-align:center}
+.nfl-matchup--vertical .nfl-matchup__center span{display:block;width:100%;height:auto;border:0;background:none;font-size:.78rem!important;line-height:1;color:#83b7a2}
+@media(max-width:620px){.nfl-matchup.nfl-matchup--vertical{gap:4px;padding:10px 12px}.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo,.nfl-matchup--vertical .nfl-team--away .nfl-team-logo{width:44px;height:44px;flex-basis:44px}}
