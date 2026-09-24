@@ -13,38 +13,49 @@ export async function fetchUpcomingRugbyFixtures({ onProgress } = {}) {
   const historyDiagnostics = createHistoryDiagnostics();
   const requestMemo = new Map();
 
-  for (const competition of activeCompetitions) {
+  // V11.7.8 — Fixtures First: toutes les compétitions sont placées immédiatement
+  // dans le scheduler prioritaire. Les historiques ne peuvent plus retarder une
+  // compétition située plus bas dans la liste (notamment Bunnings NPC).
+  const fixtureResults = await Promise.all(activeCompetitions.map(async competition => {
     try {
       const data = await fetchFromWorker("/rugby/fixtures", { league: competition.id, from: range.from, to: range.to });
       const raw = Array.isArray(data?.response) ? data.response : [];
-      const fixtures = normalizeRugbyFixtures(raw, competition, data);
-      const cacheHydrated = fixtures.map(fixture => hydrateFixtureFromCache(fixture));
-      allFixtures.push(...cacheHydrated);
+      const fixtures = normalizeRugbyFixtures(raw, competition, data).map(hydrateFixtureFromCache);
       const logEntry = {
         competition: competition.name, leagueId: competition.id, season: data?.season || null,
-        status: cacheHydrated.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: cacheHydrated.length,
+        status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: fixtures.length,
         rawResults: data?.rawResults ?? null, filteredResults: data?.filteredResults ?? null,
-        message: cacheHydrated.length ? "Rencontres chargées, historiques en cours." : (data?.warning || null)
+        message: fixtures.length ? "Rencontres chargées, historiques en arrière-plan." : (data?.warning || null)
       };
       syncLog.push(logEntry);
+      allFixtures.push(...fixtures);
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "fixtures");
-
-      const enrichedFixtures = await mapWithConcurrency(cacheHydrated, HISTORY_CONCURRENCY, async fixture => {
-        const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
-        const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
-        return { ...fixture, homeHistory, awayHistory };
-      });
-      const byId = new Map(enrichedFixtures.map(item => [String(item.id), item]));
-      for (let i = 0; i < allFixtures.length; i += 1) { const replacement = byId.get(String(allFixtures[i].id)); if (replacement) allFixtures[i] = replacement; }
-      logEntry.status = enrichedFixtures.length ? "OK" : "EMPTY";
-      logEntry.message = data?.warning || null;
-      emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
+      return { competition, data, fixtures, logEntry };
     } catch (error) {
       const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
-      syncLog.push({ competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error.message, code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null });
+      const logEntry = { competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error.message, code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null };
+      syncLog.push(logEntry);
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "error");
+      return { competition, data: null, fixtures: [], logEntry, error };
     }
-  }
+  }));
+
+  // Phase 2 seulement : enrichissement historique. Les fixtures de toutes les
+  // compétitions ont déjà été publiées à l'interface.
+  await Promise.all(fixtureResults.map(async ({ fixtures, logEntry, data }) => {
+    if (!fixtures.length) return;
+    const enrichedFixtures = await mapWithConcurrency(fixtures, HISTORY_CONCURRENCY, async fixture => {
+      const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+      const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+      return { ...fixture, homeHistory, awayHistory };
+    });
+    const byId = new Map(enrichedFixtures.map(item => [String(item.id), item]));
+    for (let i = 0; i < allFixtures.length; i += 1) { const replacement = byId.get(String(allFixtures[i].id)); if (replacement) allFixtures[i] = replacement; }
+    logEntry.status = "OK";
+    logEntry.message = data?.warning || null;
+    emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
+  }));
+
   const meta = buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete");
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
   return { fixtures: allFixtures, meta };

@@ -13,65 +13,42 @@ export async function fetchUpcomingFootballFixtures({ onProgress } = {}) {
   const historyDiagnostics = createHistoryDiagnostics();
   const requestMemo = new Map();
 
-  for (const competition of activeCompetitions) {
+  // V11.7.8 — Fixtures First: les six championnats sont mis en file prioritaire
+  // immédiatement; aucun historique d'équipe ne bloque le championnat suivant.
+  const fixtureResults = await Promise.all(activeCompetitions.map(async competition => {
     try {
-      const data = await fetchFromWorker("/football/fixtures", {
-        league: competition.id,
-        from: range.from,
-        to: range.to
-      });
-      const fixtures = normalizeFootballFixtures(data?.response || [], competition);
-
-      // V11.3.16 — publication immédiate : les fixtures sont visibles dès leur
-      // récupération. Le cache historique est utilisé sans attendre le réseau.
-      const cacheHydrated = fixtures.map(fixture => hydrateFixtureFromCache(fixture));
-      allFixtures.push(...cacheHydrated);
+      const data = await fetchFromWorker("/football/fixtures", { league: competition.id, from: range.from, to: range.to });
+      const fixtures = normalizeFootballFixtures(data?.response || [], competition).map(hydrateFixtureFromCache);
       const logEntry = {
-        competition: competition.name,
-        leagueId: competition.id,
-        status: cacheHydrated.length > 0 ? "LOADING_HISTORY" : "EMPTY",
-        source: data?.source || "unknown",
-        count: cacheHydrated.length,
+        competition: competition.name, leagueId: competition.id,
+        status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: fixtures.length,
         season: data?.season ?? null,
-        message: cacheHydrated.length ? "Rencontres chargées, historiques en cours." : "Aucune rencontre dans la fenêtre d’analyse."
+        message: fixtures.length ? "Rencontres chargées, historiques en arrière-plan." : "Aucune rencontre dans la fenêtre d’analyse."
       };
-      syncLog.push(logEntry);
+      syncLog.push(logEntry); allFixtures.push(...fixtures);
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "fixtures");
-
-      // Seuls les historiques manquants sont demandés à l'API.
-      const enrichedFixtures = await mapWithConcurrency(
-        cacheHydrated,
-        HISTORY_CONCURRENCY,
-        async fixture => {
-          const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(
-            fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo
-          );
-          const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(
-            fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo
-          );
-          return { ...fixture, homeHistory, awayHistory };
-        }
-      );
-
-      // Remplace uniquement les rencontres de cette compétition par leur version enrichie.
-      const byId = new Map(enrichedFixtures.map(item => [String(item.id), item]));
-      for (let i = 0; i < allFixtures.length; i += 1) {
-        const replacement = byId.get(String(allFixtures[i].id));
-        if (replacement) allFixtures[i] = replacement;
-      }
-      logEntry.status = enrichedFixtures.length > 0 ? "OK" : "EMPTY";
-      logEntry.message = null;
-      emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
+      return { competition, data, fixtures, logEntry };
     } catch (error) {
       const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
-      syncLog.push({
-        competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0,
-        message: error.message, code: error?.code || null, httpStatus: error?.status || null,
-        detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : classifyFootballError(error)
-      });
+      const logEntry = { competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error.message, code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : classifyFootballError(error) };
+      syncLog.push(logEntry);
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "error");
+      return { competition, data: null, fixtures: [], logEntry, error };
     }
-  }
+  }));
+
+  await Promise.all(fixtureResults.map(async ({ fixtures, logEntry }) => {
+    if (!fixtures.length) return;
+    const enrichedFixtures = await mapWithConcurrency(fixtures, HISTORY_CONCURRENCY, async fixture => {
+      const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+      const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+      return { ...fixture, homeHistory, awayHistory };
+    });
+    const byId = new Map(enrichedFixtures.map(item => [String(item.id), item]));
+    for (let i = 0; i < allFixtures.length; i += 1) { const replacement = byId.get(String(allFixtures[i].id)); if (replacement) allFixtures[i] = replacement; }
+    logEntry.status = enrichedFixtures.length > 0 ? "OK" : "EMPTY"; logEntry.message = null;
+    emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
+  }));
 
   const meta = buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete");
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
