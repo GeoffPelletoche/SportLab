@@ -15,8 +15,8 @@ test("FrenchFlair keeps confidence in recommendation without duplicate metric", 
 });
 
 test("NFL matchup exposes teams and theoretical kickoff prominently", () => {
-  assert.match(nfl, /<section class="nfl-matchup"/);
-  assert.match(nfl, /<time>\${date\(m\.date\)}<\/time>/);
+  assert.match(nfl, /<section class="nfl-matchup[^"]*"/);
+  assert.match(nfl, /<time class="nfl-kickoff">\${date\(m\.date\)}<\/time>/);
   assert.match(nflCss, /V11\.7\.2 — NFL Analysis UI/);
   assert.match(nflCss, /nfl-matchup__center time/);
 });

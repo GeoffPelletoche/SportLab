@@ -1,6 +1,6 @@
 {
   "name": "sportlab-platform",
-  "version": "11.7.3",
+  "version": "11.7.8",
   "private": true,
   "type": "module",
   "scripts": {

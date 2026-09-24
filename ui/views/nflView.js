@@ -83,19 +83,22 @@ function renderGame(m, index) {
   return `<article class="nfl-match-card nfl-match-card--${ok ? trend.toLowerCase() : "pending"}" data-nfl-card data-match-id="${id}" style="--nfl-delay:${Math.min(index,8) * 45}ms">
     <div class="nfl-match-card__rail" aria-hidden="true"></div>
     <header class="nfl-match-card__header">
-      <span class="nfl-competition">NFL · ${safe(m.stage || "Regular Season")}</span>
+      <div class="nfl-match-card__meta">
+        <span class="nfl-competition">NFL · ${safe(m.stage || "Regular Season")}</span>
+        <time class="nfl-kickoff">${date(m.date)}</time>
+      </div>
       <span class="nfl-week">${safe(m.week || "")}</span>
     </header>
 
     <section class="nfl-matchup nfl-matchup--vertical" aria-label="${safe(m.away)} chez ${safe(m.home)}">
-      <div class="nfl-team">
-        ${renderTeamLogo({sport:"nfl",teamId:m.awayId,teamName:m.away,logo:m.awayLogo,className:"sl-team-logo nfl-team-logo"})}
-        <strong>${safe(m.away)}</strong><small>EXTÉRIEUR</small>
-      </div>
-      <div class="nfl-matchup__center"><span>@</span><time>${date(m.date)}</time></div>
       <div class="nfl-team nfl-team--home">
         ${renderTeamLogo({sport:"nfl",teamId:m.homeId,teamName:m.home,logo:m.homeLogo,className:"sl-team-logo nfl-team-logo"})}
         <strong>${safe(m.home)}</strong><small>DOMICILE</small>
+      </div>
+      <div class="nfl-matchup__center"><span>VS</span></div>
+      <div class="nfl-team nfl-team--away">
+        ${renderTeamLogo({sport:"nfl",teamId:m.awayId,teamName:m.away,logo:m.awayLogo,className:"sl-team-logo nfl-team-logo"})}
+        <strong>${safe(m.away)}</strong><small>EXTÉRIEUR</small>
       </div>
     </section>
 
