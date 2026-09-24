@@ -40,3 +40,72 @@
 .nfl-matchup__center span{width:36px;height:36px;font-size:1rem}.nfl-matchup__center time{margin-top:8px;color:#a9c6d9;font-size:.7rem;font-weight:750;line-height:1.35;white-space:normal;min-width:108px}
 @media(max-width:700px){.nfl-matchup{grid-template-columns:minmax(0,1fr) 112px minmax(0,1fr);gap:8px;padding:18px 10px}.nfl-team{grid-template-columns:1fr;justify-items:center;text-align:center}.nfl-team--home{text-align:center}.nfl-team-logo,.nfl-team--home .nfl-team-logo{grid-column:1;grid-row:auto;width:48px;height:48px}.nfl-team strong,.nfl-team small,.nfl-team--home strong,.nfl-team--home small{grid-column:1}.nfl-matchup__center time{font-size:.67rem}}
 @media(max-width:430px){.nfl-matchup{grid-template-columns:minmax(0,1fr) 96px minmax(0,1fr)}.nfl-team-logo,.nfl-team--home .nfl-team-logo{width:44px;height:44px}.nfl-team strong{font-size:.86rem}.nfl-matchup__center time{min-width:0;font-size:.62rem}}
+
+/* V11.7.9 — NFL mobile matchup parity with FrenchFlair.
+   This override lives here because modules-premium-v3.css is loaded after style.css. */
+.nfl-matchup.nfl-matchup--vertical{
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:5px;
+  padding:12px 14px;
+  background:linear-gradient(145deg,rgba(13,47,62,.72),rgba(7,31,45,.80));
+  border-color:rgba(89,190,240,.20);
+}
+.nfl-matchup.nfl-matchup--vertical .nfl-team,
+.nfl-matchup.nfl-matchup--vertical .nfl-team--home,
+.nfl-matchup.nfl-matchup--vertical .nfl-team--away{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:48px;
+  text-align:center;
+}
+.nfl-matchup.nfl-matchup--vertical .nfl-team-logo,
+.nfl-matchup.nfl-matchup--vertical .nfl-team--home .nfl-team-logo,
+.nfl-matchup.nfl-matchup--vertical .nfl-team--away .nfl-team-logo{
+  width:46px;
+  height:46px;
+  flex:0 0 46px;
+  object-fit:contain;
+  grid-column:auto;
+  grid-row:auto;
+}
+.nfl-matchup.nfl-matchup--vertical .nfl-team strong,
+.nfl-matchup.nfl-matchup--vertical .nfl-team--home strong,
+.nfl-matchup.nfl-matchup--vertical .nfl-team--away strong{
+  font-size:1.05rem;
+  line-height:1.15;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  grid-column:auto;
+}
+.nfl-matchup.nfl-matchup--vertical .nfl-team small{display:none}
+.nfl-matchup.nfl-matchup--vertical .nfl-matchup__center{
+  display:flex;
+  width:100%;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+.nfl-matchup.nfl-matchup--vertical .nfl-matchup__center span{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0;
+  border:0;
+  border-radius:0;
+  background:none;
+  font-size:.78rem;
+  line-height:1;
+  color:#83b7a2;
+}
+@media(max-width:620px){
+  .nfl-matchup.nfl-matchup--vertical{gap:4px;padding:10px 12px;grid-template-columns:none}
+  .nfl-matchup.nfl-matchup--vertical .nfl-team-logo,
+  .nfl-matchup.nfl-matchup--vertical .nfl-team--home .nfl-team-logo,
+  .nfl-matchup.nfl-matchup--vertical .nfl-team--away .nfl-team-logo{width:44px;height:44px;flex-basis:44px}
+}
