@@ -2,6 +2,7 @@
 import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData, loadNflApplicationData } from "./services/appService.js";
 import { markModuleStart, markModuleProgress, markModuleComplete, formatPerformanceReport } from "./core/diagnostics/performanceInstrumentation.js";
 import { readSportsSnapshot, writeSportsSnapshot, snapshotPayloadForDisplay } from "./core/api/sportsSnapshotStore.js";
+import { readServerSportsSnapshot, serverPayloadForDisplay } from "./core/api/serverSportsSnapshot.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
@@ -158,12 +159,27 @@ async function init({ forceSports = false } = {}) {
         readSportsSnapshot("frenchflair"),
         readSportsSnapshot("nfl")
       ]);
-      drawhunterPayload = snapshotPayloadForDisplay(dhSnapshot, "football") || drawhunterPayload;
-      frenchflairPayload = snapshotPayloadForDisplay(ffSnapshot, "rugby") || frenchflairPayload;
-      nflPayload = snapshotPayloadForDisplay(nflSnapshot, "nfl") || nflPayload;
-      if (dhSnapshot) drawHunterReady = true;
-      if (ffSnapshot) frenchFlairReady = true;
-      if (nflSnapshot) nflReady = true;
+      // V11.8.2 — A fresh local IndexedDB snapshot always wins. If one is
+      // missing (new device / cleared storage), bootstrap from the shared
+      // GitHub Pages snapshot before starting the API refresh.
+      let serverSnapshot = null;
+      if (!dhSnapshot || !ffSnapshot || !nflSnapshot) serverSnapshot = await readServerSportsSnapshot();
+      const dhServer = !dhSnapshot ? serverPayloadForDisplay(serverSnapshot, "drawhunter") : null;
+      const ffServer = !ffSnapshot ? serverPayloadForDisplay(serverSnapshot, "frenchflair") : null;
+      const nflServer = !nflSnapshot ? serverPayloadForDisplay(serverSnapshot, "nfl") : null;
+
+      drawhunterPayload = snapshotPayloadForDisplay(dhSnapshot, "football") || dhServer || drawhunterPayload;
+      frenchflairPayload = snapshotPayloadForDisplay(ffSnapshot, "rugby") || ffServer || frenchflairPayload;
+      nflPayload = snapshotPayloadForDisplay(nflSnapshot, "nfl") || nflServer || nflPayload;
+      if (dhSnapshot || dhServer) drawHunterReady = true;
+      if (ffSnapshot || ffServer) frenchFlairReady = true;
+      if (nflSnapshot || nflServer) nflReady = true;
+
+      // Seed IndexedDB from the server snapshot so the following launch uses
+      // the fastest local path even if the background refresh is interrupted.
+      if (dhServer) void writeSportsSnapshot("drawhunter", dhServer);
+      if (ffServer) void writeSportsSnapshot("frenchflair", ffServer);
+      if (nflServer) void writeSportsSnapshot("nfl", nflServer);
     }
 
     currentAppData = {

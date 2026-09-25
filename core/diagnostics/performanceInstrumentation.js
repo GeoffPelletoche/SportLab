@@ -10,7 +10,7 @@ function moduleState(name) {
 function elapsed() { return Math.max(0, performance.now() - STARTED_AT); }
 export function markModuleStart(name) { const s=moduleState(name); if (s.startedAtMs == null) s.startedAtMs=elapsed(); }
 export function markModuleProgress(name, payload, reason="") {
-  const s=moduleState(name); const now=elapsed(); const phase=payload?.meta?.phase || reason || "progress"; const matches=Array.isArray(payload?.matches)?payload.matches:[];
+  const s=moduleState(name); const now=elapsed(); const phase=payload?.meta?.serverSnapshot ? "server-snapshot" : payload?.meta?.snapshot ? "local-snapshot" : payload?.meta?.phase || reason || "progress"; const matches=Array.isArray(payload?.matches)?payload.matches:[];
   const analyses=matches.filter(m => Array.isArray(m?.homeHistory)&&m.homeHistory.length&&Array.isArray(m?.awayHistory)&&m.awayHistory.length).length;
   if (matches.length && s.firstFixturesMs == null) s.firstFixturesMs=now;
   if (analyses && s.firstAnalysisMs == null) s.firstAnalysisMs=now;
@@ -24,7 +24,7 @@ export function recordSchedulerEnd(startedAt, ok=true) { scheduler.completed+=1;
 export function recordRateLimit(){ scheduler.rateLimits+=1; }
 export function getPerformanceReport(){
   const moduleReport={}; for(const [name,s] of modules) moduleReport[name]={...s, startedAtMs:r(s.startedAtMs), firstFixturesMs:r(s.firstFixturesMs), firstAnalysisMs:r(s.firstAnalysisMs), completeMs:r(s.completeMs)};
-  return { version:"11.8.1", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
+  return { version:"11.8.2", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
 }
 export function formatPerformanceReport(){ return JSON.stringify(getPerformanceReport(),null,2); }
 function r(v){return v==null?null:Math.round(v);}
