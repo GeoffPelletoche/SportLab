@@ -83,8 +83,13 @@ export function renderCloudDashboard({ cloud = {}, storageSummary = {}, recovery
 function resolveState(cloud) {
   if (!cloud.enabled || !cloud.token) return { key: "disconnected", icon: "⚪", label: "Cloud déconnecté", shortLabel: "Déconnecté", description: "Connecte cet appareil pour activer la synchronisation multi-appareils.", badgeClass: "sl-badge-neutral" };
   if (cloud.online === false) return { key: "offline", icon: "🟠", label: "Mode hors ligne", shortLabel: "Hors ligne", description: "Les changements sont conservés dans la file locale et seront envoyés au retour du réseau.", badgeClass: "sl-badge-warning" };
-  if (cloud.lastError) return { key: "error", icon: "🔴", label: "Synchronisation à vérifier", shortLabel: "Erreur", description: "Le cloud reste configuré, mais la dernière tentative a échoué.", badgeClass: "sl-badge-danger" };
-  if (cloud.syncing) return { key: "syncing", icon: "🔄", label: "Synchronisation en cours", shortLabel: "En cours", description: "SportLab compare, envoie puis récupère les changements disponibles.", badgeClass: "sl-badge-info" };
+  const errorCode = String(cloud.lastErrorCode || "").toLowerCase();
+  const hardFailure = errorCode === "d1_daily_quota_exceeded"
+    || errorCode === "unauthorized" || errorCode === "forbidden"
+    || errorCode === "401" || errorCode === "403"
+    || errorCode.includes("auth") || errorCode.includes("token");
+  if (cloud.lastError && hardFailure) return { key: "error", icon: "🔴", label: "Synchronisation à vérifier", shortLabel: "Erreur", description: "Le cloud nécessite une action avant de pouvoir reprendre la synchronisation.", badgeClass: "sl-badge-danger" };
+  if (cloud.syncing || cloud.lastError) return { key: "syncing", icon: "🔄", label: "Synchronisation en cours", shortLabel: "En cours", description: "SportLab poursuit automatiquement la synchronisation et les reprises réseau.", badgeClass: "sl-badge-info" };
   return { key: "synced", icon: "🟢", label: "Cloud opérationnel", shortLabel: "Synchronisé", description: "Le Sync Engine V2 est connecté et prêt à protéger les données SportLab.", badgeClass: "sl-badge-success" };
 }
 function renderKpi(icon, value, label) { return `<article class="sl-kpi-card"><span>${icon}</span><strong class="cloud-dashboard-kpi-value">${escapeHtml(value)}</strong><span class="sl-muted">${escapeHtml(label)}</span></article>`; }

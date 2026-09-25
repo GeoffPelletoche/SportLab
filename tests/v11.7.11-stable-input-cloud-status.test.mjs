@@ -12,8 +12,9 @@ test("analysis interaction freezes background rerenders beyond focusout", () => 
   assert.match(legacy, /if \(isProtectedInteractionActive\(\)\) \{ flushDeferredRender\(\); return; \}/);
 });
 
-test("cloud red state is reserved for persistent failures", () => {
-  assert.match(panel, /consecutiveErrors/);
-  assert.match(panel, /persistent \? "error" : "syncing"/);
+test("cloud red state is reserved for failures requiring user action", () => {
+  assert.match(panel, /hardFailure/);
+  assert.match(panel, /d1_daily_quota_exceeded/);
+  assert.match(panel, /status = hardFailure \? "error" : "syncing"/);
   assert.match(panel, /status = event\.status/);
 });
