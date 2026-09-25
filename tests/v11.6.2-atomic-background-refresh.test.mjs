@@ -4,8 +4,9 @@ import { readFile } from "node:fs/promises";
 
 const legacy = await readFile(new URL("../legacyApp.js", import.meta.url), "utf8");
 
-test("V11.6.2 ne rend jamais les étapes progressives", () => {
-  assert.match(legacy, /if \(isProgressUpdate\) return false/);
+test("V11.6.2/V11.7.10 garde les étapes progressives contrôlées", () => {
+  assert.match(legacy, /if \(isProgressUpdate\) \{/);
+  assert.match(legacy, /earlyAnalysisRenderedGeneration/);
 });
 
 test("V11.6.2 ne rend que le sport actif une fois prêt", () => {

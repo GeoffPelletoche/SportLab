@@ -9,7 +9,7 @@ const nfl = await readFile(new URL("../ui/views/nflView.js", import.meta.url), "
 test("V11.6.1 diffère le rendu pendant une saisie sportive", () => {
   assert.match(legacy, /isProtectedInteractionActive/);
   assert.match(legacy, /deferredRenderRequested = true/);
-  assert.match(legacy, /if \(isProgressUpdate\) return false/);
+  assert.match(legacy, /if \(isProgressUpdate\) \{/);
 });
 
 test("V11.6.1 prépare la navigation vers l'analyse suivante ou précédente", () => {
