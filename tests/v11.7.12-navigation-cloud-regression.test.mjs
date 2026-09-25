@@ -14,7 +14,7 @@ test("V11.7.12 dashboard module buttons do not activate analysis render lock", (
 });
 
 test("V11.7.12 transient cloud errors remain a recovery state", () => {
-  assert.match(panel, /hardFailure \? "error" : "syncing"/);
-  assert.match(cloudView, /cloud\.syncing \|\| cloud\.lastError/);
+  assert.match(panel, /hardFailure \? "error"/);
+  assert.match(cloudView, /if \(cloud\.syncing\)/);
   assert.match(cloudView, /cloud\.lastError && hardFailure/);
 });

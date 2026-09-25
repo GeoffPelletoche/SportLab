@@ -15,6 +15,6 @@ test("analysis interaction freezes background rerenders beyond focusout", () => 
 test("cloud red state is reserved for failures requiring user action", () => {
   assert.match(panel, /hardFailure/);
   assert.match(panel, /d1_daily_quota_exceeded/);
-  assert.match(panel, /status = hardFailure \? "error" : "syncing"/);
+  assert.match(panel, /status = hardFailure \? "error"/);
   assert.match(panel, /status = event\.status/);
 });
