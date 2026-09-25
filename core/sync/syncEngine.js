@@ -232,6 +232,10 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
       return { ok: false, error: error.message };
     } finally {
       syncing = false;
+      // V11.7.13 — publier l'état « au repos » après la fin réelle de l'opération.
+      // Les vues peuvent ainsi quitter « Synchronisation… » même si la dernière
+      // tentative s'est terminée par une erreur réseau transitoire.
+      window.dispatchEvent(new CustomEvent("sportlab:cloud-config", { detail: syncConfigStore.get() }));
       if (rerunRequested && navigator.onLine) {
         rerunRequested = false;
         setTimeout(() => syncNow({ silent: true, reason: "queued-rerun" }).catch(() => {}), 100);
