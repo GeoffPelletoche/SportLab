@@ -7,7 +7,7 @@ const store = fs.readFileSync(new URL("../core/api/sportsSnapshotStore.js", impo
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 test("V11.8.1 is snapshot-first before network refresh", () => {
-  assert.equal(pkg.version, "11.8.1");
+  assert.match(pkg.version, /^11\.8\.[1-9][0-9]*$/);
   assert.match(legacy, /Promise\.all\(\[\s*readSportsSnapshot\("drawhunter"\)/);
   assert.ok(legacy.indexOf('readSportsSnapshot("drawhunter")') < legacy.indexOf('refreshDrawHunterData({ force: forceSports'));
 });

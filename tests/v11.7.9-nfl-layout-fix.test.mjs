@@ -11,5 +11,5 @@ test("V11.7.9 overrides late NFL grid with vertical flex layout",()=>{
 test("V11.7.9 cache-busts late NFL stylesheet and app module",()=>{
  const html=fs.readFileSync("index.html","utf8");
  assert.match(html,/modules-premium-v3\.css\?v=11\.7\.9/);
- assert.match(html,/app\.js\?v=11\.7\.(?:9|10|11|12|13|14)|8.0/);
+ assert.match(html,/app\.js\?v=(?:11\.7\.(?:9|10|11|12|13|14)|11\.8\.[0-9]+)/);
 });
