@@ -392,13 +392,13 @@ function protectAnalysisInteraction() {
 }
 
 document.addEventListener("input", event => {
-  if (event.target?.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"]')) protectAnalysisInteraction();
+  if (event.target?.closest?.('[data-match-id]')) protectAnalysisInteraction();
 }, true);
 document.addEventListener("change", event => {
-  if (event.target?.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"]')) protectAnalysisInteraction();
+  if (event.target?.closest?.('[data-match-id]')) protectAnalysisInteraction();
 }, true);
 document.addEventListener("pointerdown", event => {
-  if (event.target?.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"] input, [data-module="drawhunter"] select, [data-module="frenchflair"] select, [data-module="nfl"] select, [data-module="drawhunter"] button, [data-module="frenchflair"] button, [data-module="nfl"] button')) protectAnalysisInteraction();
+  if (event.target?.closest?.('[data-match-id] input, [data-match-id] select, [data-match-id] textarea, [data-match-id] button')) protectAnalysisInteraction();
 }, true);
 
 function requestStableRender({ force = false } = {}) {

@@ -1,3 +1,11 @@
+## V11.7.12 — Navigation + Cloud Recovery Fix
+
+- Corrige la régression qui bloquait les boutons « Ouvrir » du dashboard : la protection anti-rerender ne s’active plus sur toute la carte module, uniquement dans les cartes d’analyse `[data-match-id]`.
+- Conserve la protection anti-saut pendant la saisie dans DrawHunter, FrenchFlair et NFL Totals.
+- Les erreurs Cloud transitoires et le circuit breaker de reprise restent en état « Synchronisation… » ; le rouge est réservé aux erreurs nécessitant une action (auth/token/quota D1 explicite).
+- Le Cloud Dashboard applique la même distinction entre reprise automatique et panne nécessitant une action.
+- Aucun changement du scheduler API, des moteurs de prédiction, VALUE ou settlement.
+
 ## V11.7.11 — Stable Input + Cloud Status
 
 - Gèle les rerenders des ateliers pendant la saisie et durant une courte fenêtre après les interactions iOS.
