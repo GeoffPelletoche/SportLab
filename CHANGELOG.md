@@ -667,3 +667,9 @@
 
 ## V11.4.1 — NFL Sprint 0.2
 - NFL Totals Engine, VALUE Betclic, Bet Store et settlement NFL.
+
+## V11.7.13 — Cloud Settled Status
+- `Synchronisation…` n'est affiché que pendant une opération Cloud réellement active.
+- Une erreur réseau transitoire terminée ne laisse plus le statut bloqué si une synchronisation réussie existe déjà.
+- Publication explicite de l'état Cloud au repos à la fin de chaque tentative.
+- Aucun changement du scheduler API, des moteurs d'analyse, de la navigation ou du settlement.
