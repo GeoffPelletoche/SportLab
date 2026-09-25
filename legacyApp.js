@@ -57,6 +57,7 @@ const earlyAnalysisRenderedGeneration = { drawhunter: 0, frenchflair: 0, nfl: 0 
 // Les données peuvent continuer à évoluer en arrière-plan sans reconstruire la vue
 // pendant une saisie. Le rendu différé est appliqué dès que l’interaction se termine.
 let deferredRenderRequested = false;
+let protectedInteractionUntil = 0;
 let deferredRenderTimer = 0;
 let pendingNavigationTargetId = null;
 
@@ -378,9 +379,27 @@ async function runPostSportsTasks(generation) {
 
 function isProtectedInteractionActive() {
   const active = document.activeElement;
-  if (!active || !active.matches?.("input, select, textarea")) return false;
-  return Boolean(active.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"]'));
+  const focusedField = Boolean(active?.matches?.("input, select, textarea")
+    && active.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"]'));
+  return focusedField || Date.now() < protectedInteractionUntil;
 }
+
+function protectAnalysisInteraction() {
+  // V11.7.11 — pendant une saisie, aucun payload progressif/final ne doit
+  // reconstruire l'atelier. Le délai couvre aussi le bref focusout iOS
+  // provoqué par le clavier, un select ou le bouton de calcul.
+  protectedInteractionUntil = Date.now() + 1400;
+}
+
+document.addEventListener("input", event => {
+  if (event.target?.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"]')) protectAnalysisInteraction();
+}, true);
+document.addEventListener("change", event => {
+  if (event.target?.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"]')) protectAnalysisInteraction();
+}, true);
+document.addEventListener("pointerdown", event => {
+  if (event.target?.closest?.('[data-module="drawhunter"], [data-module="frenchflair"], [data-module="nfl"] input, [data-module="drawhunter"] select, [data-module="frenchflair"] select, [data-module="nfl"] select, [data-module="drawhunter"] button, [data-module="frenchflair"] button, [data-module="nfl"] button')) protectAnalysisInteraction();
+}, true);
 
 function requestStableRender({ force = false } = {}) {
   if (!force && isProtectedInteractionActive()) {
@@ -392,12 +411,16 @@ function requestStableRender({ force = false } = {}) {
 }
 
 function flushDeferredRender() {
-  if (!deferredRenderRequested || isProtectedInteractionActive()) return;
+  if (!deferredRenderRequested) return;
   clearTimeout(deferredRenderTimer);
-  deferredRenderTimer = window.setTimeout(() => requestStableRender({ force: true }), 120);
+  const remaining = Math.max(0, protectedInteractionUntil - Date.now());
+  deferredRenderTimer = window.setTimeout(() => {
+    if (isProtectedInteractionActive()) { flushDeferredRender(); return; }
+    requestStableRender({ force: true });
+  }, Math.max(180, remaining + 80));
 }
 
-document.addEventListener("focusout", () => window.setTimeout(flushDeferredRender, 80), true);
+document.addEventListener("focusout", () => { protectAnalysisInteraction(); flushDeferredRender(); }, true);
 
 function captureViewportAnchor() {
   const cards = [...document.querySelectorAll('[data-match-id]')];

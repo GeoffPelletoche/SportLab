@@ -1,3 +1,11 @@
+## V11.7.11 — Stable Input + Cloud Status
+
+- Gèle les rerenders des ateliers pendant la saisie et durant une courte fenêtre après les interactions iOS.
+- Conserve les données reçues en arrière-plan et applique le rendu différé une fois l’interaction terminée.
+- N’affiche plus « Erreur Cloud » pour un échec transitoire : le rouge est réservé aux échecs persistants/circuit breaker.
+- Une synchronisation réussie rétablit immédiatement « Cloud synchronisé ».
+- Aucun changement du scheduler API, des moteurs, du settlement ou de la logique VALUE.
+
 ## V11.7.10 — Early Analysis Display
 
 - Affichage anticipé d’un premier lot d’analyses dès que les deux historiques équipes sont exploitables.

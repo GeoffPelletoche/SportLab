@@ -17,7 +17,19 @@ export function createSyncPanel({ engine, eventBus, notifications }) {
     dialog.querySelector("#sl-cloud-disconnect").addEventListener("click", () => { engine.disconnect(); notifications.info("Cet appareil est déconnecté du cloud."); dialog.close(); });
     dialog.showModal();
   }
-  eventBus.on("cloud:status", event => { status = event.status; ensureButton(); });
+  eventBus.on("cloud:status", event => {
+    // V11.7.11 — un échec isolé (4G/Safari, timeout, reprise automatique) n'est
+    // pas une panne Cloud. Le rouge est réservé à un échec persistant / circuit
+    // breaker. Une réussite ultérieure repasse immédiatement à « synchronisé ».
+    if (event.status === "error") {
+      const cfg = event.config || engine.getStatus();
+      const persistent = Number(cfg.consecutiveErrors || 0) >= 3 || Number(cfg.cloudBlockedUntil || 0) > Date.now();
+      status = persistent ? "error" : "syncing";
+    } else {
+      status = event.status;
+    }
+    ensureButton();
+  });
   window.addEventListener("sportlab:cloud-config", () => renderButton());
   ensureButton(); return Object.freeze({ open, render: ensureButton });
 }
