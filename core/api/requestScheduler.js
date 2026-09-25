@@ -8,14 +8,17 @@ import { recordRateLimit, recordSchedulerEnqueue, recordSchedulerEnd, recordSche
  */
 const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
 const MIN_GAP_MS = IS_SNAPSHOT_BUILD ? 2500 : 900;
-const DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 65000 : 15000;
-const MAX_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 90000 : 60000;
+const DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 75000 : 15000;
+const MAX_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 120000 : 60000;
+const SNAPSHOT_WINDOW_MS = 60000;
+const SNAPSHOT_MAX_STARTS_PER_WINDOW = 15;
 
 let queue = [];
 let running = false;
 let sequence = 0;
 let lastStartedAt = 0;
 let blockedUntil = 0;
+let snapshotStarts = [];
 
 export function scheduleApiRequest(task, { priority = 0 } = {}) {
   return new Promise((resolve, reject) => {
@@ -44,9 +47,11 @@ async function drain() {
   try {
     while (queue.length) {
       const item = queue.shift();
+      if (IS_SNAPSHOT_BUILD) await waitForSnapshotWindow();
       const waitMs = Math.max(0, blockedUntil - Date.now(), MIN_GAP_MS - (Date.now() - lastStartedAt));
       if (waitMs > 0) await wait(waitMs);
       lastStartedAt = Date.now();
+      if (IS_SNAPSHOT_BUILD) recordSnapshotStart(lastStartedAt);
       const perfStartedAt = recordSchedulerStart(item.perfEnqueuedAt);
       try { item.resolve(await item.task()); recordSchedulerEnd(perfStartedAt, true); }
       catch (error) { recordSchedulerEnd(perfStartedAt, false); item.reject(error); }
@@ -54,6 +59,21 @@ async function drain() {
   } finally {
     running = false;
     if (queue.length) void drain();
+  }
+}
+
+function recordSnapshotStart(now) {
+  snapshotStarts = snapshotStarts.filter(startedAt => now - startedAt < SNAPSHOT_WINDOW_MS);
+  snapshotStarts.push(now);
+}
+
+async function waitForSnapshotWindow() {
+  while (true) {
+    const now = Date.now();
+    snapshotStarts = snapshotStarts.filter(startedAt => now - startedAt < SNAPSHOT_WINDOW_MS);
+    if (snapshotStarts.length < SNAPSHOT_MAX_STARTS_PER_WINDOW) return;
+    const waitMs = Math.max(1, SNAPSHOT_WINDOW_MS - (now - snapshotStarts[0]) + 50);
+    await wait(waitMs);
   }
 }
 

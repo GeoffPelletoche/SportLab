@@ -712,3 +712,11 @@
 - Full-window 65 s cooldown after API-Sports 429, capped at 90 s, with two rate-limit retries in CI.
 - Exact in-flight deduplication for team history requests during snapshot generation.
 - Atomic publish remains mandatory: incomplete snapshots are never deployed.
+
+
+## V11.8.2.4 — Snapshot Rolling-Window Rate Limit
+- Snapshot CI only: caps request starts at 15 per rolling 60-second window, in addition to the 2.5 s minimum gap.
+- A 429 now triggers a conservative 75 s global cooldown (maximum accepted pause 120 s) before retry.
+- Browser/iPhone scheduler remains unchanged at 900 ms and keeps its existing retry behavior.
+- Snapshot mode remains scoped only to the `Build atomic server snapshot` workflow step.
+- Atomic publish remains mandatory: incomplete snapshots are never deployed.
