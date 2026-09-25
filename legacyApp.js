@@ -464,6 +464,23 @@ function applyPendingAnalysisNavigation() {
   return true;
 }
 
+// V11.7.14 — une validation est une navigation volontaire, pas un refresh sportif.
+// On republie uniquement les stores locaux déjà en mémoire puis on positionne
+// l'atelier sur la prochaine analyse. Aucun appel API sport n'est relancé.
+function commitLocalAnalysisAndNavigate(matchId) {
+  queueAnalysisNavigation(matchId);
+  protectedInteractionUntil = 0;
+  deferredRenderRequested = false;
+  clearTimeout(deferredRenderTimer);
+  currentAppData = {
+    ...loadLocalApplicationData(),
+    drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
+    frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby"),
+    nflPayload: withSportLoadingState(nflPayload, nflReady, "nfl")
+  };
+  requestStableRender({ force: true });
+}
+
 function renderCurrentApplication(app = document.getElementById("app")) {
   if (!app || !currentAppData) return;
   if (isProtectedInteractionActive()) {
@@ -561,8 +578,8 @@ window.saveDrawHunterBet = function(matchId) {
     }
   });
 
+  commitLocalAnalysisAndNavigate(matchId);
   alert(saved.placed ? "Pari DrawHunter sauvegardé." : "Analyse DrawHunter sauvegardée.");
-  init();
 };
 
 /**
@@ -955,12 +972,10 @@ window.saveFrenchFlairAnalysis = function(matchId) {
   });
   pendingFrenchFlairAnalyses.delete(String(matchId));
 
-  alert("Analyse sauvegardée dans le Journal.");
-
   // V11.6.1 — la décision NO VALUE est définitive : la rencontre quitte l’atelier.
   // Une VALUE reste disponible tant qu’aucun pari n’a été enregistré.
-  queueAnalysisNavigation(matchId);
-  init();
+  commitLocalAnalysisAndNavigate(matchId);
+  alert("Analyse sauvegardée dans le Journal.");
 };
 window.saveFrenchFlairBet = function(matchId, analysisId) {
   const match = getFrenchFlairMatchById(matchId);
@@ -1040,9 +1055,8 @@ if (!match?.id || !match?.date) {
     placed: Boolean(placed), stake,
     event: { type: placed ? "tracked" : "decided", label: placed ? "Pari enregistré" : "Analyse enregistrée", note: placed ? `Mise : ${stake.toFixed(2)} €` : "Aucun pari placé" }
   });
+  commitLocalAnalysisAndNavigate(matchId);
   alert("Analyse FrenchFlair sauvegardée.");
-  queueAnalysisNavigation(matchId);
-  init();
 };
 
 
@@ -1070,8 +1084,8 @@ window.calculateNflAnalysis = function(matchId) {
   const analysis={source:"NFL Totals",sport:"nfl",competition:"NFL",matchId:match.id,match:`${match.home} vs ${match.away}`,home:match.home,away:match.away,homeId:match.homeId,awayId:match.awayId,homeLogo:match.homeLogo||null,awayLogo:match.awayLogo||null,date:match.date,market,line,odds,probability,impliedProbability:value.impliedProbability,value:value.value,edge:value.edge,decision:value.decision,predictedHomePoints:match.predictedHomePoints,predictedAwayPoints:match.predictedAwayPoints,predictedTotalPoints:mean,modelEdgePoints,modelEdgePercent,sigma,confidence,scoreValue,finalDecision,placed:false,stake:0,status:"draft",notes,modelVersion:match.modelVersion||"NFL-TOTALS-11.4.1"}; pendingNflAnalyses.set(String(match.id),analysis);
   const box=document.getElementById(`nfl-calculation-${match.id}`); if(!box)return; box.innerHTML=`<hr><p><strong>${market} ${line.toFixed(1)}</strong> · cote ${odds.toFixed(2)}</p><p>Total modèle : <strong>${mean.toFixed(1)} pts</strong> · Sigma : ${sigma.toFixed(1)}</p><p>Probabilité SportLab : <strong>${(probability*100).toFixed(1)}%</strong> · implicite : ${(value.impliedProbability*100).toFixed(1)}%</p><p>Edge : <strong>${(value.edge*100).toFixed(1)}%</strong> · Value : ${(value.value*100).toFixed(1)}%</p><p><span class="badge ${finalDecision==="VALUE"?"badge-value":"badge-no"}">${finalDecision} — ${scoreValue}%</span></p><button onclick="saveNflAnalysis('${match.id}')">💾 Sauvegarder l’analyse</button>${finalDecision==="VALUE"?`<label><input type="checkbox" id="nfl-placed-${match.id}"> Pari placé</label><label>Mise <input id="nfl-stake-${match.id}" type="number" min="0" step="0.01"></label><button onclick="saveNflBet('${match.id}')">Sauvegarder le pari</button>`:""}`;
 };
-window.saveNflAnalysis=function(matchId){const a=pendingNflAnalyses.get(String(matchId)); if(!a)return alert("Calcule d’abord la VALUE."); saveAnalysis(a); pendingNflAnalyses.delete(String(matchId)); queueAnalysisNavigation(matchId); alert("Analyse NFL sauvegardée dans le Journal."); init();};
-window.saveNflBet=function(matchId){const match=getNflMatchById(matchId); const a=pendingNflAnalyses.get(String(matchId))||getAnalysisForMatch(match?.id); if(!match||!a)return alert("Analyse NFL introuvable."); if(!isMatchEditableBeforeKickoff(match))return alert("Le match a commencé : pari verrouillé."); const placed=document.getElementById(`nfl-placed-${match.id}`)?.checked; const stake=Number(document.getElementById(`nfl-stake-${match.id}`)?.value||0); if(placed&&stake<=0)return alert("Saisis une mise valide."); saveAnalysis({...a,placed,stake,status:placed?"betPlaced":"completed"}); createBet({source:"NFL Totals",sport:"nfl",competition:"NFL",matchId:match.id,matchDate:match.date,match:`${match.home} vs ${match.away}`,home:match.home,away:match.away,homeId:match.homeId,awayId:match.awayId,homeLogo:match.homeLogo,awayLogo:match.awayLogo,market:`${a.market} ${a.line}`,line:a.line,odds:a.odds,probability:a.probability,value:a.value,edge:a.edge,decision:a.decision,placed,stake}); pendingNflAnalyses.delete(String(matchId)); queueAnalysisNavigation(matchId); alert("Analyse NFL sauvegardée."); init();};
+window.saveNflAnalysis=function(matchId){const a=pendingNflAnalyses.get(String(matchId)); if(!a)return alert("Calcule d’abord la VALUE."); saveAnalysis(a); pendingNflAnalyses.delete(String(matchId)); commitLocalAnalysisAndNavigate(matchId); alert("Analyse NFL sauvegardée dans le Journal.");};
+window.saveNflBet=function(matchId){const match=getNflMatchById(matchId); const a=pendingNflAnalyses.get(String(matchId))||getAnalysisForMatch(match?.id); if(!match||!a)return alert("Analyse NFL introuvable."); if(!isMatchEditableBeforeKickoff(match))return alert("Le match a commencé : pari verrouillé."); const placed=document.getElementById(`nfl-placed-${match.id}`)?.checked; const stake=Number(document.getElementById(`nfl-stake-${match.id}`)?.value||0); if(placed&&stake<=0)return alert("Saisis une mise valide."); saveAnalysis({...a,placed,stake,status:placed?"betPlaced":"completed"}); createBet({source:"NFL Totals",sport:"nfl",competition:"NFL",matchId:match.id,matchDate:match.date,match:`${match.home} vs ${match.away}`,home:match.home,away:match.away,homeId:match.homeId,awayId:match.awayId,homeLogo:match.homeLogo,awayLogo:match.awayLogo,market:`${a.market} ${a.line}`,line:a.line,odds:a.odds,probability:a.probability,value:a.value,edge:a.edge,decision:a.decision,placed,stake}); pendingNflAnalyses.delete(String(matchId)); commitLocalAnalysisAndNavigate(matchId); alert("Analyse NFL sauvegardée.");};
 function computeTotalsProbability(mean,sigma,market,line){const z=(line-mean)/sigma; const over=1-normalCdf(z); return clamp(market==="OVER"?over:1-over,.01,.99);}
 function getNflMatchById(matchId){return nflPayload?.matches?.find(m=>String(m.id)===String(matchId))||null;}
 

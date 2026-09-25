@@ -1,3 +1,12 @@
+
+## V11.7.14 — Deterministic Next Analysis + Non-blocking Cloud
+
+- Après validation d’un pari ou d’une décision NO VALUE, l’atelier republie uniquement l’état local et se positionne sur la prochaine analyse sans relancer les trois chargements sportifs.
+- DrawHunter utilise désormais le même enchaînement déterministe que FrenchFlair et NFL Totals.
+- Une validation volontaire neutralise la restauration de viewport de fond afin que la navigation vers la prochaine carte soit prioritaire.
+- Les événements métier Cloud marquent les données comme modifiées puis laissent le scheduler effectuer la capture au cycle différé ; le scan Cloud n’est plus exécuté dans le chemin synchrone de validation.
+- Aucun changement du scheduler API-Sports, de l’anti-429, des moteurs VALUE ou du settlement.
+
 ## V11.7.12 — Navigation + Cloud Recovery Fix
 
 - Corrige la régression qui bloquait les boutons « Ouvrir » du dashboard : la protection anti-rerender ne s’active plus sur toute la carte module, uniquement dans les cartes d’analyse `[data-match-id]`.
