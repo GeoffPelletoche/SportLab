@@ -1,3 +1,13 @@
+# V11.8.1 — Snapshot Architecture
+
+- Démarrage snapshot-first pour DrawHunter, FrenchFlair et NFL Totals.
+- Dernier jeu de données valide conservé dans IndexedDB (pas dans localStorage).
+- Affichage du snapshot avant l’entrée des requêtes API dans le scheduler.
+- Rafraîchissement réseau conservé en arrière-plan avec anti-429 inchangé.
+- Écriture atomique uniquement après un chargement complet sans erreur.
+- Snapshot périmé après 72 h afin d’éviter d’afficher durablement des données obsolètes.
+- Instrumentation V11.8.0 conservée pour mesurer le gain réel.
+
 # V11.8.0 — Performance Instrumentation
 
 - Instrumentation légère du scheduler API et des trois modules sportifs.

@@ -1,6 +1,7 @@
 // SPORTLAB V7.0.0 — Legacy runtime encapsulated by Sprint 7.1 Core Foundation
 import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData, loadNflApplicationData } from "./services/appService.js";
 import { markModuleStart, markModuleProgress, markModuleComplete, formatPerformanceReport } from "./core/diagnostics/performanceInstrumentation.js";
+import { readSportsSnapshot, writeSportsSnapshot, snapshotPayloadForDisplay } from "./core/api/sportsSnapshotStore.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
@@ -147,6 +148,24 @@ async function init({ forceSports = false } = {}) {
 
   try {
     const localData = loadLocalApplicationData();
+
+    // V11.8.1 — Snapshot-first startup: publish the last-known-good datasets
+    // before any API request enters the global scheduler. Network refresh remains
+    // background-only and atomically replaces the snapshot when complete.
+    if (!forceSports) {
+      const [dhSnapshot, ffSnapshot, nflSnapshot] = await Promise.all([
+        readSportsSnapshot("drawhunter"),
+        readSportsSnapshot("frenchflair"),
+        readSportsSnapshot("nfl")
+      ]);
+      drawhunterPayload = snapshotPayloadForDisplay(dhSnapshot, "football") || drawhunterPayload;
+      frenchflairPayload = snapshotPayloadForDisplay(ffSnapshot, "rugby") || frenchflairPayload;
+      nflPayload = snapshotPayloadForDisplay(nflSnapshot, "nfl") || nflPayload;
+      if (dhSnapshot) drawHunterReady = true;
+      if (ffSnapshot) frenchFlairReady = true;
+      if (nflSnapshot) nflReady = true;
+    }
+
     currentAppData = {
       ...localData,
       drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
@@ -274,6 +293,7 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
         publishRetry: retryPayloadValue => publishSportPayload("drawhunter", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== drawHunterRefreshGeneration) return null;
+      if (!isErrorPayload(payload)) void writeSportsSnapshot("drawhunter", payload);
       publishSportPayload("drawhunter", payload, { ready: true, reason });
       maybeStartPostSportsTasks();
       return payload;
@@ -306,6 +326,7 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
         publishRetry: retryPayloadValue => publishSportPayload("frenchflair", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== frenchFlairRefreshGeneration) return null;
+      if (!isErrorPayload(payload)) void writeSportsSnapshot("frenchflair", payload);
       publishSportPayload("frenchflair", payload, { ready: true, reason });
       maybeStartPostSportsTasks();
       return payload;
@@ -337,6 +358,7 @@ async function refreshNflData({ force = false, reason = "background" } = {}) {
         publishRetry: retryPayloadValue => publishSportPayload("nfl", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== nflRefreshGeneration) return null;
+      if (!isErrorPayload(payload)) void writeSportsSnapshot("nfl", payload);
       publishSportPayload("nfl", payload, { ready: true, reason });
       return payload;
     } catch (error) {
