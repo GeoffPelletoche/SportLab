@@ -5,8 +5,8 @@ import fs from "node:fs";
 const workflow = fs.readFileSync(new URL("../.github/workflows/pages.yml", import.meta.url), "utf8");
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
-test("V11.8.2.2 ships the server-snapshot Pages workflow", () => {
-  assert.match(workflow, /name: Deploy SportLab Pages \+ Server Snapshot \(V11\.8\.2\.2\)/);
+test("V11.8.2.3 ships the server-snapshot Pages workflow", () => {
+  assert.match(workflow, /name: Deploy SportLab Pages \+ Server Snapshot \(V11\.8\.2\.3\)/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /cron: "17 5,12,18 \* \* \*"/);
   assert.match(workflow, /name: Validate SportLab/);
@@ -17,7 +17,7 @@ test("V11.8.2.2 ships the server-snapshot Pages workflow", () => {
   assert.ok(workflow.indexOf("Build atomic server snapshot") < workflow.indexOf("Upload artifact"));
 });
 
-test("V11.8.2.2 exposes the snapshot build command", () => {
-  assert.equal(pkg.version, "11.8.2.2");
+test("V11.8.2.3 exposes the snapshot build command", () => {
+  assert.equal(pkg.version, "11.8.2.3");
   assert.equal(pkg.scripts.snapshot, "node scripts/build-server-snapshot.mjs");
 });
