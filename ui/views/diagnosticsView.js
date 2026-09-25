@@ -1,3 +1,4 @@
+import { getPerformanceReport, formatPerformanceReport } from "../../core/diagnostics/performanceInstrumentation.js";
 function n(value) {
   return Number(value || 0).toLocaleString("fr-FR");
 }
@@ -43,6 +44,24 @@ function competitionDetails(log) {
   `;
 }
 
+
+function performanceCard() {
+  const report = getPerformanceReport();
+  const rows = Object.entries(report.modules || {}).map(([name, m]) => `
+    <tr><td>${escapeHtml(name)}</td><td>${ms(m.firstFixturesMs)}</td><td>${ms(m.firstAnalysisMs)}</td><td>${ms(m.completeMs)}</td><td>${n(m.analysisCount)}</td></tr>`).join("");
+  return `
+    <article class="sl-panel">
+      <h2>⏱️ V11.8.0 — Performance Instrumentation</h2>
+      <p class="sl-muted">Mesures de cette session uniquement. Aucun réglage de débit API n'est modifié.</p>
+      <p>Requêtes planifiées : <strong>${n(report.scheduler.enqueued)}</strong> · terminées : <strong>${n(report.scheduler.completed)}</strong> · échecs : <strong>${n(report.scheduler.failed)}</strong></p>
+      <p>Attente moyenne scheduler : <strong>${ms(report.scheduler.averageQueueWaitMs)}</strong> · maximum : <strong>${ms(report.scheduler.maxQueueWaitMs)}</strong> · pauses 429 : <strong>${n(report.scheduler.rateLimits)}</strong></p>
+      <div style="overflow-x:auto"><table><thead><tr><th>Module</th><th>Fixtures</th><th>1re analyse</th><th>Complet</th><th>Analyses</th></tr></thead><tbody>${rows || '<tr><td colspan="5">Mesures en attente…</td></tr>'}</tbody></table></div>
+      <button type="button" id="copy-performance-diagnostic">📋 Copier le rapport performance</button>
+      <details><summary>Rapport brut</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(formatPerformanceReport())}</pre></details>
+    </article>`;
+}
+function ms(value) { return value == null ? "—" : value < 1000 ? `${Math.round(value)} ms` : `${(value/1000).toFixed(1)} s`; }
+
 function moduleCard(label, meta = {}) {
   const log = Array.isArray(meta.syncLog) ? meta.syncLog : [];
   const h = meta.historyDiagnostics || {};
@@ -85,10 +104,12 @@ export function renderDiagnostics({
   return `
     <section class="diagnostics-page sl-page sl-stack">
       <header class="sl-panel">
-        <span class="sl-label">SportLab V11.3</span>
+        <span class="sl-label">SportLab V11.8.0</span>
         <h1>Diagnostics opérationnels</h1>
         <p>Chaque compétition est maintenant distinguée entre fonctionnement normal, période sans match et véritable erreur API.</p>
       </header>
+
+      ${performanceCard()}
 
       <div class="sl-grid sl-grid-2">
         ${moduleCard("⚽ DrawHunter", drawhunterMeta)}
