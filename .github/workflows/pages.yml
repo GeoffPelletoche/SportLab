@@ -1,4 +1,4 @@
-name: Deploy SportLab Pages + Server Snapshot (V11.8.2.3)
+name: Deploy SportLab Pages + Server Snapshot (V11.8.2.4)
 
 on:
   push:
