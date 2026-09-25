@@ -4,7 +4,7 @@ import { applyGlobalRateLimit, scheduleApiRequest } from "./requestScheduler.js"
 const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_ATTEMPTS = 3;
 const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
-const RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 2 : 1;
+const RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 3 : 1;
 const snapshotInFlight = new Map();
 
 export async function fetchFromWorker(path, params = {}, options = {}) {

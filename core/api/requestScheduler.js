@@ -7,11 +7,11 @@ import { recordRateLimit, recordSchedulerEnqueue, recordSchedulerEnd, recordSche
  * pause globale lorsqu'API-Sports répond 429.
  */
 const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
-const MIN_GAP_MS = IS_SNAPSHOT_BUILD ? 2500 : 900;
-const DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 75000 : 15000;
-const MAX_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 120000 : 60000;
+const MIN_GAP_MS = IS_SNAPSHOT_BUILD ? 5000 : 900;
+const DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 90000 : 15000;
+const MAX_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 180000 : 60000;
 const SNAPSHOT_WINDOW_MS = 60000;
-const SNAPSHOT_MAX_STARTS_PER_WINDOW = 15;
+const SNAPSHOT_MAX_STARTS_PER_WINDOW = 10;
 
 let queue = [];
 let running = false;

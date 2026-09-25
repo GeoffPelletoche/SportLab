@@ -1,3 +1,11 @@
+## V11.8.2.5 — Conservative Snapshot Builder
+
+- Snapshot GitHub Actions uniquement : cadence minimale portée à 5 s entre départs de requêtes.
+- Fenêtre glissante Snapshot limitée à 10 départs sur 60 s pour garder une marge sur le quota API-Sports partagé.
+- Après HTTP 429 en build Snapshot : pause globale minimale de 90 s, plafonnée à 180 s.
+- Jusqu’à 3 reprises longues après 429 pour le builder ; comportement navigateur inchangé (900 ms, 15 s, une reprise).
+- Publication atomique conservée : aucune publication si une compétition ou un historique reste en erreur.
+
 ## V11.8.2.3 — Workflow Version Corrective
 
 - Corrige et verrouille le nom/version du workflow GitHub Pages + Server Snapshot.
