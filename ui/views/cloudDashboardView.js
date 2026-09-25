@@ -89,7 +89,8 @@ function resolveState(cloud) {
     || errorCode === "401" || errorCode === "403"
     || errorCode.includes("auth") || errorCode.includes("token");
   if (cloud.lastError && hardFailure) return { key: "error", icon: "🔴", label: "Synchronisation à vérifier", shortLabel: "Erreur", description: "Le cloud nécessite une action avant de pouvoir reprendre la synchronisation.", badgeClass: "sl-badge-danger" };
-  if (cloud.syncing || cloud.lastError) return { key: "syncing", icon: "🔄", label: "Synchronisation en cours", shortLabel: "En cours", description: "SportLab poursuit automatiquement la synchronisation et les reprises réseau.", badgeClass: "sl-badge-info" };
+  if (cloud.syncing) return { key: "syncing", icon: "🔄", label: "Synchronisation en cours", shortLabel: "En cours", description: "SportLab synchronise actuellement les données avec le Cloud.", badgeClass: "sl-badge-info" };
+  if (cloud.lastError && !cloud.lastSyncAt) return { key: "syncing", icon: "🔄", label: "Synchronisation en attente", shortLabel: "En attente", description: "Une reprise réseau est prévue ; aucune synchronisation réussie n’est encore disponible sur cet appareil.", badgeClass: "sl-badge-info" };
   return { key: "synced", icon: "🟢", label: "Cloud opérationnel", shortLabel: "Synchronisé", description: "Le Sync Engine V2 est connecté et prêt à protéger les données SportLab.", badgeClass: "sl-badge-success" };
 }
 function renderKpi(icon, value, label) { return `<article class="sl-kpi-card"><span>${icon}</span><strong class="cloud-dashboard-kpi-value">${escapeHtml(value)}</strong><span class="sl-muted">${escapeHtml(label)}</span></article>`; }
