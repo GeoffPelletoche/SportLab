@@ -1,3 +1,9 @@
+## V11.8.2.3 — Workflow Version Corrective
+
+- Corrige et verrouille le nom/version du workflow GitHub Pages + Server Snapshot.
+- Conserve intégralement la protection rate-limit de V11.8.2.2.
+- Aucun changement des moteurs, du Cloud Sync, du scheduler iPhone ou de la navigation.
+
 # V11.8.1 — Snapshot Architecture
 
 - Démarrage snapshot-first pour DrawHunter, FrenchFlair et NFL Totals.
