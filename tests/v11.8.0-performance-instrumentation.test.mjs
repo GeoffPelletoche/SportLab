@@ -4,7 +4,7 @@ import fs from "node:fs";
 
 test("V11.8.0 instruments scheduler without relaxing anti-429 gap", () => {
   const src=fs.readFileSync("core/api/requestScheduler.js","utf8");
-  assert.match(src,/MIN_GAP_MS = IS_SNAPSHOT_BUILD \? 2500 : 900/);
+  assert.match(src,/MIN_GAP_MS = IS_SNAPSHOT_BUILD \? 5000 : 900/);
   assert.match(src,/recordSchedulerEnqueue/);
   assert.match(src,/recordRateLimit/);
 });
