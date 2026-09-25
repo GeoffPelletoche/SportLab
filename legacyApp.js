@@ -1,5 +1,6 @@
 // SPORTLAB V7.0.0 — Legacy runtime encapsulated by Sprint 7.1 Core Foundation
 import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData, loadNflApplicationData } from "./services/appService.js";
+import { markModuleStart, markModuleProgress, markModuleComplete, formatPerformanceReport } from "./core/diagnostics/performanceInstrumentation.js";
 
 import { computeValue } from "./core/engines/valueEngine.js";
 
@@ -198,6 +199,8 @@ function refreshGenerationFor(kind) {
 }
 
 function publishSportPayload(kind, payload, { ready = false, reason = "background" } = {}) {
+  markModuleProgress(kind, payload, reason);
+  if (ready) markModuleComplete(kind, payload);
   if (kind === "drawhunter") {
     drawhunterPayload = payload;
     drawHunterReady = ready;
@@ -256,6 +259,7 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
 }
 
 async function refreshDrawHunterData({ force = false, reason = "background" } = {}) {
+  markModuleStart("drawhunter");
   if (drawHunterRefreshPromise) return drawHunterRefreshPromise;
   const generation = ++drawHunterRefreshGeneration;
   drawHunterReady = false;
@@ -287,6 +291,7 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
 }
 
 async function refreshFrenchFlairData({ force = false, reason = "background" } = {}) {
+  markModuleStart("frenchflair");
   if (frenchFlairRefreshPromise) return frenchFlairRefreshPromise;
   const generation = ++frenchFlairRefreshGeneration;
   frenchFlairReady = false;
@@ -318,6 +323,7 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
 }
 
 async function refreshNflData({ force = false, reason = "background" } = {}) {
+  markModuleStart("nfl");
   if (nflRefreshPromise) return nflRefreshPromise;
   const generation = ++nflRefreshGeneration;
   nflReady = false;
@@ -1259,6 +1265,12 @@ window.closeSportLabMenu = closeSportLabMenu;
 document.addEventListener(
   "click",
   async event => {
+    const perfButton = event.target.closest("#copy-performance-diagnostic");
+    if (perfButton) {
+      try { await navigator.clipboard.writeText(formatPerformanceReport()); perfButton.textContent = "✅ Mesures copiées"; }
+      catch { perfButton.textContent = "Copie impossible — sélectionne le rapport"; }
+      return;
+    }
     const button = event.target.closest(
       "#run-settlement-diagnostic"
     );

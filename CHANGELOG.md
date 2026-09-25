@@ -1,3 +1,11 @@
+# V11.8.0 — Performance Instrumentation
+
+- Instrumentation légère du scheduler API et des trois modules sportifs.
+- Mesure du délai jusqu’aux fixtures, à la première analyse exploitable et au chargement complet.
+- Compteurs de requêtes, échecs, attente scheduler et pauses 429.
+- Rapport de session visible et copiable depuis Diagnostics.
+- Aucun changement de débit API, moteur, Cloud Sync, navigation ou settlement.
+
 
 ## V11.7.14 — Deterministic Next Analysis + Non-blocking Cloud
 

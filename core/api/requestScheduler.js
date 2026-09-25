@@ -1,3 +1,4 @@
+import { recordRateLimit, recordSchedulerEnqueue, recordSchedulerEnd, recordSchedulerStart } from "../diagnostics/performanceInstrumentation.js";
 /**
  * SportLab V11.7.1 — API Request Scheduler
  *
@@ -17,7 +18,8 @@ let blockedUntil = 0;
 
 export function scheduleApiRequest(task, { priority = 0 } = {}) {
   return new Promise((resolve, reject) => {
-    queue.push({ task, priority: Number(priority) || 0, sequence: sequence++, resolve, reject });
+    const perfEnqueuedAt = recordSchedulerEnqueue();
+    queue.push({ task, priority: Number(priority) || 0, sequence: sequence++, resolve, reject, perfEnqueuedAt });
     queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);
     void drain();
   });
@@ -26,6 +28,7 @@ export function scheduleApiRequest(task, { priority = 0 } = {}) {
 export function applyGlobalRateLimit(retryAfterMs = 0) {
   const requested = Number(retryAfterMs) || DEFAULT_RATE_LIMIT_PAUSE_MS;
   const pause = Math.max(DEFAULT_RATE_LIMIT_PAUSE_MS, Math.min(MAX_RATE_LIMIT_PAUSE_MS, requested));
+  recordRateLimit();
   blockedUntil = Math.max(blockedUntil, Date.now() + pause);
   return pause;
 }
@@ -43,8 +46,9 @@ async function drain() {
       const waitMs = Math.max(0, blockedUntil - Date.now(), MIN_GAP_MS - (Date.now() - lastStartedAt));
       if (waitMs > 0) await wait(waitMs);
       lastStartedAt = Date.now();
-      try { item.resolve(await item.task()); }
-      catch (error) { item.reject(error); }
+      const perfStartedAt = recordSchedulerStart(item.perfEnqueuedAt);
+      try { item.resolve(await item.task()); recordSchedulerEnd(perfStartedAt, true); }
+      catch (error) { recordSchedulerEnd(perfStartedAt, false); item.reject(error); }
     }
   } finally {
     running = false;
