@@ -23,8 +23,15 @@ export function createSyncPanel({ engine, eventBus, notifications }) {
     // breaker. Une réussite ultérieure repasse immédiatement à « synchronisé ».
     if (event.status === "error") {
       const cfg = event.config || engine.getStatus();
-      const persistent = Number(cfg.consecutiveErrors || 0) >= 3 || Number(cfg.cloudBlockedUntil || 0) > Date.now();
-      status = persistent ? "error" : "syncing";
+      const code = String(cfg.lastErrorCode || event.code || "").toLowerCase();
+      // V11.7.12 — un circuit breaker/retry reste un état de synchronisation,
+      // pas une panne utilisateur. Le rouge est réservé aux erreurs qui exigent
+      // réellement une action (authentification ou quota D1 explicite).
+      const hardFailure = code === "d1_daily_quota_exceeded"
+        || code === "unauthorized" || code === "forbidden"
+        || code === "401" || code === "403"
+        || code.includes("auth") || code.includes("token");
+      status = hardFailure ? "error" : "syncing";
     } else {
       status = event.status;
     }
