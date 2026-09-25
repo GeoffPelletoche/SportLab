@@ -33,7 +33,7 @@ for (const [kind, load] of Object.entries(loaders)) {
 }
 if (failures.length) throw new Error(`Server snapshot refused (atomic publish): ${failures.join("; ")}`);
 if (Object.keys(sports).length !== 3) throw new Error("Server snapshot refused: all three sports are required.");
-const document = { schemaVersion: 1, generatedAt: new Date().toISOString(), version: "11.8.2.1", sports };
+const document = { schemaVersion: 1, generatedAt: new Date().toISOString(), version: "11.8.2.2", sports };
 const output = path.resolve("data/server-snapshot.json");
 await fs.writeFile(output, JSON.stringify(document), "utf8");
 console.log(`[SportLab] Server snapshot written: ${output}`);
