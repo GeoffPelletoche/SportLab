@@ -259,10 +259,13 @@ export function createSyncEngine({ eventBus, logger, notifications }) {
     intervalMs: Number(syncConfigStore.get().intervalMs || 300_000)
   });
   const watchedEvents = ["sportlab:bets-updated", "sportlab:drawhunter-workflow-updated", "sportlab:frenchflair-workflow-updated"];
-  const onDomainChange = () => { diff.markDirty(); captureOrDefer(); scheduler.schedule("change"); };
+  // V11.7.14 — les écritures métier sont déjà persistées localement.
+  // Le scan/capture Cloud est différé au cycle de sync (debounce) afin qu'une
+  // validation de pari/analyse ne bloque jamais la navigation de l'atelier.
+  const onDomainChange = () => { diff.markDirty(); scheduler.schedule("change"); };
   const onStorage = event => {
     if (!event.key || event.key.startsWith("sportlab.v7.cloud")) return;
-    diff.markDirty(); captureOrDefer(); scheduler.schedule("storage");
+    diff.markDirty(); scheduler.schedule("storage");
   };
 
   function start() {
