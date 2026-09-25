@@ -1,3 +1,11 @@
+## V11.7.10 — Early Analysis Display
+
+- Affichage anticipé d’un premier lot d’analyses dès que les deux historiques équipes sont exploitables.
+- Une seule publication progressive par sport et par cycle afin de préserver le viewport et les saisies.
+- Les rencontres incomplètes restent masquées jusqu’à disposer des données nécessaires ; le payload final reste complet.
+- Scheduler API, cadence anti-429, Cloud Sync, moteurs de prédiction et settlement inchangés.
+- Atomic Background Refresh conservé : aucun rendu progressif pendant une saisie active.
+
 ## V11.7.7 — Compact Team Rows
 
 - Présentation des matchs raccourcie dans FrenchFlair, DrawHunter et NFL Totals.

@@ -47,6 +47,11 @@ let frenchFlairReady = false;
 let nflReady = false;
 let postLoadTasksStarted = false;
 
+// V11.7.10 — Early Analysis Display
+// Une seule publication anticipée par cycle et par sport. Les étapes suivantes
+// restent silencieuses afin de préserver le viewport et les saisies en cours.
+const earlyAnalysisRenderedGeneration = { drawhunter: 0, frenchflair: 0, nfl: 0 };
+
 // V11.6.2 — Atomic Background Refresh
 // V11.6.1 — Background Refresh & Stable Input
 // Les données peuvent continuer à évoluer en arrière-plan sans reconstruire la vue
@@ -167,6 +172,30 @@ function withSportLoadingState(payload, ready, sport) {
   return { matches: [], meta: { loading: true, sport, phase: "startup" } };
 }
 
+function hasUsableAnalysisHistory(match) {
+  return Array.isArray(match?.homeHistory) && match.homeHistory.length > 0
+    && Array.isArray(match?.awayHistory) && match.awayHistory.length > 0;
+}
+
+function earlyAnalysisPayload(payload) {
+  const matches = (Array.isArray(payload?.matches) ? payload.matches : []).filter(hasUsableAnalysisHistory);
+  return {
+    ...(payload || {}),
+    matches,
+    meta: {
+      ...(payload?.meta || {}),
+      visibleTotal: matches.length,
+      earlyAnalysisDisplay: true
+    }
+  };
+}
+
+function refreshGenerationFor(kind) {
+  if (kind === "drawhunter") return drawHunterRefreshGeneration;
+  if (kind === "frenchflair") return frenchFlairRefreshGeneration;
+  return nflRefreshGeneration;
+}
+
 function publishSportPayload(kind, payload, { ready = false, reason = "background" } = {}) {
   if (kind === "drawhunter") {
     drawhunterPayload = payload;
@@ -197,7 +226,14 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
   // Sur le dashboard, on attend que les trois sports aient terminé afin de publier un seul
   // état cohérent au lieu de trois rendus successifs qui déplacent le viewport.
   const shouldRender = (() => {
-    if (isProgressUpdate) return false;
+    if (isProgressUpdate) {
+      if (!isActiveSport) return false;
+      const generation = refreshGenerationFor(kind);
+      const hasEarlyAnalyses = Array.isArray(payload?.matches) && payload.matches.some(hasUsableAnalysisHistory);
+      if (!hasEarlyAnalyses || earlyAnalysisRenderedGeneration[kind] === generation) return false;
+      earlyAnalysisRenderedGeneration[kind] = generation;
+      return true;
+    }
     if (activeSportKind) return isActiveSport && ready;
     if (currentPage === "home") return drawHunterReady && frenchFlairReady && nflReady;
     return false;
@@ -229,7 +265,7 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
       const payload = await loadSportWithStartupRetry({
         load: loadDrawHunterApplicationData, previousPayload: drawhunterPayload, sport: "football", reason,
         generationIsCurrent: () => generation === drawHunterRefreshGeneration,
-        publishProgress: progressPayload => publishSportPayload("drawhunter", progressPayload, { ready: false, reason: `${reason}:progress` }),
+        publishProgress: progressPayload => publishSportPayload("drawhunter", earlyAnalysisPayload(progressPayload), { ready: false, reason: `${reason}:progress` }),
         publishRetry: retryPayloadValue => publishSportPayload("drawhunter", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== drawHunterRefreshGeneration) return null;
@@ -260,7 +296,7 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
       const payload = await loadSportWithStartupRetry({
         load: loadFrenchFlairApplicationData, previousPayload: frenchflairPayload, sport: "rugby", reason,
         generationIsCurrent: () => generation === frenchFlairRefreshGeneration,
-        publishProgress: progressPayload => publishSportPayload("frenchflair", progressPayload, { ready: false, reason: `${reason}:progress` }),
+        publishProgress: progressPayload => publishSportPayload("frenchflair", earlyAnalysisPayload(progressPayload), { ready: false, reason: `${reason}:progress` }),
         publishRetry: retryPayloadValue => publishSportPayload("frenchflair", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== frenchFlairRefreshGeneration) return null;
@@ -290,7 +326,7 @@ async function refreshNflData({ force = false, reason = "background" } = {}) {
       const payload = await loadSportWithStartupRetry({
         load: loadNflApplicationData, previousPayload: nflPayload, sport: "nfl", reason,
         generationIsCurrent: () => generation === nflRefreshGeneration,
-        publishProgress: progress => publishSportPayload("nfl", progress, { ready: false, reason: `${reason}:progress` }),
+        publishProgress: progress => publishSportPayload("nfl", earlyAnalysisPayload(progress), { ready: false, reason: `${reason}:progress` }),
         publishRetry: retryPayloadValue => publishSportPayload("nfl", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
       });
       if (generation !== nflRefreshGeneration) return null;
