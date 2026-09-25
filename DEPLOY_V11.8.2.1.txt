@@ -1,0 +1,19 @@
+SPORTLAB V11.8.2.1 — CORRECTIVE SERVER SNAPSHOT
+
+IMPORTANT: the corrective workflow is a hidden repository path:
+.github/workflows/pages.yml
+
+When replacing the repository, make sure this exact file is replaced too.
+After push to main, GitHub > Actions must show the workflow name:
+Deploy SportLab Pages + Server Snapshot (V11.8.2.1)
+
+Its job must contain, in this order:
+1. Checkout
+2. Setup Node
+3. Validate SportLab
+4. Build atomic server snapshot
+5. Configure Pages
+6. Upload artifact
+7. Deploy to GitHub Pages
+
+Do not delete Safari/IndexedDB data to validate this deployment.

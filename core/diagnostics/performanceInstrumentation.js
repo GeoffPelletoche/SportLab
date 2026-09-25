@@ -24,7 +24,7 @@ export function recordSchedulerEnd(startedAt, ok=true) { scheduler.completed+=1;
 export function recordRateLimit(){ scheduler.rateLimits+=1; }
 export function getPerformanceReport(){
   const moduleReport={}; for(const [name,s] of modules) moduleReport[name]={...s, startedAtMs:r(s.startedAtMs), firstFixturesMs:r(s.firstFixturesMs), firstAnalysisMs:r(s.firstAnalysisMs), completeMs:r(s.completeMs)};
-  return { version:"11.8.2", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
+  return { version:"11.8.2.1", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
 }
 export function formatPerformanceReport(){ return JSON.stringify(getPerformanceReport(),null,2); }
 function r(v){return v==null?null:Math.round(v);}
