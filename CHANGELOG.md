@@ -700,3 +700,9 @@
 - Une erreur réseau transitoire terminée ne laisse plus le statut bloqué si une synchronisation réussie existe déjà.
 - Publication explicite de l'état Cloud au repos à la fin de chaque tentative.
 - Aucun changement du scheduler API, des moteurs d'analyse, de la navigation ou du settlement.
+
+## V11.8.2.2 — Snapshot Rate-Limit Protection
+- GitHub snapshot build only: 2.5 s minimum gap between API Bridge requests (browser remains 900 ms).
+- Full-window 65 s cooldown after API-Sports 429, capped at 90 s, with two rate-limit retries in CI.
+- Exact in-flight deduplication for team history requests during snapshot generation.
+- Atomic publish remains mandatory: incomplete snapshots are never deployed.

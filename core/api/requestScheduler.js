@@ -6,9 +6,10 @@ import { recordRateLimit, recordSchedulerEnqueue, recordSchedulerEnd, recordSche
  * Objectifs : supprimer les rafales, prioriser les fixtures et appliquer une
  * pause globale lorsqu'API-Sports répond 429.
  */
-const MIN_GAP_MS = 900;
-const DEFAULT_RATE_LIMIT_PAUSE_MS = 15000;
-const MAX_RATE_LIMIT_PAUSE_MS = 60000;
+const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
+const MIN_GAP_MS = IS_SNAPSHOT_BUILD ? 2500 : 900;
+const DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 65000 : 15000;
+const MAX_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 90000 : 60000;
 
 let queue = [];
 let running = false;

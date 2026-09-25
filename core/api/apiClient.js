@@ -3,7 +3,9 @@ import { applyGlobalRateLimit, scheduleApiRequest } from "./requestScheduler.js"
 
 const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_ATTEMPTS = 3;
-const RATE_LIMIT_RETRIES = 1;
+const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
+const RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 2 : 1;
+const snapshotInFlight = new Map();
 
 export async function fetchFromWorker(path, params = {}, options = {}) {
   const url = new URL(CONFIG.api.workerBaseUrl + path);
@@ -11,33 +13,39 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
     if (value !== undefined && value !== null) url.searchParams.set(key, value);
   });
 
-  const attempts = Math.max(1, Number(options.attempts || DEFAULT_ATTEMPTS));
-  const priority = Number(options.priority ?? inferPriority(path));
-  let lastError = null;
-  let rateLimitRetries = 0;
+  const dedupeKey = IS_SNAPSHOT_BUILD && /\/team-(?:games|fixtures)$/.test(String(path)) ? url.toString() : null;
+  if (dedupeKey && snapshotInFlight.has(dedupeKey)) return snapshotInFlight.get(dedupeKey);
 
-  for (let attempt = 1; attempt <= attempts; attempt += 1) {
-    try {
-      return await scheduleApiRequest(() => executeRequest(url, options), { priority });
-    } catch (error) {
-      lastError = error;
-      const status = Number(error?.status || 0);
+  const run = async () => {
+    const attempts = Math.max(1, Number(options.attempts || DEFAULT_ATTEMPTS));
+    const priority = Number(options.priority ?? inferPriority(path));
+    let lastError = null;
+    let rateLimitRetries = 0;
 
-      if (status === 429 && rateLimitRetries < RATE_LIMIT_RETRIES) {
-        rateLimitRetries += 1;
-        applyGlobalRateLimit(error?.retryAfterMs);
-        // Le prochain essai repasse dans la file centrale après la pause globale.
-        attempt -= 1;
-        continue;
+    for (let attempt = 1; attempt <= attempts; attempt += 1) {
+      try {
+        return await scheduleApiRequest(() => executeRequest(url, options), { priority });
+      } catch (error) {
+        lastError = error;
+        const status = Number(error?.status || 0);
+        if (status === 429 && rateLimitRetries < RATE_LIMIT_RETRIES) {
+          rateLimitRetries += 1;
+          applyGlobalRateLimit(error?.retryAfterMs);
+          attempt -= 1;
+          continue;
+        }
+        const retryable = ![400, 401, 403, 404, 409, 422, 429].includes(status);
+        if (attempt < attempts && retryable) await wait(Math.min(2500, 500 * attempt));
+        else break;
       }
-
-      const retryable = ![400, 401, 403, 404, 409, 422, 429].includes(status);
-      if (attempt < attempts && retryable) await wait(Math.min(2500, 500 * attempt));
-      else break;
     }
-  }
+    throw lastError || new Error("WORKER_UNAVAILABLE");
+  };
 
-  throw lastError || new Error("WORKER_UNAVAILABLE");
+  if (!dedupeKey) return run();
+  const promise = run().finally(() => snapshotInFlight.delete(dedupeKey));
+  snapshotInFlight.set(dedupeKey, promise);
+  return promise;
 }
 
 async function executeRequest(url, options) {
