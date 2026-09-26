@@ -1,3 +1,10 @@
+# V11.8.2.9 — Critical Save Quota Coverage
+
+- Étend la sauvegarde résistante au quota à toutes les écritures critiques de `betsStore.js`.
+- Conserve la récupération non destructive : seuls les caches `sportlab.v9.history.*` sont supprimables.
+- Ajoute des tests de régression exécutant réellement `saveAnalysis()` et `saveBet()` sous `QuotaExceededError`.
+- Aucun changement des moteurs, du Cloud Sync, de la navigation ou du builder snapshot conservateur.
+
 # V11.8.2.8 — Save Quota Recovery
 
 - Sécurise la sauvegarde des analyses et workflows contre `QuotaExceededError` Safari.
