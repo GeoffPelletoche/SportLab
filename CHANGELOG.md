@@ -1,3 +1,10 @@
+# V11.8.2.10 — NFL Match Identity Fix
+
+- Stabilise l’identité des rencontres NFL déjà affichées pendant le rafraîchissement silencieux Snapshot → API.
+- Une carte NFL rendue depuis un snapshot reste analysable même si le payload réseau courant ne contient plus momentanément son identifiant.
+- Le payload NFL courant reste prioritaire ; le registre de session sert uniquement de repli par `matchId`.
+- Aucun changement des moteurs NFL, de la sauvegarde quota-safe, du Cloud Sync, du settlement ou du Snapshot Builder.
+
 # V11.8.2.9 — Critical Save Quota Coverage
 
 - Étend la sauvegarde résistante au quota à toutes les écritures critiques de `betsStore.js`.
