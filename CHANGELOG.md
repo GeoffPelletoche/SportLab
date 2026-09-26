@@ -1,3 +1,10 @@
+## V11.8.2.7 — Save Regression Rollback
+
+- Repart strictement de la V11.8.2.5 validée, sans le mode diagnostic `serverSnapshotTest` introduit en V11.8.2.6.
+- Restaure le chemin normal de chargement/sauvegarde des analyses sans interception diagnostique.
+- Conserve le Conservative Snapshot Builder validé : 5 s entre requêtes, 10 départs/60 s, cooldown 429 de 90 à 180 s, publication atomique.
+- Cloud Sync, moteurs, navigation, settlement et données utilisateur inchangés par rapport à V11.8.2.5.
+
 ## V11.8.2.5 — Conservative Snapshot Builder
 
 - Snapshot GitHub Actions uniquement : cadence minimale portée à 5 s entre départs de requêtes.
