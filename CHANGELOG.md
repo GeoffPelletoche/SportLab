@@ -1,3 +1,10 @@
+# V11.8.2.8 — Save Quota Recovery
+
+- Sécurise la sauvegarde des analyses et workflows contre `QuotaExceededError` Safari.
+- En cas de quota saturé, purge uniquement les caches historiques API régénérables (`sportlab.v9.history.*`) puis retente l’écriture.
+- Ne supprime jamais analyses, paris, workflows ni file Cloud pendant cette récupération.
+- Le builder snapshot conservateur et le comportement Cloud restent inchangés.
+
 ## V11.8.2.7 — Save Regression Rollback
 
 - Repart strictement de la V11.8.2.5 validée, sans le mode diagnostic `serverSnapshotTest` introduit en V11.8.2.6.
