@@ -5,8 +5,8 @@ import fs from "node:fs";
 const workflow = fs.readFileSync(new URL("../.github/workflows/pages.yml", import.meta.url), "utf8");
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
-test("V11.8.2.9 ships the server-snapshot Pages workflow", () => {
-  assert.match(workflow, /name: Deploy SportLab Pages \+ Server Snapshot \(V11\.8\.2\.9\)/);
+test("V11.8.2.10 ships the server-snapshot Pages workflow", () => {
+  assert.match(workflow, /name: Deploy SportLab Pages \+ Server Snapshot \(V11\.8\.2\.10\)/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /cron: "17 5,12,18 \* \* \*"/);
   assert.match(workflow, /name: Validate SportLab/);
@@ -17,13 +17,13 @@ test("V11.8.2.9 ships the server-snapshot Pages workflow", () => {
   assert.ok(workflow.indexOf("Build atomic server snapshot") < workflow.indexOf("Upload artifact"));
 });
 
-test("V11.8.2.9 exposes the snapshot build command", () => {
-  assert.equal(pkg.version, "11.8.2.9");
+test("V11.8.2.10 exposes the snapshot build command", () => {
+  assert.equal(pkg.version, "11.8.2.10");
   assert.equal(pkg.scripts.snapshot, "node scripts/build-server-snapshot.mjs");
 });
 
 
-test("V11.8.2.9 snapshot build uses a conservative rolling one-minute request window", () => {
+test("V11.8.2.10 snapshot build uses a conservative rolling one-minute request window", () => {
   const scheduler = fs.readFileSync(new URL("../core/api/requestScheduler.js", import.meta.url), "utf8");
   assert.match(scheduler, /SNAPSHOT_WINDOW_MS = 60000/);
   assert.match(scheduler, /MIN_GAP_MS = IS_SNAPSHOT_BUILD \? 5000 : 900/);
