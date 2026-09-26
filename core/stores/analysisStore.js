@@ -1,3 +1,5 @@
+import { quotaSafeSetItem } from "./quotaSafeStorage.js";
+
 const STORAGE_KEY = "sportlab_analyses_v1";
 
 export function getAnalyses() {
@@ -71,7 +73,7 @@ modelEdgePercent: Number(analysis.modelEdgePercent || 0)
     analyses.push(cleanAnalysis);
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(analyses));
+  quotaSafeSetItem(STORAGE_KEY, JSON.stringify(analyses));
 
   return cleanAnalysis;
 }

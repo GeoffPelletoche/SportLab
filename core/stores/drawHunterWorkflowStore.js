@@ -1,3 +1,5 @@
+import { quotaSafeSetItem } from "./quotaSafeStorage.js";
+
 const STORAGE_KEY = "sportlab_drawhunter_workflow_v1";
 const CONTEXT_KEY = "sportlab_drawhunter_context_v1";
 
@@ -41,7 +43,7 @@ export function saveDrawHunterMatchWorkflow(matchId, patch = {}) {
 
   delete next.event;
   all[key] = next;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+  quotaSafeSetItem(STORAGE_KEY, JSON.stringify(all));
   window.dispatchEvent(new CustomEvent("sportlab:drawhunter-workflow-updated", { detail: next }));
   return next;
 }
