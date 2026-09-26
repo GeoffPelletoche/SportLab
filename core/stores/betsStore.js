@@ -1,3 +1,5 @@
+import { quotaSafeSetItem } from "./quotaSafeStorage.js";
+
 export const BETS_STORAGE_KEY = "sportlab_bets_v3";
 const STORAGE_KEY = BETS_STORAGE_KEY;
 const LEGACY_STORAGE_KEYS = ["sportlab_bets", "sportlab_bets_v1", "sportlab_bets_v2", "bets_v3"];
@@ -28,7 +30,7 @@ export function getBets() {
       legacy.length > 0 ||
       merged.length !== canonical.length
     ) {
-      localStorage.setItem(
+      quotaSafeSetItem(
         STORAGE_KEY,
         JSON.stringify(merged)
       );
@@ -59,7 +61,7 @@ function saveBets(bets) {
   }
 
   try {
-    localStorage.setItem(
+    quotaSafeSetItem(
       STORAGE_KEY,
       JSON.stringify(bets)
     );
@@ -316,7 +318,7 @@ export function updateBetResult(id, result) {
 
   bets[betIndex] = updatedBet;
 
-  localStorage.setItem(
+  quotaSafeSetItem(
     STORAGE_KEY,
     JSON.stringify(bets)
   );
