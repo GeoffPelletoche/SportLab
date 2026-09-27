@@ -1,3 +1,13 @@
+# V11.8.3 — Decoupled Snapshot Deployment + Responsive Diagnostics
+
+- Découple le déploiement GitHub Pages de la génération du Server Snapshot : un push sur `main` valide et déploie l’application sans appeler API-Sports.
+- Ajoute un workflow `server-snapshot.yml` autonome, planifié 3 fois par jour et déclenchable manuellement.
+- Le workflow Snapshot conserve le builder conservateur anti-429, publie atomiquement `data/server-snapshot.json` dans `main`, se recale sur le dernier `main`, puis publie lui-même le site avec le snapshot rafraîchi. Les déploiements déclenchés par tes commits restent indépendants et rapides.
+- Le commit automatique du snapshot ne relance jamais sa propre construction : le workflow Snapshot n’écoute pas les push.
+- Diagnostics Performance devient réellement responsive : tableau sur écran large, fiches verticales par module sur iPhone/mobile.
+- Instrumentation conservée pour valider le découplage en conditions réelles.
+- Aucun changement des moteurs sportifs, VALUE, settlement, Cloud Sync, sauvegarde quota-safe ou identité NFL.
+
 # V11.8.2.12 — NFL Notes Cleanup
 
 - Supprime le champ Notes visible de la saisie NFL Totals.
