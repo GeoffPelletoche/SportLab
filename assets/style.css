@@ -2560,3 +2560,19 @@ body.sportlab-navigation-open {
 .nfl-matchup--vertical .nfl-matchup__center{display:flex;width:100%;align-items:center;justify-content:center;text-align:center}
 .nfl-matchup--vertical .nfl-matchup__center span{display:block;width:100%;height:auto;border:0;background:none;font-size:.78rem!important;line-height:1;color:#83b7a2}
 @media(max-width:620px){.nfl-matchup.nfl-matchup--vertical{gap:4px;padding:10px 12px}.nfl-matchup--vertical .nfl-team-logo,.nfl-matchup--vertical .nfl-team--home .nfl-team-logo,.nfl-matchup--vertical .nfl-team--away .nfl-team-logo{width:44px;height:44px;flex-basis:44px}}
+
+/* V11.8.3 — Responsive Diagnostics performance instrumentation */
+.diagnostic-performance-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.diagnostic-performance-mobile{display:none}
+@media(max-width:620px){
+  .diagnostics-page .sl-panel{min-width:0}
+  .diagnostic-performance-table{display:none}
+  .diagnostic-performance-mobile{display:grid;gap:10px;margin:14px 0}
+  .diagnostic-performance-module{min-width:0;padding:12px 14px;border:1px solid rgba(148,163,184,.18);border-radius:14px;background:rgba(7,20,34,.36)}
+  .diagnostic-performance-module__name{display:block;margin-bottom:9px;font-size:1rem;overflow-wrap:anywhere}
+  .diagnostic-performance-module dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:0}
+  .diagnostic-performance-module dl div{min-width:0}
+  .diagnostic-performance-module dt{margin:0 0 2px;color:#8fa2ba;font-size:.72rem;line-height:1.2}
+  .diagnostic-performance-module dd{margin:0;font-size:.92rem;font-weight:750;line-height:1.25;overflow-wrap:anywhere}
+  #copy-performance-diagnostic{width:100%;white-space:normal;line-height:1.25}
+}
