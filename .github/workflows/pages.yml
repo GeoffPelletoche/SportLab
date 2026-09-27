@@ -1,12 +1,9 @@
-name: Deploy SportLab Pages + Server Snapshot (V11.8.2.12)
+name: Deploy SportLab Pages (V11.8.3)
 
 on:
   push:
     branches: ["main"]
   workflow_dispatch:
-  schedule:
-    # 3 refreshes/day. UTC avoids DST ambiguity; the app displays generatedAt locally.
-    - cron: "17 5,12,18 * * *"
 
 permissions:
   contents: read
@@ -32,10 +29,6 @@ jobs:
           node-version: "22"
       - name: Validate SportLab
         run: npm run validate
-      - name: Build atomic server snapshot
-        env:
-          SPORTLAB_SNAPSHOT_BUILD: "1"
-        run: npm run snapshot
       - name: Configure Pages
         uses: actions/configure-pages@v6
       - name: Upload artifact
