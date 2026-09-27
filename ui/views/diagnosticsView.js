@@ -47,15 +47,27 @@ function competitionDetails(log) {
 
 function performanceCard() {
   const report = getPerformanceReport();
-  const rows = Object.entries(report.modules || {}).map(([name, m]) => `
+  const modules = Object.entries(report.modules || {});
+  const rows = modules.map(([name, m]) => `
     <tr><td>${escapeHtml(name)}</td><td>${ms(m.firstFixturesMs)}</td><td>${ms(m.firstAnalysisMs)}</td><td>${ms(m.completeMs)}</td><td>${n(m.analysisCount)}</td></tr>`).join("");
+  const mobileCards = modules.map(([name, m]) => `
+    <article class="diagnostic-performance-module">
+      <strong class="diagnostic-performance-module__name">${escapeHtml(name)}</strong>
+      <dl>
+        <div><dt>Fixtures</dt><dd>${ms(m.firstFixturesMs)}</dd></div>
+        <div><dt>1re analyse</dt><dd>${ms(m.firstAnalysisMs)}</dd></div>
+        <div><dt>Complet</dt><dd>${ms(m.completeMs)}</dd></div>
+        <div><dt>Analyses</dt><dd>${n(m.analysisCount)}</dd></div>
+      </dl>
+    </article>`).join("");
   return `
     <article class="sl-panel">
-      <h2>⏱️ V11.8.0 — Performance Instrumentation</h2>
+      <h2>⏱️ V11.8.3 — Performance Instrumentation</h2>
       <p class="sl-muted">Mesures de cette session uniquement. Aucun réglage de débit API n'est modifié.</p>
       <p>Requêtes planifiées : <strong>${n(report.scheduler.enqueued)}</strong> · terminées : <strong>${n(report.scheduler.completed)}</strong> · échecs : <strong>${n(report.scheduler.failed)}</strong></p>
       <p>Attente moyenne scheduler : <strong>${ms(report.scheduler.averageQueueWaitMs)}</strong> · maximum : <strong>${ms(report.scheduler.maxQueueWaitMs)}</strong> · pauses 429 : <strong>${n(report.scheduler.rateLimits)}</strong></p>
-      <div style="overflow-x:auto"><table><thead><tr><th>Module</th><th>Fixtures</th><th>1re analyse</th><th>Complet</th><th>Analyses</th></tr></thead><tbody>${rows || '<tr><td colspan="5">Mesures en attente…</td></tr>'}</tbody></table></div>
+      <div class="diagnostic-performance-table"><table><thead><tr><th>Module</th><th>Fixtures</th><th>1re analyse</th><th>Complet</th><th>Analyses</th></tr></thead><tbody>${rows || '<tr><td colspan="5">Mesures en attente…</td></tr>'}</tbody></table></div>
+      <div class="diagnostic-performance-mobile">${mobileCards || '<p class="sl-muted">Mesures en attente…</p>'}</div>
       <button type="button" id="copy-performance-diagnostic">📋 Copier le rapport performance</button>
       <details><summary>Rapport brut</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(formatPerformanceReport())}</pre></details>
     </article>`;
@@ -104,7 +116,7 @@ export function renderDiagnostics({
   return `
     <section class="diagnostics-page sl-page sl-stack">
       <header class="sl-panel">
-        <span class="sl-label">SportLab V11.8.0</span>
+        <span class="sl-label">SportLab V11.8.3</span>
         <h1>Diagnostics opérationnels</h1>
         <p>Chaque compétition est maintenant distinguée entre fonctionnement normal, période sans match et véritable erreur API.</p>
       </header>
