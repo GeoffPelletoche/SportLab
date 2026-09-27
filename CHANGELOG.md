@@ -1,3 +1,9 @@
+# V11.8.3.1 — Diagnostics Version Fix
+
+- Corrige la version embarquée dans le rapport performance JSON : `11.8.3.1` au lieu de l’ancienne valeur `11.8.2.1`.
+- Aligne l’étiquette Diagnostics, le package, les cache-busts et les noms des deux workflows sur V11.8.3.1.
+- Aucun changement des moteurs sportifs, du Snapshot, du scheduler API-Sports, du Cloud Sync, des sauvegardes ou de l’interface responsive.
+
 # V11.8.3 — Decoupled Snapshot Deployment + Responsive Diagnostics
 
 - Découple le déploiement GitHub Pages de la génération du Server Snapshot : un push sur `main` valide et déploie l’application sans appeler API-Sports.
