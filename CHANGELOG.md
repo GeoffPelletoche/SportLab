@@ -1,3 +1,19 @@
+# V11.8.2.12 — NFL Notes Cleanup
+
+- Supprime le champ Notes visible de la saisie NFL Totals.
+- Préserve silencieusement toute note historique déjà enregistrée lors du recalcul ou de la sauvegarde d’une ancienne analyse NFL.
+- DrawHunter vérifié : aucun champ personnel Notes/Observation à supprimer.
+- Conserve les correctifs sauvegarde/quota, NFL Match Identity et FrenchFlair Recommended Market UX.
+
+# V11.8.2.11 — FrenchFlair Recommended Market UX
+
+- FrenchFlair sélectionne désormais automatiquement OVER ou UNDER à l’ouverture d’une nouvelle analyse selon `recommendedTrend`.
+- Une analyse FrenchFlair existante conserve son marché déjà choisi lors d’une réouverture.
+- Suppression du champ visible « Notes / Observation personnelle » dans FrenchFlair.
+- Les anciennes notes FrenchFlair déjà enregistrées restent conservées silencieusement lors d’une réanalyse.
+- Vérification DrawHunter : aucun champ « Notes / Observation personnelle » équivalent n’est présent dans son parcours d’analyse actuel.
+- Correctifs V11.8.2.9 (sauvegarde/quota) et V11.8.2.10 (identité NFL) inchangés.
+
 # V11.8.2.10 — NFL Match Identity Fix
 
 - Stabilise l’identité des rencontres NFL déjà affichées pendant le rafraîchissement silencieux Snapshot → API.

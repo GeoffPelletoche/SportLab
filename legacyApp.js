@@ -643,6 +643,10 @@ window.analyzeFrenchFlairValue = function(matchId) {
   }
 
   const existing = getAnalysisForMatch(match.id);
+  const recommendedMarket = match.recommendedTrend === "UNDER" ? "UNDER" : "OVER";
+  const selectedMarket = existing?.market === "UNDER" || existing?.market === "OVER"
+    ? existing.market
+    : recommendedMarket;
   const box = document.getElementById(`ff-result-${match.id}`);
 
   if (!box) return;
@@ -655,8 +659,8 @@ window.analyzeFrenchFlairValue = function(matchId) {
     <label>
       Marché
       <select id="ff-market-${match.id}">
-        <option value="OVER" ${existing?.market === "OVER" ? "selected" : ""}>Over</option>
-        <option value="UNDER" ${existing?.market === "UNDER" ? "selected" : ""}>Under</option>
+        <option value="OVER" ${selectedMarket === "OVER" ? "selected" : ""}>Over</option>
+        <option value="UNDER" ${selectedMarket === "UNDER" ? "selected" : ""}>Under</option>
       </select>
     </label>
 
@@ -668,11 +672,6 @@ window.analyzeFrenchFlairValue = function(matchId) {
     <label>
       Cote
       <input id="ff-odds-${match.id}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds || ""}">
-    </label>
-
-    <label>
-      Notes
-      <input id="ff-notes-${match.id}" type="text" placeholder="Observation personnelle" value="${existing?.notes ?? ""}">
     </label>
 
     <button onclick="calculateFrenchFlairAnalysis('${match.id}')">
@@ -716,8 +715,9 @@ window.calculateFrenchFlairAnalysis = function(matchId) {
     document.getElementById(`ff-odds-${match.id}`)?.value || 0
   );
 
-  const notes =
-    document.getElementById(`ff-notes-${match.id}`)?.value || "";
+  // Le champ Notes n'est plus affiché. Une note historique éventuelle reste
+  // conservée lors d'une réanalyse afin de ne pas altérer les anciennes données.
+  const notes = getAnalysisForMatch(match.id)?.notes || "";
 
   if (!market || line <= 0 || odds <= 1) {
     alert("Saisis une ligne bookmaker et une cote valides.");
@@ -1115,11 +1115,11 @@ window.analyzeNflValue = function(matchId) {
   const match = getNflMatchById(matchId); if (!match) return alert("Match NFL introuvable.");
   const existing = getAnalysisForMatch(match.id); const box = document.getElementById(`nfl-result-${match.id}`); if (!box) return;
   const recommendedMarket = existing?.market || (match.recommendedTrend === "UNDER" ? "UNDER" : "OVER");
-  box.innerHTML = `<div class="nfl-analysis-recommendation">Préconisation SportLab : <strong>${recommendedMarket}</strong></div><div class="nfl-analysis-form"><label>Marché<select id="nfl-market-${match.id}"><option value="OVER" ${recommendedMarket==="OVER"?"selected":""}>Over</option><option value="UNDER" ${recommendedMarket==="UNDER"?"selected":""}>Under</option></select></label><label>Ligne Betclic<input id="nfl-line-${match.id}" type="number" step="0.5" placeholder="Ex : 45.5" value="${existing?.line??""}"></label><label>Cote<input id="nfl-odds-${match.id}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds||""}"></label><label>Notes<input id="nfl-notes-${match.id}" type="text" value="${existing?.notes??""}"></label></div><button class="sl-button sl-button-primary" onclick="calculateNflAnalysis('${match.id}')">Calculer la VALUE</button><div id="nfl-calculation-${match.id}"></div>`;
+  box.innerHTML = `<div class="nfl-analysis-recommendation">Préconisation SportLab : <strong>${recommendedMarket}</strong></div><div class="nfl-analysis-form"><label>Marché<select id="nfl-market-${match.id}"><option value="OVER" ${recommendedMarket==="OVER"?"selected":""}>Over</option><option value="UNDER" ${recommendedMarket==="UNDER"?"selected":""}>Under</option></select></label><label>Ligne Betclic<input id="nfl-line-${match.id}" type="number" step="0.5" placeholder="Ex : 45.5" value="${existing?.line??""}"></label><label>Cote<input id="nfl-odds-${match.id}" type="number" step="0.01" placeholder="Ex : 1.90" value="${existing?.odds||""}"></label></div><button class="sl-button sl-button-primary" onclick="calculateNflAnalysis('${match.id}')">Calculer la VALUE</button><div id="nfl-calculation-${match.id}"></div>`;
 };
 window.calculateNflAnalysis = function(matchId) {
   const match=getNflMatchById(matchId); if(!match) return alert("Match NFL introuvable."); if(!isMatchEditableBeforeKickoff(match)) return alert("Le match a commencé : analyse verrouillée.");
-  const market=document.getElementById(`nfl-market-${match.id}`)?.value||"OVER"; const line=Number(document.getElementById(`nfl-line-${match.id}`)?.value||0); const odds=Number(document.getElementById(`nfl-odds-${match.id}`)?.value||0); const notes=document.getElementById(`nfl-notes-${match.id}`)?.value||"";
+  const market=document.getElementById(`nfl-market-${match.id}`)?.value||"OVER"; const line=Number(document.getElementById(`nfl-line-${match.id}`)?.value||0); const odds=Number(document.getElementById(`nfl-odds-${match.id}`)?.value||0); const notes=getAnalysisForMatch(match.id)?.notes||"";
   if(line<=0||odds<=1) return alert("Saisis une ligne Betclic et une cote valides."); const mean=Number(match.predictedTotalPoints||0), sigma=Number(match.sigma||0); if(mean<=0||sigma<=0) return alert("Total modèle ou sigma NFL indisponible.");
   const probability=computeTotalsProbability(mean,sigma,market,line); const value=computeValue({probability,odds,minValue:0.01}); const modelEdgePoints=market==="OVER"?mean-line:line-mean; const modelEdgePercent=line>0?modelEdgePoints/line*100:0; const confidence=Number(match.confidence||0);
   const scoreValue=computeFrenchFlairScore({modelEdgePercent,confidence,sigma,predictedTotal:mean,mathValue:value.value});
