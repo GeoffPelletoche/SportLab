@@ -1,7 +1,16 @@
-# V11.8.3.2 — Diagnostics Version Fix
+# V11.8.4 — Data Integrity
 
-- Corrige la version embarquée dans le rapport performance JSON : `11.8.3.2` au lieu de l’ancienne valeur `11.8.2.1`.
-- Aligne l’étiquette Diagnostics, le package, les cache-busts et les noms des deux workflows sur V11.8.3.2.
+- Protège Learning Store, dataset de snapshots et repository Performance contre les quotas Safari via `quotaSafeSetItem`.
+- Synchronise désormais aussi `sportlab.v7.learning.dataset` et `sportlab.v7.modelPerformance.records` dans le Cloud.
+- Les restaurations Cloud utilisent la même écriture quota-safe pour les données synchronisées et les métadonnées.
+- Clarifie les populations dans Performance : snapshots présents, évaluations, paris réglés/ROI.
+- Clarifie Calibration : observations calibrables et exclusions.
+- Aucune migration destructive, aucun recalcul de modèle, aucun changement des seuils VALUE ou des moteurs sportifs.
+
+# V11.8.4 — Diagnostics Version Fix
+
+- Corrige la version embarquée dans le rapport performance JSON : `11.8.4` au lieu de l’ancienne valeur `11.8.2.1`.
+- Aligne l’étiquette Diagnostics, le package, les cache-busts et les noms des deux workflows sur V11.8.4.
 - Aucun changement des moteurs sportifs, du Snapshot, du scheduler API-Sports, du Cloud Sync, des sauvegardes ou de l’interface responsive.
 
 # V11.8.3 — Decoupled Snapshot Deployment + Responsive Diagnostics
