@@ -94,14 +94,14 @@ export function renderCalibration(calibration = {}) {
     <section class="calibration-page sl-page sl-stack sl-stack-lg">
       <header class="calibration-hero sl-panel">
         <div>
-          <span class="sl-label">SportLab V11.3</span>
+          <span class="sl-label">SportLab V11.8.4</span>
           <h1>Calibration Engine</h1>
-          <p>Mesure passive de l’écart entre les probabilités annoncées et les résultats réellement observés. Le moteur ne modifie aucune prédiction.</p>
+          <p>Mesure passive sur les enregistrements évalués et calibrables du Learning Store. Le moteur ne modifie aucune prédiction.</p>
         </div>
         <div class="calibration-hero-meta">
           <small>Dernière mise à jour</small>
           <strong>${escapeHtml(updated)}</strong>
-          <span>${n(calibration.observations)} observation(s) exploitable(s)</span>
+          <span>${n(calibration.observations)} calibrable(s) · ${n(calibration.excluded)} exclue(s)</span>
         </div>
       </header>
 
