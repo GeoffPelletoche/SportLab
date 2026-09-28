@@ -28,5 +28,5 @@ test("V11.7.8 NFL uses FrenchFlair-style home VS away and visible kickoff", () =
 test("V11.7.8 improves poster contrast and cache-busts Safari CSS", () => {
   assert.match(css, /V11\.7\.8 — Fast Fixtures/);
   assert.match(css, /rgba\(13,47,39,.72\)/);
-  assert.match(html, /style\.css\?v=11\.8\.3/);
+  assert.match(html, /style\.css\?v=11\.8\.4/);
 });
