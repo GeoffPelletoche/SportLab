@@ -1,12 +1,14 @@
+import { quotaSafeSetItem } from "../stores/quotaSafeStorage.js";
 export const SYNCED_KEYS = Object.freeze([
   "sportlab_analyses_v1", "sportlab_bets_v3",
   "sportlab_drawhunter_workflow_v1", "sportlab_drawhunter_context_v1",
   "sportlab_frenchflair_workflow_v1", "sportlab_frenchflair_context_v1",
-  "sportlab.v7.settings", "sportlab_learning_v1"
+  "sportlab.v7.settings", "sportlab_learning_v1",
+  "sportlab.v7.learning.dataset", "sportlab.v7.modelPerformance.records"
 ]);
 const META_KEY = "sportlab.v7.cloud.meta";
 function meta() { try { return JSON.parse(localStorage.getItem(META_KEY)) || {}; } catch { return {}; } }
-function saveMeta(value) { localStorage.setItem(META_KEY, JSON.stringify(value)); }
+function saveMeta(value) { quotaSafeSetItem(META_KEY, JSON.stringify(value), localStorage); }
 function namespaceFor(key) { return key === "sportlab.v7.settings" ? "settings" : key.includes("drawhunter") ? "drawhunter" : key.includes("frenchflair") ? "frenchflair" : key.includes("bets") ? "bets" : key.includes("learning") ? "learning" : "analyses"; }
 function recordKeyFor(key) { return key; }
 function hash(value) { let h = 2166136261; for (let i = 0; i < value.length; i += 1) { h ^= value.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16); }
@@ -97,7 +99,7 @@ export function applyRemoteRecords(records = []) {
     if (!SYNCED_KEYS.includes(key)) continue;
     const deleted = Boolean(record.deleted);
     const raw = record?.payload?.raw ?? null;
-    if (deleted) localStorage.removeItem(key); else if (typeof raw === "string" && localStorage.getItem(key) !== raw) { localStorage.setItem(key, raw); changed = true; }
+    if (deleted) localStorage.removeItem(key); else if (typeof raw === "string" && localStorage.getItem(key) !== raw) { quotaSafeSetItem(key, raw, localStorage); changed = true; }
     state[key] = { hash: hash(deleted ? "__deleted__" : String(raw)), version: Number(record.version || 0), serverUpdatedAt: Number(record.serverUpdatedAt || record.server_updated_at || Date.now()), pendingHash: "", pendingClientUpdatedAt: 0 };
   }
   saveMeta(state);

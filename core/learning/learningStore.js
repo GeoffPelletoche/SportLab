@@ -1,3 +1,4 @@
+import { quotaSafeSetItem } from "../stores/quotaSafeStorage.js";
 export const LEARNING_STORAGE_KEY = "sportlab_learning_v1";
 const MAX_RECORDS = 10000;
 
@@ -17,7 +18,7 @@ export function saveLearningRecord(record, storage = globalThis.localStorage) {
   const normalized = normalizeRecord(record);
   if (index >= 0) records[index] = { ...records[index], ...normalized };
   else records.push(normalized);
-  storage?.setItem?.(LEARNING_STORAGE_KEY, JSON.stringify(records.slice(-MAX_RECORDS)));
+  quotaSafeSetItem(LEARNING_STORAGE_KEY, JSON.stringify(records.slice(-MAX_RECORDS)), storage);
   return normalized;
 }
 
