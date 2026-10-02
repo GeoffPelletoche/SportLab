@@ -12,10 +12,8 @@ test("V11.7.10 only exposes analyses with both team histories", () => {
   assert.match(legacy, /function earlyAnalysisPayload/);
 });
 
-test("V11.7.10 renders at most one early batch per sport generation", () => {
-  assert.match(legacy, /earlyAnalysisRenderedGeneration/);
-  assert.match(legacy, /earlyAnalysisRenderedGeneration\[kind\] === generation/);
-  assert.match(legacy, /earlyAnalysisRenderedGeneration\[kind\] = generation/);
+test("V11.8.4.1 keeps early batches in memory instead of rendering them", () => {
+  assert.match(legacy, /if \(isProgressUpdate\) return false;/);
 });
 
 test("V11.7.10 preserves stable input protection", () => {

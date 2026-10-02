@@ -6,22 +6,22 @@ const pages = fs.readFileSync(new URL("../.github/workflows/pages.yml", import.m
 const snapshot = fs.readFileSync(new URL("../.github/workflows/server-snapshot.yml", import.meta.url), "utf8");
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
-test("V11.8.4 ships decoupled Pages and server-snapshot workflows", () => {
-  assert.match(pages, /name: Deploy SportLab Pages \(V11\.8\.4\)/);
+test("V11.8.4.1 ships decoupled Pages and server-snapshot workflows", () => {
+  assert.match(pages, /name: Deploy SportLab Pages \(V11\.8\.4\.1\)/);
   assert.match(pages, /name: Validate SportLab/);
   assert.doesNotMatch(pages, /Build atomic server snapshot/);
-  assert.match(snapshot, /name: Refresh Server Snapshot \(V11\.8\.4\)/);
+  assert.match(snapshot, /name: Refresh Server Snapshot \(V11\.8\.4\.1\)/);
   assert.match(snapshot, /cron: "17 5,12,18 \* \* \*"/);
   assert.match(snapshot, /name: Build atomic server snapshot/);
   assert.match(snapshot, /SPORTLAB_SNAPSHOT_BUILD: "1"/);
 });
 
-test("V11.8.4 exposes the snapshot build command", () => {
-  assert.equal(pkg.version, "11.8.4");
+test("V11.8.4.1 exposes the snapshot build command", () => {
+  assert.equal(pkg.version, "11.8.4.1");
   assert.equal(pkg.scripts.snapshot, "node scripts/build-server-snapshot.mjs");
 });
 
-test("V11.8.4 snapshot build keeps the conservative rolling one-minute request window", () => {
+test("V11.8.4.1 snapshot build keeps the conservative rolling one-minute request window", () => {
   const scheduler = fs.readFileSync(new URL("../core/api/requestScheduler.js", import.meta.url), "utf8");
   assert.match(scheduler, /SNAPSHOT_WINDOW_MS = 60000/);
   assert.match(scheduler, /MIN_GAP_MS = IS_SNAPSHOT_BUILD \? 5000 : 900/);
