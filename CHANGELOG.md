@@ -1,3 +1,10 @@
+# V11.8.4.1 — Stable Refresh
+
+- Supprime les rendus progressifs de l’atelier sportif pendant les rafraîchissements de fond.
+- Restaure l’ancre de viewport dans la même tâche que le rendu final, avec une correction post-layout.
+- Évite le second rendu de l’atelier après évaluation passive ou règlement automatique.
+- Préserve Data Integrity V11.8.4, la navigation post-validation et les moteurs sportifs sans modification.
+
 # V11.8.4 — Data Integrity
 
 - Protège Learning Store, dataset de snapshots et repository Performance contre les quotas Safari via `quotaSafeSetItem`.

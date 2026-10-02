@@ -270,14 +270,10 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
   // Sur le dashboard, on attend que les trois sports aient terminé afin de publier un seul
   // état cohérent au lieu de trois rendus successifs qui déplacent le viewport.
   const shouldRender = (() => {
-    if (isProgressUpdate) {
-      if (!isActiveSport) return false;
-      const generation = refreshGenerationFor(kind);
-      const hasEarlyAnalyses = Array.isArray(payload?.matches) && payload.matches.some(hasUsableAnalysisHistory);
-      if (!hasEarlyAnalyses || earlyAnalysisRenderedGeneration[kind] === generation) return false;
-      earlyAnalysisRenderedGeneration[kind] = generation;
-      return true;
-    }
+    // V11.8.4.1 — Stable Refresh: les payloads progressifs ne reconstruisent jamais
+    // l'atelier visible. Ils restent en mémoire jusqu'au payload final afin d'éviter
+    // tout déplacement de carte pendant un rafraîchissement en arrière-plan.
+    if (isProgressUpdate) return false;
     if (activeSportKind) return isActiveSport && ready;
     if (currentPage === "home") return drawHunterReady && frenchFlairReady && nflReady;
     return false;
@@ -404,7 +400,9 @@ async function runPostSportsTasks(generation) {
     console.log("[PredictionEvaluation]", predictionEvaluation);
     if (predictionEvaluation.evaluated > 0) {
       currentAppData = { ...currentAppData, ...loadLocalApplicationData() };
-      requestStableRender();
+      // Sur un atelier sportif, l'évaluation est une tâche de fond : le payload final
+      // vient déjà d'être publié. Ne pas provoquer un second remplacement de la vue.
+      if (!isSportWorkshopPage()) requestStableRender();
     }
   } catch (error) {
     console.warn("[PredictionEvaluation] Échec", error);
@@ -419,11 +417,15 @@ async function runPostSportsTasks(generation) {
         drawhunterPayload,
         frenchflairPayload
       };
-      requestStableRender();
+      if (!isSportWorkshopPage()) requestStableRender();
     }
   } catch (error) {
     console.error("[Settlement] Échec du règlement automatique :", error);
   }
+}
+
+function isSportWorkshopPage() {
+  return ["drawhunter", "frenchflair", "nfl"].includes(currentPage);
 }
 
 function isProtectedInteractionActive() {
@@ -539,9 +541,14 @@ function renderCurrentApplication(app = document.getElementById("app")) {
   const anchor = captureViewportAnchor();
   renderApplication(app, { ...currentAppData, currentPage });
   initializeUi();
-  requestAnimationFrame(() => {
-    if (!applyPendingAnalysisNavigation()) restoreViewportAnchor(anchor);
-  });
+  // Restaurer l'ancre dans la même tâche que le remplacement du DOM : le navigateur
+  // n'a ainsi aucune frame où la nouvelle géométrie peut apparaître à une autre position.
+  if (!applyPendingAnalysisNavigation()) restoreViewportAnchor(anchor);
+  // Une seconde correction après layout couvre les images/logos dont la taille se stabilise
+  // juste après le rendu, sans changer la navigation volontaire après validation.
+  if (!pendingNavigationTargetId && anchor) {
+    requestAnimationFrame(() => restoreViewportAnchor(anchor));
+  }
 }
 
 /**
