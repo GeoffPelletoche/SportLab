@@ -94,7 +94,7 @@ export function renderCalibration(calibration = {}) {
     <section class="calibration-page sl-page sl-stack sl-stack-lg">
       <header class="calibration-hero sl-panel">
         <div>
-          <span class="sl-label">SportLab V11.8.4</span>
+          <span class="sl-label">SportLab V11.8.4.1</span>
           <h1>Calibration Engine</h1>
           <p>Mesure passive sur les enregistrements évalués et calibrables du Learning Store. Le moteur ne modifie aucune prédiction.</p>
         </div>
