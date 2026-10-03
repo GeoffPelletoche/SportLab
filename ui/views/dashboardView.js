@@ -515,6 +515,9 @@ function renderModuleCard({
 }) {
   const hasError = meta?.error === true;
   const isRetrying = meta?.retrying === true;
+  const isSnapshot = meta?.snapshot === true || meta?.serverSnapshot === true;
+  const isRefreshing = meta?.loading === true || isRetrying;
+  const isFresh = !hasError && !isRefreshing && !isSnapshot && meta?.phase === "complete";
 
   return `
     <article
@@ -535,8 +538,8 @@ function renderModuleCard({
           </div>
         </div>
 
-        <span class="sl-badge ${hasError ? "sl-badge-danger" : isRetrying ? "sl-badge-warning" : "sl-badge-success"}">
-          ${hasError ? "Erreur" : isRetrying ? "Connexion…" : "À jour"}
+        <span class="sl-badge ${hasError ? "sl-badge-danger" : isFresh ? "sl-badge-success" : "sl-badge-warning"}">
+          ${hasError ? "Erreur" : isFresh ? "À jour" : isRetrying ? "Connexion…" : isRefreshing ? "Mise à jour…" : "Snapshot"}
         </span>
       </header>
 
@@ -544,16 +547,18 @@ function renderModuleCard({
       <div class="dashboard-v2-module-stats">
         ${renderModuleStat(stats.pending, "À analyser")}
         ${renderModuleStat(stats.placed, "Paris placés")}
-        ${renderModuleStat(formatSyncDate(meta?.syncedAt), "Synchronisé")}
+        ${renderModuleStat(formatSyncDate(meta?.syncedAt), "Dernières données")}
       </div>
 
       <footer class="sl-card-footer">
         <span class="dashboard-v2-module-status">
           ${hasError
-            ? "La synchronisation reste indisponible après les nouvelles tentatives."
-            : isRetrying
-              ? `Nouvelle tentative automatique ${Number(meta?.retryAttempt || 1)}/${Number(meta?.retryMax || 2)}…`
-              : "Les données du module sont disponibles."}
+            ? "La mise à jour sportive reste indisponible après les nouvelles tentatives."
+            : isRefreshing
+              ? (isRetrying ? `Nouvelle tentative automatique ${Number(meta?.retryAttempt || 1)}/${Number(meta?.retryMax || 2)}…` : "Mise à jour des données sportives en cours…")
+              : isFresh
+                ? "Données sportives mises à jour."
+                : "Dernier snapshot disponible — mise à jour sportive à confirmer."}
         </span>
 
         <button

@@ -62,7 +62,7 @@ function performanceCard() {
     </article>`).join("");
   return `
     <article class="sl-panel">
-      <h2>⏱️ V11.8.4.1 — Performance Instrumentation</h2>
+      <h2>⏱️ V11.8.4.2 — Performance Instrumentation</h2>
       <p class="sl-muted">Mesures de cette session uniquement. Aucun réglage de débit API n'est modifié.</p>
       <p>Requêtes planifiées : <strong>${n(report.scheduler.enqueued)}</strong> · terminées : <strong>${n(report.scheduler.completed)}</strong> · échecs : <strong>${n(report.scheduler.failed)}</strong></p>
       <p>Attente moyenne scheduler : <strong>${ms(report.scheduler.averageQueueWaitMs)}</strong> · maximum : <strong>${ms(report.scheduler.maxQueueWaitMs)}</strong> · pauses 429 : <strong>${n(report.scheduler.rateLimits)}</strong></p>
@@ -96,6 +96,7 @@ function moduleCard(label, meta = {}) {
       <p>Réponses historiques vides : <strong>${n(h.emptyResponses)}</strong></p>
       <p>Erreurs historiques : <strong>${n(h.errors)}</strong></p>
       <p>Matchs historiques exploités : <strong>${n(h.gamesLoaded)}</strong></p>
+      ${h.fixtureRequest ? `<p>Requête fixtures : <strong>${escapeHtml(h.fixtureRequest.from || "?")} → ${escapeHtml(h.fixtureRequest.to || "?")}</strong> · statut <strong>${escapeHtml(h.fixtureRequest.status || "?")}</strong> · retournés <strong>${n(h.fixtureRequest.returned)}</strong>${h.fixtureRequest.httpStatus ? ` · HTTP ${escapeHtml(h.fixtureRequest.httpStatus)}` : ""}</p>` : ""}
       ${competitionDetails(log)}
     </article>
   `;
@@ -105,6 +106,7 @@ export function renderDiagnostics({
   settlement = null,
   drawhunterMeta = {},
   frenchflairMeta = {},
+  nflMeta = {},
   learningDataset = [],
   learningSummary = {},
   calibration = {}
@@ -116,7 +118,7 @@ export function renderDiagnostics({
   return `
     <section class="diagnostics-page sl-page sl-stack">
       <header class="sl-panel">
-        <span class="sl-label">SportLab V11.8.4.1</span>
+        <span class="sl-label">SportLab V11.8.4.2</span>
         <h1>Diagnostics opérationnels</h1>
         <p>Chaque compétition est maintenant distinguée entre fonctionnement normal, période sans match et véritable erreur API.</p>
       </header>
@@ -126,6 +128,7 @@ export function renderDiagnostics({
       <div class="sl-grid sl-grid-2">
         ${moduleCard("⚽ DrawHunter", drawhunterMeta)}
         ${moduleCard("🏉 FrenchFlair", frenchflairMeta)}
+        ${moduleCard("🏈 NFL Totals", nflMeta)}
       </div>
 
       <article class="sl-panel">
