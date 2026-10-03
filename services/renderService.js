@@ -122,6 +122,7 @@ export function renderApplication(app, data = {}) {
         settlement: data.diagnostic,
         drawhunterMeta: data.drawhunterPayload?.meta || {},
         frenchflairMeta: data.frenchflairPayload?.meta || {},
+        nflMeta: data.nflPayload?.meta || {},
         learningDataset,
         learningSummary: buildLearningSummary(learningRecords),
         calibration: calibrationDashboard
