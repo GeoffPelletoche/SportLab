@@ -46,15 +46,18 @@ async function drain() {
   running = true;
   try {
     while (queue.length) {
-      const item = queue.shift();
-      // V11.8.4.2 — respect the API-Sports minute window in the browser too.
-      // Snapshot-first keeps the UI fast; avoiding 429 storms is more important than
-      // finishing background history enrichment aggressively.
-      await waitForStartWindow();
+      // V11.8.4.3 — Non-Blocking Fixtures. Never reserve an item before a
+      // scheduler pause. Requests may arrive while we wait (especially fixture
+      // lists); once the pause expires, re-sort and select the highest priority
+      // item that is actually ready to start.
+      if (IS_SNAPSHOT_BUILD) await waitForStartWindow();
       const waitMs = Math.max(0, blockedUntil - Date.now(), MIN_GAP_MS - (Date.now() - lastStartedAt));
       if (waitMs > 0) await wait(waitMs);
+      queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);
+      const item = queue.shift();
+      if (!item) continue;
       lastStartedAt = Date.now();
-      recordRequestStart(lastStartedAt);
+      if (IS_SNAPSHOT_BUILD) recordRequestStart(lastStartedAt);
       const perfStartedAt = recordSchedulerStart(item.perfEnqueuedAt);
       try { item.resolve(await item.task()); recordSchedulerEnd(perfStartedAt, true); }
       catch (error) { recordSchedulerEnd(perfStartedAt, false); item.reject(error); }
