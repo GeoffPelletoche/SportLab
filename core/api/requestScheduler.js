@@ -46,7 +46,7 @@ async function drain() {
   running = true;
   try {
     while (queue.length) {
-      // V11.8.4.3 — Non-Blocking Fixtures. Never reserve an item before a
+      // V11.8.4.4 — Non-Blocking Fixtures. Never reserve an item before a
       // scheduler pause. Requests may arrive while we wait (especially fixture
       // lists); once the pause expires, re-sort and select the highest priority
       // item that is actually ready to start.
