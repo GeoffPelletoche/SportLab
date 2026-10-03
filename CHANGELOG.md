@@ -1,4 +1,12 @@
-# V11.8.4.3 — Non-Blocking Fixtures
+# V11.8.4.4 — Atomic Snapshot Refresh
+
+- Conserve le dernier snapshot valide affiché pendant tout le rafraîchissement réseau.
+- Les phases `fixtures`, `history` et `retry` alimentent uniquement un buffer de progression/diagnostic et ne remplacent plus le payload actif.
+- Un seul swap atomique est effectué à la fin d’un rafraîchissement réussi.
+- En cas d’erreur, le dernier dataset valide reste affiché et l’erreur de refresh est portée par les métadonnées.
+- Scheduler V11.8.4.3 inchangé.
+
+# V11.8.4.4 — Non-Blocking Fixtures
 
 - Retire la fenêtre navigateur 10 requêtes / 60 s introduite en V11.8.4.2, responsable d'attentes artificielles très longues.
 - Conserve la priorité NFL / fixtures et le gap historique de 900 ms.

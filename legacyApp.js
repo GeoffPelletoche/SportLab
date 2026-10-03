@@ -234,6 +234,36 @@ function earlyAnalysisPayload(payload) {
   };
 }
 
+
+// V11.8.4.4 — Atomic Snapshot Refresh
+// Network progress belongs to a staging buffer. It may feed diagnostics/status,
+// but it must never replace the last-known-good payload displayed by a workshop.
+function recordSportRefreshProgress(kind, payload, reason = "background:progress") {
+  markModuleProgress(kind, payload, reason);
+  window.dispatchEvent(new CustomEvent("sportlab:sports-refresh-progress", {
+    detail: {
+      reason,
+      sport: kind === "drawhunter" ? "football" : kind === "frenchflair" ? "rugby" : "nfl",
+      phase: payload?.meta?.phase || "progress",
+      stagedMatches: Array.isArray(payload?.matches) ? payload.matches.length : 0
+    }
+  }));
+}
+
+function atomicRefreshFailurePayload(previousPayload, failedPayload, sport) {
+  return {
+    ...(previousPayload || { matches: [] }),
+    meta: {
+      ...(previousPayload?.meta || {}),
+      sport,
+      loading: false,
+      refreshError: true,
+      refreshErrorMessage: failedPayload?.meta?.errorMessage || "Rafraîchissement temporairement indisponible.",
+      lastRefreshPhase: failedPayload?.meta?.phase || "error"
+    }
+  };
+}
+
 function refreshGenerationFor(kind) {
   if (kind === "drawhunter") return drawHunterRefreshGeneration;
   if (kind === "frenchflair") return frenchFlairRefreshGeneration;
@@ -309,11 +339,16 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
       const payload = await loadSportWithStartupRetry({
         load: loadDrawHunterApplicationData, previousPayload: drawhunterPayload, sport: "football", reason,
         generationIsCurrent: () => generation === drawHunterRefreshGeneration,
-        publishProgress: progressPayload => publishSportPayload("drawhunter", earlyAnalysisPayload(progressPayload), { ready: false, reason: `${reason}:progress` }),
-        publishRetry: retryPayloadValue => publishSportPayload("drawhunter", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
+        publishProgress: progressPayload => recordSportRefreshProgress("drawhunter", earlyAnalysisPayload(progressPayload), `${reason}:progress`),
+        publishRetry: retryPayloadValue => recordSportRefreshProgress("drawhunter", retryPayloadValue, `${reason}:retry`)
       });
       if (generation !== drawHunterRefreshGeneration) return null;
-      if (!isErrorPayload(payload)) void writeSportsSnapshot("drawhunter", payload);
+      if (isErrorPayload(payload)) {
+        const preserved = atomicRefreshFailurePayload(drawhunterPayload, payload, "football");
+        publishSportPayload("drawhunter", preserved, { ready: true, reason: `${reason}:error` });
+        return preserved;
+      }
+      void writeSportsSnapshot("drawhunter", payload);
       publishSportPayload("drawhunter", payload, { ready: true, reason });
       maybeStartPostSportsTasks();
       return payload;
@@ -342,11 +377,16 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
       const payload = await loadSportWithStartupRetry({
         load: loadFrenchFlairApplicationData, previousPayload: frenchflairPayload, sport: "rugby", reason,
         generationIsCurrent: () => generation === frenchFlairRefreshGeneration,
-        publishProgress: progressPayload => publishSportPayload("frenchflair", earlyAnalysisPayload(progressPayload), { ready: false, reason: `${reason}:progress` }),
-        publishRetry: retryPayloadValue => publishSportPayload("frenchflair", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
+        publishProgress: progressPayload => recordSportRefreshProgress("frenchflair", earlyAnalysisPayload(progressPayload), `${reason}:progress`),
+        publishRetry: retryPayloadValue => recordSportRefreshProgress("frenchflair", retryPayloadValue, `${reason}:retry`)
       });
       if (generation !== frenchFlairRefreshGeneration) return null;
-      if (!isErrorPayload(payload)) void writeSportsSnapshot("frenchflair", payload);
+      if (isErrorPayload(payload)) {
+        const preserved = atomicRefreshFailurePayload(frenchflairPayload, payload, "rugby");
+        publishSportPayload("frenchflair", preserved, { ready: true, reason: `${reason}:error` });
+        return preserved;
+      }
+      void writeSportsSnapshot("frenchflair", payload);
       publishSportPayload("frenchflair", payload, { ready: true, reason });
       maybeStartPostSportsTasks();
       return payload;
@@ -374,11 +414,16 @@ async function refreshNflData({ force = false, reason = "background" } = {}) {
       const payload = await loadSportWithStartupRetry({
         load: loadNflApplicationData, previousPayload: nflPayload, sport: "nfl", reason,
         generationIsCurrent: () => generation === nflRefreshGeneration,
-        publishProgress: progress => publishSportPayload("nfl", earlyAnalysisPayload(progress), { ready: false, reason: `${reason}:progress` }),
-        publishRetry: retryPayloadValue => publishSportPayload("nfl", retryPayloadValue, { ready: false, reason: `${reason}:retry` })
+        publishProgress: progress => recordSportRefreshProgress("nfl", earlyAnalysisPayload(progress), `${reason}:progress`),
+        publishRetry: retryPayloadValue => recordSportRefreshProgress("nfl", retryPayloadValue, `${reason}:retry`)
       });
       if (generation !== nflRefreshGeneration) return null;
-      if (!isErrorPayload(payload)) void writeSportsSnapshot("nfl", payload);
+      if (isErrorPayload(payload)) {
+        const preserved = atomicRefreshFailurePayload(nflPayload, payload, "nfl");
+        publishSportPayload("nfl", preserved, { ready: true, reason: `${reason}:error` });
+        return preserved;
+      }
+      void writeSportsSnapshot("nfl", payload);
       publishSportPayload("nfl", payload, { ready: true, reason });
       return payload;
     } catch (error) {
