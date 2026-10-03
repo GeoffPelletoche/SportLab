@@ -804,3 +804,11 @@
 - Browser/iPhone scheduler remains unchanged at 900 ms and keeps its existing retry behavior.
 - Snapshot mode remains scoped only to the `Build atomic server snapshot` workflow step.
 - Atomic publish remains mandatory: incomplete snapshots are never deployed.
+
+## 11.8.4.2 — Fixture Priority & Sync Status
+- NFL fixture discovery is enqueued first and receives the highest fixture priority.
+- All fixture lists stay ahead of team-history enrichment in the global API scheduler.
+- Browser requests respect a rolling API start window to prevent 429 storms during background refresh.
+- Dashboard distinguishes Cloud sync from sports-data freshness; snapshots are no longer labelled "À jour".
+- NFL diagnostics expose requested date window, response status and returned fixture count.
+- Data Integrity 11.8.4 and Stable Refresh 11.8.4.1 remain unchanged.

@@ -196,9 +196,12 @@ async function init({ forceSports = false } = {}) {
 
     // V11.3.16 — Football et Rugby sont totalement indépendants.
     // Aucun sport n'attend l'autre pour publier ses rencontres.
-    void refreshDrawHunterData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
-    void refreshFrenchFlairData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    // V11.8.4.2 — enqueue NFL first. Its single fixture request must not wait behind
+    // the 17 football/rugby competition fixture requests. Scheduler priorities remain
+    // the authoritative ordering once all requests are queued.
     void refreshNflData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    void refreshFrenchFlairData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    void refreshDrawHunterData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
     return { runId };
   } catch (error) {
     console.error("SportLab init error:", error);
@@ -1297,9 +1300,9 @@ window.refreshSportLab = async function() {
   // V11.3.15 : le bouton Actualiser force réellement la récupération
   // Football/Rugby, sans changer de page ni redémarrer le Cloud.
   await Promise.allSettled([
-    refreshDrawHunterData({ force: true, reason: "manual" }),
+    refreshNflData({ force: true, reason: "manual" }),
     refreshFrenchFlairData({ force: true, reason: "manual" }),
-    refreshNflData({ force: true, reason: "manual" })
+    refreshDrawHunterData({ force: true, reason: "manual" })
   ]);
 };
 
