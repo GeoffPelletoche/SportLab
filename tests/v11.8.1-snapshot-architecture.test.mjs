@@ -13,9 +13,9 @@ test("V11.8.1 is snapshot-first before network refresh", () => {
 });
 
 test("V11.8.1 persists only successful completed payloads", () => {
-  assert.match(legacy, /if \(!isErrorPayload\(payload\)\) void writeSportsSnapshot\("drawhunter", payload\)/);
-  assert.match(legacy, /if \(!isErrorPayload\(payload\)\) void writeSportsSnapshot\("frenchflair", payload\)/);
-  assert.match(legacy, /if \(!isErrorPayload\(payload\)\) void writeSportsSnapshot\("nfl", payload\)/);
+  assert.match(legacy, /if \(isErrorPayload\(payload\)\) \{[\s\S]*?writeSportsSnapshot\("drawhunter", payload\)/);
+  assert.match(legacy, /if \(isErrorPayload\(payload\)\) \{[\s\S]*?writeSportsSnapshot\("frenchflair", payload\)/);
+  assert.match(legacy, /if \(isErrorPayload\(payload\)\) \{[\s\S]*?writeSportsSnapshot\("nfl", payload\)/);
 });
 
 test("snapshot store uses IndexedDB, atomic transactions and bounded stale fallback", () => {

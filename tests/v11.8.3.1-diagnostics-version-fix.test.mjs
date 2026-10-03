@@ -6,13 +6,13 @@ const instrumentation = fs.readFileSync(new URL("../core/diagnostics/performance
 const view = fs.readFileSync(new URL("../ui/views/diagnosticsView.js", import.meta.url), "utf8");
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
-test("V11.8.4.3 performance report advertises the deployed version", () => {
-  assert.equal(pkg.version, "11.8.4.3");
-  assert.match(instrumentation, /version:\s*"11\.8\.4\.3"/);
+test("V11.8.4.4 performance report advertises the deployed version", () => {
+  assert.equal(pkg.version, "11.8.4.4");
+  assert.match(instrumentation, /version:\s*"11\.8\.4\.4"/);
   assert.doesNotMatch(instrumentation, /version:\s*"11\.8\.2\.1"/);
 });
 
-test("V11.8.4.3 Diagnostics heading is aligned with the report", () => {
-  assert.match(view, /V11\.8\.4\.3 — Performance Instrumentation/);
-  assert.match(view, /SportLab V11\.8\.4\.3/);
+test("V11.8.4.4 Diagnostics heading is aligned with the report", () => {
+  assert.match(view, /V11\.8\.4\.4 — Performance Instrumentation/);
+  assert.match(view, /SportLab V11\.8\.4\.4/);
 });

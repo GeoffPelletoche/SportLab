@@ -12,7 +12,7 @@ test("V11.7.10 only exposes analyses with both team histories", () => {
   assert.match(legacy, /function earlyAnalysisPayload/);
 });
 
-test("V11.8.4.3 keeps early batches in memory instead of rendering them", () => {
+test("V11.8.4.4 keeps early batches in memory instead of rendering them", () => {
   assert.match(legacy, /if \(isProgressUpdate\) return false;/);
 });
 
