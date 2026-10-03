@@ -10,15 +10,15 @@ const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTL
 const MIN_GAP_MS = IS_SNAPSHOT_BUILD ? 5000 : 900;
 const DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 90000 : 15000;
 const MAX_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 180000 : 60000;
-const SNAPSHOT_WINDOW_MS = 60000;
-const SNAPSHOT_MAX_STARTS_PER_WINDOW = 10;
+const START_WINDOW_MS = 60000;
+const MAX_STARTS_PER_WINDOW = 10;
 
 let queue = [];
 let running = false;
 let sequence = 0;
 let lastStartedAt = 0;
 let blockedUntil = 0;
-let snapshotStarts = [];
+let requestStarts = [];
 
 export function scheduleApiRequest(task, { priority = 0 } = {}) {
   return new Promise((resolve, reject) => {
@@ -47,11 +47,14 @@ async function drain() {
   try {
     while (queue.length) {
       const item = queue.shift();
-      if (IS_SNAPSHOT_BUILD) await waitForSnapshotWindow();
+      // V11.8.4.2 — respect the API-Sports minute window in the browser too.
+      // Snapshot-first keeps the UI fast; avoiding 429 storms is more important than
+      // finishing background history enrichment aggressively.
+      await waitForStartWindow();
       const waitMs = Math.max(0, blockedUntil - Date.now(), MIN_GAP_MS - (Date.now() - lastStartedAt));
       if (waitMs > 0) await wait(waitMs);
       lastStartedAt = Date.now();
-      if (IS_SNAPSHOT_BUILD) recordSnapshotStart(lastStartedAt);
+      recordRequestStart(lastStartedAt);
       const perfStartedAt = recordSchedulerStart(item.perfEnqueuedAt);
       try { item.resolve(await item.task()); recordSchedulerEnd(perfStartedAt, true); }
       catch (error) { recordSchedulerEnd(perfStartedAt, false); item.reject(error); }
@@ -62,17 +65,17 @@ async function drain() {
   }
 }
 
-function recordSnapshotStart(now) {
-  snapshotStarts = snapshotStarts.filter(startedAt => now - startedAt < SNAPSHOT_WINDOW_MS);
-  snapshotStarts.push(now);
+function recordRequestStart(now) {
+  requestStarts = requestStarts.filter(startedAt => now - startedAt < START_WINDOW_MS);
+  requestStarts.push(now);
 }
 
-async function waitForSnapshotWindow() {
+async function waitForStartWindow() {
   while (true) {
     const now = Date.now();
-    snapshotStarts = snapshotStarts.filter(startedAt => now - startedAt < SNAPSHOT_WINDOW_MS);
-    if (snapshotStarts.length < SNAPSHOT_MAX_STARTS_PER_WINDOW) return;
-    const waitMs = Math.max(1, SNAPSHOT_WINDOW_MS - (now - snapshotStarts[0]) + 50);
+    requestStarts = requestStarts.filter(startedAt => now - startedAt < START_WINDOW_MS);
+    if (requestStarts.length < MAX_STARTS_PER_WINDOW) return;
+    const waitMs = Math.max(1, START_WINDOW_MS - (now - requestStarts[0]) + 50);
     await wait(waitMs);
   }
 }

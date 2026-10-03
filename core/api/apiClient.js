@@ -74,8 +74,15 @@ async function executeRequest(url, options) {
 }
 
 function inferPriority(path) {
-  // Les listes de rencontres utiles à l'écran passent avant les historiques.
-  return /\/fixtures$|\/games$/.test(String(path)) ? 10 : 0;
+  // V11.8.4.2 — Fixture Priority. NFL is a single fixture request and must not
+  // sit behind every football/rugby league request at startup. All fixture lists
+  // remain strictly ahead of team history requests.
+  const value = String(path);
+  if (value === "/nfl/games") return 120;
+  if (value === "/rugby/fixtures") return 110;
+  if (value === "/football/fixtures") return 100;
+  if (/\/fixtures$|\/games$/.test(value)) return 90;
+  return 0;
 }
 
 function readRetryAfterMs(response, payload) {

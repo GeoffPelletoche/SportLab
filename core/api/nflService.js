@@ -12,10 +12,12 @@ export async function fetchUpcomingNflFixtures({ onProgress } = {}) {
   const memo = new Map();
 
   try {
+    const requestStartedAt = new Date().toISOString();
     const data = await fetchFromWorker("/nfl/games", { league: leagueId, from: range.from, to: range.to });
     const fixtures = normalizeNflGames(data?.response || []);
     const cacheHydrated = fixtures.map(hydrateFixtureFromCache);
     const syncLog = [{ competition: "NFL", leagueId, status: cacheHydrated.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: cacheHydrated.length, season: data?.season || null, message: cacheHydrated.length ? "Rencontres NFL chargées, historiques en cours." : "Aucune rencontre NFL dans la fenêtre d’analyse." }];
+    diagnostics.fixtureRequest = { from: range.from, to: range.to, leagueId, status: "OK", returned: cacheHydrated.length, source: data?.source || "unknown", startedAt: requestStartedAt, completedAt: new Date().toISOString() };
     emitProgress(onProgress, cacheHydrated, range, syncLog, diagnostics, true, "fixtures", data?.season);
 
     const enriched = await mapWithConcurrency(cacheHydrated, HISTORY_CONCURRENCY, async fixture => {
@@ -30,6 +32,7 @@ export async function fetchUpcomingNflFixtures({ onProgress } = {}) {
   } catch (error) {
     const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
     const syncLog = [{ competition: "NFL", leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error?.message || String(error), code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null }];
+    diagnostics.fixtureRequest = { from: range.from, to: range.to, leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", returned: 0, httpStatus: error?.status || null, code: error?.code || null, message: error?.message || String(error), completedAt: new Date().toISOString() };
     emitProgress(onProgress, [], range, syncLog, diagnostics, false, "error", null);
     throw error;
   }
@@ -66,7 +69,7 @@ function normalizeNflGames(items) {
     source: "NFL Totals", sport: "nfl", homeHistory: [], awayHistory: []
   }));
 }
-function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0 }; }
+function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0, fixtureRequest: null }; }
 function emitProgress(callback, fixtures, range, syncLog, diagnostics, loading, phase, season) { if (typeof callback === "function") callback({ fixtures: [...fixtures], meta: buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) }); }
 function buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) { return { sport: "nfl", from: range.from, to: range.to, competitions: 1, total: fixtures.length, season: season || fixtures[0]?.season || null, syncedAt: new Date().toISOString(), syncLog: syncLog.map(x => ({...x})), historyDiagnostics: {...diagnostics}, loading, phase }; }
 async function mapWithConcurrency(items, limit, mapper) { const results = new Array(items.length); let next=0; const workers=Array.from({length:Math.min(limit,items.length)}, async()=>{ while(next<items.length){ const i=next++; results[i]=await mapper(items[i],i); }}); await Promise.all(workers); return results; }
