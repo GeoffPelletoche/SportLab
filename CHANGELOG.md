@@ -1,3 +1,10 @@
+# V11.8.4.3 — Non-Blocking Fixtures
+
+- Retire la fenêtre navigateur 10 requêtes / 60 s introduite en V11.8.4.2, responsable d'attentes artificielles très longues.
+- Conserve la priorité NFL / fixtures et le gap historique de 900 ms.
+- Le scheduler ne réserve plus une requête avant une temporisation : après un 429 ou un délai, il réévalue la file et démarre la requête la plus prioritaire.
+- Préserve Data Integrity V11.8.4, Stable Refresh V11.8.4.1 et les diagnostics fixtures V11.8.4.2.
+
 # V11.8.4.1 — Stable Refresh
 
 - Supprime les rendus progressifs de l’atelier sportif pendant les rafraîchissements de fond.
