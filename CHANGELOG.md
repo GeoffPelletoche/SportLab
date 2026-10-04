@@ -1,3 +1,11 @@
+# V11.8.4.5 — Incremental Background Refresh
+
+- Réutilise les historiques complets du snapshot actif pour les fixtures inchangées.
+- Ne recharge les historiques API que pour les nouveaux matchs ou les historiques absents.
+- Conserve V11.8.4.4 Atomic Snapshot Refresh et le scheduler non bloquant V11.8.4.3.
+- Ajoute aux diagnostics API les compteurs snapshotMatches, reusedMatches et newMatches.
+- Aucun changement des modèles, seuils VALUE, sauvegardes ou règles métier.
+
 # V11.8.4.4 — Atomic Snapshot Refresh
 
 - Conserve le dernier snapshot valide affiché pendant tout le rafraîchissement réseau.
