@@ -5,7 +5,8 @@ import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
 const HISTORY_LIMIT = 30;
 const HISTORY_CONCURRENCY = 2;
 
-export async function fetchUpcomingFootballFixtures({ onProgress } = {}) {
+export async function fetchUpcomingFootballFixtures({ onProgress, previousMatches = [] } = {}) {
+  const previousById = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [String(match?.id), match]));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const activeCompetitions = CONFIG.drawhunter.competitions.filter(c => c.active);
   const allFixtures = [];
@@ -18,7 +19,7 @@ export async function fetchUpcomingFootballFixtures({ onProgress } = {}) {
   const fixtureResults = await Promise.all(activeCompetitions.map(async competition => {
     try {
       const data = await fetchFromWorker("/football/fixtures", { league: competition.id, from: range.from, to: range.to });
-      const fixtures = normalizeFootballFixtures(data?.response || [], competition).map(hydrateFixtureFromCache);
+      const fixtures = normalizeFootballFixtures(data?.response || [], competition).map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById));
       const logEntry = {
         competition: competition.name, leagueId: competition.id,
         status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: fixtures.length,
@@ -36,6 +37,10 @@ export async function fetchUpcomingFootballFixtures({ onProgress } = {}) {
       return { competition, data: null, fixtures: [], logEntry, error };
     }
   }));
+
+  historyDiagnostics.snapshotMatches = previousById.size;
+  historyDiagnostics.reusedMatches = allFixtures.filter(hasCompleteHistory).length;
+  historyDiagnostics.newMatches = allFixtures.filter(match => !previousById.has(String(match.id))).length;
 
   await Promise.all(fixtureResults.map(async ({ fixtures, logEntry }) => {
     if (!fixtures.length) return;
@@ -55,14 +60,18 @@ export async function fetchUpcomingFootballFixtures({ onProgress } = {}) {
   return { fixtures: allFixtures, meta };
 }
 
-function hydrateFixtureFromCache(fixture) {
+function hydrateFixtureFromPreviousOrCache(fixture, previousById) {
+  const previous = previousById.get(String(fixture.id));
+  const previousHome = Array.isArray(previous?.homeHistory) ? previous.homeHistory : [];
+  const previousAway = Array.isArray(previous?.awayHistory) ? previous.awayHistory : [];
   return {
     ...fixture,
-    homeHistory: readCachedTeamHistory(fixture.homeId, fixture.home, fixture.leagueId),
-    awayHistory: readCachedTeamHistory(fixture.awayId, fixture.away, fixture.leagueId)
+    homeHistory: previousHome.length ? previousHome : readCachedTeamHistory(fixture.homeId, fixture.home, fixture.leagueId),
+    awayHistory: previousAway.length ? previousAway : readCachedTeamHistory(fixture.awayId, fixture.away, fixture.leagueId)
   };
 }
 
+function hasCompleteHistory(match) { return Array.isArray(match?.homeHistory) && match.homeHistory.length > 0 && Array.isArray(match?.awayHistory) && match.awayHistory.length > 0; }
 function readCachedTeamHistory(teamId, teamName, leagueId) {
   const cleanName = decodeHtmlEntities(teamName).trim();
   if (!teamId && !cleanName) return [];

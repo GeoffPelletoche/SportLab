@@ -5,7 +5,8 @@ import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
 const HISTORY_LIMIT = Number(CONFIG.nfl?.historyLimit || 30);
 const HISTORY_CONCURRENCY = 2;
 
-export async function fetchUpcomingNflFixtures({ onProgress } = {}) {
+export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [] } = {}) {
+  const previousById = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [String(match?.id), match]));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const leagueId = Number(CONFIG.nfl?.leagueId || 1);
   const diagnostics = createHistoryDiagnostics();
@@ -15,7 +16,8 @@ export async function fetchUpcomingNflFixtures({ onProgress } = {}) {
     const requestStartedAt = new Date().toISOString();
     const data = await fetchFromWorker("/nfl/games", { league: leagueId, from: range.from, to: range.to });
     const fixtures = normalizeNflGames(data?.response || []);
-    const cacheHydrated = fixtures.map(hydrateFixtureFromCache);
+    const cacheHydrated = fixtures.map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById));
+    diagnostics.snapshotMatches = previousById.size; diagnostics.reusedMatches = cacheHydrated.filter(hasCompleteHistory).length; diagnostics.newMatches = cacheHydrated.filter(match => !previousById.has(String(match.id))).length;
     const syncLog = [{ competition: "NFL", leagueId, status: cacheHydrated.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: cacheHydrated.length, season: data?.season || null, message: cacheHydrated.length ? "Rencontres NFL chargées, historiques en cours." : "Aucune rencontre NFL dans la fenêtre d’analyse." }];
     diagnostics.fixtureRequest = { from: range.from, to: range.to, leagueId, status: "OK", returned: cacheHydrated.length, source: data?.source || "unknown", startedAt: requestStartedAt, completedAt: new Date().toISOString() };
     emitProgress(onProgress, cacheHydrated, range, syncLog, diagnostics, true, "fixtures", data?.season);
@@ -38,9 +40,17 @@ export async function fetchUpcomingNflFixtures({ onProgress } = {}) {
   }
 }
 
-function hydrateFixtureFromCache(fixture) {
-  return { ...fixture, homeHistory: readCachedHistory(fixture.homeId), awayHistory: readCachedHistory(fixture.awayId) };
+function hydrateFixtureFromPreviousOrCache(fixture, previousById) {
+  const previous = previousById.get(String(fixture.id));
+  const previousHome = Array.isArray(previous?.homeHistory) ? previous.homeHistory : [];
+  const previousAway = Array.isArray(previous?.awayHistory) ? previous.awayHistory : [];
+  return {
+    ...fixture,
+    homeHistory: previousHome.length ? previousHome : readCachedHistory(fixture.homeId),
+    awayHistory: previousAway.length ? previousAway : readCachedHistory(fixture.awayId)
+  };
 }
+function hasCompleteHistory(match) { return Array.isArray(match?.homeHistory) && match.homeHistory.length > 0 && Array.isArray(match?.awayHistory) && match.awayHistory.length > 0; }
 function readCachedHistory(teamId) { return teamId ? readHistoryCache("nfl", `team:${teamId}:league:${CONFIG.nfl.leagueId}`) : []; }
 async function fetchTeamHistory(teamId, teamName, season, diagnostics, memo) {
   if (!teamId) return [];
