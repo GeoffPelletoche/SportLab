@@ -17,8 +17,8 @@ test("V11.3.16 separates Football and Rugby refresh lifecycles", () => {
 test("V11.3.16 publishes fixtures before history enrichment", () => {
   assert.match(football, /emitProgress\(onProgress[\s\S]*"fixtures"/);
   assert.match(rugby, /emitProgress\(onProgress[\s\S]*"fixtures"/);
-  assert.match(football, /hydrateFixtureFromCache/);
-  assert.match(rugby, /hydrateFixtureFromCache/);
+  assert.match(football, /hydrateFixtureFromPreviousOrCache/);
+  assert.match(rugby, /hydrateFixtureFromPreviousOrCache/);
 });
 
 test("V11.3.16 requests only missing history when cache exists", () => {

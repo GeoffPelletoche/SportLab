@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 
 const legacy = await readFile(new URL("../legacyApp.js", import.meta.url), "utf8");
 
-test("V11.6.2/V11.8.4.4 garde les étapes progressives hors du rendu visible", () => {
+test("V11.6.2/V11.8.4.5 garde les étapes progressives hors du rendu visible", () => {
   assert.match(legacy, /if \(isProgressUpdate\) return false;/);
 });
 

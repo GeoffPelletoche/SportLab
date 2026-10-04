@@ -7,8 +7,8 @@ const snapshot = fs.readFileSync(new URL("../.github/workflows/server-snapshot.y
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 const builder = fs.readFileSync(new URL("../scripts/build-server-snapshot.mjs", import.meta.url), "utf8");
 
-test("V11.8.4.4 Pages deploy is independent from API-Sports snapshot generation", () => {
-  assert.match(pages, /name: Deploy SportLab Pages \(V11\.8\.4\.4\)/);
+test("V11.8.4.5 Pages deploy is independent from API-Sports snapshot generation", () => {
+  assert.match(pages, /name: Deploy SportLab Pages \(V11\.8\.4\.5\)/);
   assert.match(pages, /push:/);
   assert.doesNotMatch(pages, /schedule:/);
   assert.doesNotMatch(pages, /npm run snapshot/);
@@ -17,8 +17,8 @@ test("V11.8.4.4 Pages deploy is independent from API-Sports snapshot generation"
   assert.match(pages, /uses: actions\/deploy-pages@v5/);
 });
 
-test("V11.8.4.4 snapshot refresh is autonomous, conservative and publishes only the snapshot", () => {
-  assert.match(snapshot, /name: Refresh Server Snapshot \(V11\.8\.4\.4\)/);
+test("V11.8.4.5 snapshot refresh is autonomous, conservative and publishes only the snapshot", () => {
+  assert.match(snapshot, /name: Refresh Server Snapshot \(V11\.8\.4\.5\)/);
   assert.match(snapshot, /workflow_dispatch:/);
   assert.match(snapshot, /cron: "17 5,12,18 \* \* \*"/);
   assert.doesNotMatch(snapshot, /push:/);
@@ -32,8 +32,8 @@ test("V11.8.4.4 snapshot refresh is autonomous, conservative and publishes only 
   assert.match(snapshot, /name: Deploy refreshed snapshot to GitHub Pages/);
 });
 
-test("V11.8.4.4 package and generated snapshot advertise the current version", () => {
-  assert.equal(pkg.version, "11.8.4.4");
+test("V11.8.4.5 package and generated snapshot advertise the current version", () => {
+  assert.equal(pkg.version, "11.8.4.5");
   assert.equal(pkg.scripts.snapshot, "node scripts/build-server-snapshot.mjs");
-  assert.match(builder, /version: "11\.8\.4\.4"/);
+  assert.match(builder, /version: "11\.8\.4\.5"/);
 });
