@@ -1,4 +1,4 @@
-name: Refresh Server Snapshot (V11.8.4.11)
+name: Refresh Server Snapshot (V11.8.4.12)
 
 on:
   workflow_dispatch:
