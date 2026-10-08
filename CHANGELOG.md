@@ -1,3 +1,11 @@
+# V11.8.4.9 — Smart Freshness Policy
+
+- 0–30 min: startup fixture refresh skipped when snapshot is complete and fresh.
+- 30–60 min: automatic refresh only when a known snapshot match starts within 24h.
+- >60 min: automatic fixture refresh resumes.
+- Manual/force refresh always bypasses the policy.
+- Snapshot reuse, scheduler protection, 429 handling, bets and models unchanged.
+
 # V11.8.4.8 — Smart Fixture Refresh
 
 - Ajoute un cooldown de 10 minutes au démarrage pour éviter de relancer immédiatement une vérification complète des fixtures après un snapshot récent.
