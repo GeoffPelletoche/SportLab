@@ -5,6 +5,7 @@ const DB_VERSION = 1;
 const STORE = "snapshots";
 const SCHEMA_VERSION = 1;
 const MAX_STALE_MS = 72 * 60 * 60 * 1000;
+const MAX_BOOTSTRAP_STALE_MS = 14 * 24 * 60 * 60 * 1000;
 
 function hasIndexedDb() { return typeof indexedDB !== "undefined"; }
 function openDb() {
@@ -32,8 +33,8 @@ export async function readSportsSnapshot(sport) {
     db.close();
     if (!record || record.schemaVersion !== SCHEMA_VERSION || !record.payload) return null;
     const ageMs = Date.now() - Number(record.savedAt || 0);
-    if (!Number.isFinite(ageMs) || ageMs < 0 || ageMs > MAX_STALE_MS) return null;
-    return { payload: record.payload, savedAt: record.savedAt, ageMs };
+    if (!Number.isFinite(ageMs) || ageMs < 0 || ageMs > MAX_BOOTSTRAP_STALE_MS) return null;
+    return { payload: record.payload, savedAt: record.savedAt, ageMs, stale: ageMs > MAX_STALE_MS };
   } catch (error) {
     console.warn("[SportsSnapshot] Lecture impossible", sport, error);
     return null;
@@ -71,6 +72,7 @@ export function snapshotPayloadForDisplay(snapshot, sport) {
       snapshot: true,
       snapshotSavedAt: new Date(snapshot.savedAt).toISOString(),
       snapshotAgeMs: snapshot.ageMs,
+      snapshotStale: snapshot.stale === true,
       refreshingInBackground: true
     }
   };

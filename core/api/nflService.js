@@ -61,7 +61,7 @@ async function fetchTeamHistory(teamId, teamName, season, diagnostics, memo) {
   const promise = (async () => {
     diagnostics.requested += 1;
     try {
-      const data = await fetchFromWorker("/nfl/team-games", { team: teamId, league: CONFIG.nfl.leagueId, season, limit: HISTORY_LIMIT });
+      const data = await fetchFromWorker("/nfl/team-games", { team: teamId, league: CONFIG.nfl.leagueId, season, limit: HISTORY_LIMIT }, { attempts: 1, rateLimitRetries: 0 });
       const history = Array.isArray(data?.response) ? data.response : [];
       if (history.length) { diagnostics.apiSuccess += 1; diagnostics.gamesLoaded += history.length; writeHistoryCache("nfl", key, history); return history; }
       diagnostics.emptyResponses += 1;

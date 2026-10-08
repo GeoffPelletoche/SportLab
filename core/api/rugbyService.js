@@ -90,7 +90,7 @@ async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics,
   const promise = (async () => {
     diagnostics.requested += 1;
     try {
-      const data = await fetchFromWorker("/rugby/team-games", { team: teamId || undefined, teamName: cleanName || undefined, league: leagueId, season, limit: HISTORY_LIMIT });
+      const data = await fetchFromWorker("/rugby/team-games", { team: teamId || undefined, teamName: cleanName || undefined, league: leagueId, season, limit: HISTORY_LIMIT }, { attempts: 1, rateLimitRetries: 0 });
       const history = Array.isArray(data?.response) ? data.response : [];
       if (history.length) { diagnostics.apiSuccess += 1; diagnostics.gamesLoaded += history.length; writeHistoryCache("rugby", cacheKey, history); return history; }
       diagnostics.emptyResponses += 1;

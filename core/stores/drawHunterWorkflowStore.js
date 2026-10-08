@@ -70,8 +70,10 @@ export function deriveDrawHunterWorkflowState(match, stored = null) {
   return Number.isFinite(Number(match?.probability)) ? "pending" : "new";
 }
 
-export function statusLabel(status) {
-  return ({ new: "Nouveau", pending: "À analyser", awaiting_result: "En attente du résultat", resulted: "Évaluée", archived: "Historique" })[normalizeStatus(status)] || "Nouveau";
+export function statusLabel(status, stored = null) {
+  const normalized = normalizeStatus(status);
+  if (normalized === "awaiting_result" && stored?.placed === true) return "Pari en attente";
+  return ({ new: "Nouveau", pending: "À analyser", awaiting_result: "En attente du résultat", resulted: "Évaluée", archived: "Historique" })[normalized] || "Nouveau";
 }
 
 function normalizeStatus(status) {

@@ -21,6 +21,7 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
     const priority = Number(options.priority ?? inferPriority(path));
     let lastError = null;
     let rateLimitRetries = 0;
+    const maxRateLimitRetries = options.rateLimitRetries == null ? RATE_LIMIT_RETRIES : Math.max(0, Number(options.rateLimitRetries));
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
@@ -28,7 +29,7 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
       } catch (error) {
         lastError = error;
         const status = Number(error?.status || 0);
-        if (status === 429 && rateLimitRetries < RATE_LIMIT_RETRIES) {
+        if (status === 429 && rateLimitRetries < maxRateLimitRetries) {
           rateLimitRetries += 1;
           applyGlobalRateLimit(error?.retryAfterMs);
           attempt -= 1;
