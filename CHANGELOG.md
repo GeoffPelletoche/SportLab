@@ -1,11 +1,20 @@
-# V11.8.4.7 — True Snapshot Reuse
+# V11.8.4.8 — Smart Fixture Refresh
+
+- Ajoute un cooldown de 10 minutes au démarrage pour éviter de relancer immédiatement une vérification complète des fixtures après un snapshot récent.
+- Un rafraîchissement manuel contourne toujours le cooldown.
+- Les snapshots marqués obsolètes ne sont jamais protégés par ce cooldown.
+- Le pipeline transmet désormais explicitement le payload précédent et le mode de rafraîchissement aux trois services sportifs.
+- Un module sous cooldown conserve son snapshot actif sans requête fixtures ni historique et signale `fixture-cooldown` aux diagnostics.
+- Aucun changement du scheduler, des moteurs de prédiction, des règles VALUE ou du Worker Cloudflare.
+
+# V11.8.4.8 — True Snapshot Reuse
 
 - Réutilisation robuste des matchs du snapshot par identifiant stable ou identité composite (compétition, équipes, date).
 - Un match complet du snapshot ne déclenche plus de requête historique même si l’identifiant de fixture change entre deux rafraîchissements.
 - Les diagnostics `reusedMatches` / `newMatches` utilisent la même logique d’identité que le pipeline de réutilisation.
 - Aucun changement du moteur de prédiction, des seuils VALUE, du scheduler ou du Worker Cloudflare.
 
-# V11.8.4.7 — Bet State + Soft Snapshot Bootstrap
+# V11.8.4.8 — Bet State + Soft Snapshot Bootstrap
 
 - DrawHunter affiche désormais explicitement « Pari en attente » lorsqu’un pari est placé et conserve la mise affichée dans la carte verrouillée.
 - Les snapshots locaux et serveur peuvent servir de bootstrap jusqu’à 14 jours, tout en signalant leur caractère obsolète au-delà de 72 h ; le rafraîchissement fixtures reste prioritaire.

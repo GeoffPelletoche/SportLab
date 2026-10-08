@@ -109,6 +109,8 @@ async function loadSportWithStartupRetry({ load, previousPayload, sport, reason,
     try {
       lastPayload = await load({
         previousMatches: Array.isArray(previousPayload?.matches) ? previousPayload.matches : [],
+        previousPayload,
+        refreshMode: reason,
         onProgress: progress => {
           if (generationIsCurrent()) publishProgress(progress);
         }
