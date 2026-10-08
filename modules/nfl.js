@@ -1,8 +1,9 @@
 import { fetchUpcomingNflFixtures } from "../core/api/nflService.js";
 import { predictNflMatch } from "../core/engines/nflTotalsPredictionEngine.js";
 
-export async function loadNflMatches({ onProgress } = {}) {
+export async function loadNflMatches({ onProgress, previousMatches = [] } = {}) {
   const { fixtures, meta } = await fetchUpcomingNflFixtures({
+    previousMatches,
     onProgress: progress => onProgress?.({
       matches: (progress.fixtures || []).map(match => predictNflMatch(match)),
       meta: progress.meta || {}

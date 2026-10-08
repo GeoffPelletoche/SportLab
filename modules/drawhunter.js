@@ -2,7 +2,7 @@ import { fetchUpcomingFootballFixtures } from "../core/api/footballService.js";
 import { predictDrawMatch } from "../core/engines/footballDrawPredictionEngine.js";
 
 /** SPORTLAB V8 — DRAWHUNTER */
-export async function loadDrawHunterMatches({ onProgress } = {}) {
+export async function loadDrawHunterMatches({ onProgress, previousMatches = [] } = {}) {
   const mapMatches = fixtures => fixtures.map(match => {
     const prediction = predictDrawMatch(match);
 
@@ -29,6 +29,7 @@ export async function loadDrawHunterMatches({ onProgress } = {}) {
   });
 
   const { fixtures, meta } = await fetchUpcomingFootballFixtures({
+    previousMatches,
     onProgress: progress => {
       if (typeof onProgress !== "function") return;
       const matches = mapMatches(progress.fixtures || []);
