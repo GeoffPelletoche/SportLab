@@ -1,5 +1,6 @@
 // SPORTLAB V7.0.0 — Legacy runtime encapsulated by Sprint 7.1 Core Foundation
 import { loadApplicationData, loadLocalApplicationData, loadDrawHunterApplicationData, loadFrenchFlairApplicationData, loadNflApplicationData } from "./services/appService.js";
+import { createLoadCycleGuard } from "./core/app/loadCycleGuard.js";
 import { markModuleStart, markModuleProgress, markModuleComplete, formatPerformanceReport } from "./core/diagnostics/performanceInstrumentation.js";
 import { readSportsSnapshot, writeSportsSnapshot, snapshotPayloadForDisplay } from "./core/api/sportsSnapshotStore.js";
 import { readServerSportsSnapshot, serverPayloadForDisplay } from "./core/api/serverSportsSnapshot.js";
@@ -42,6 +43,10 @@ const nflMatchRegistry = new Map();
 let currentPage = "home";
 let currentAppData = null;
 let initializationRun = 0;
+let initializationPromise = null;
+let manualRefreshPromise = null;
+const loadCycleGuard = createLoadCycleGuard();
+const startupCycle = loadCycleGuard.createCycle("startup");
 let drawHunterRefreshPromise = null;
 let frenchFlairRefreshPromise = null;
 let nflRefreshPromise = null;
@@ -99,7 +104,7 @@ function retryPayload(previousPayload, sport, attempt, maxAttempts, message = ""
 }
 
 async function loadSportWithStartupRetry({ load, previousPayload, sport, reason, generationIsCurrent, publishProgress, publishRetry }) {
-  const retryDelays = reason === "startup" ? STARTUP_RETRY_DELAYS_MS : [];
+  const retryDelays = reason === "startup" && !hasUsableSnapshot(previousPayload) ? STARTUP_RETRY_DELAYS_MS : [];
   const maxAttempts = 1 + retryDelays.length;
   let lastPayload = null;
   let lastError = null;
@@ -149,7 +154,29 @@ function initializeUi() {
   initFrenchFlairWorkflow();
 }
 
-async function init({ forceSports = false } = {}) {
+function init(options = {}) {
+  if (initializationPromise) return initializationPromise;
+  if (currentAppData && !options.forceSports) {
+    refreshLocalApplicationState();
+    return Promise.resolve({ runId: initializationRun });
+  }
+  const task = initializeApplication(options);
+  initializationPromise = task;
+  void task.finally(() => { if (initializationPromise === task) initializationPromise = null; });
+  return task;
+}
+
+function refreshLocalApplicationState() {
+  currentAppData = {
+    ...loadLocalApplicationData(),
+    drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
+    frenchflairPayload: withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby"),
+    nflPayload: withSportLoadingState(nflPayload, nflReady, "nfl")
+  };
+  requestStableRender();
+}
+
+async function initializeApplication({ forceSports = false } = {}) {
   const app = document.getElementById("app");
   const runId = ++initializationRun;
 
@@ -178,9 +205,9 @@ async function init({ forceSports = false } = {}) {
       frenchflairPayload = snapshotPayloadForDisplay(ffSnapshot, "rugby") || ffServer || frenchflairPayload;
       nflPayload = snapshotPayloadForDisplay(nflSnapshot, "nfl") || nflServer || nflPayload;
       rememberNflMatches(nflPayload?.matches);
-      if (dhSnapshot || dhServer) drawHunterReady = true;
-      if (ffSnapshot || ffServer) frenchFlairReady = true;
-      if (nflSnapshot || nflServer) nflReady = true;
+      if (dhSnapshot || dhServer) drawHunterReady = hasUsableSnapshot(drawhunterPayload);
+      if (ffSnapshot || ffServer) frenchFlairReady = hasUsableSnapshot(frenchflairPayload);
+      if (nflSnapshot || nflServer) nflReady = hasUsableSnapshot(nflPayload);
 
       // Seed IndexedDB from the server snapshot so the following launch uses
       // the fastest local path even if the background refresh is interrupted.
@@ -189,6 +216,11 @@ async function init({ forceSports = false } = {}) {
       if (nflServer) void writeSportsSnapshot("nfl", nflServer);
     }
 
+    const cycle = forceSports ? loadCycleGuard.createCycle("manual", startupCycle.loadCycleId) : startupCycle;
+    for (const [kind, payload] of [["nfl", nflPayload], ["frenchflair", frenchflairPayload], ["drawhunter", drawhunterPayload]]) {
+      markModuleStart(kind, { ...cycle, snapshotVersion: loadCycleGuard.snapshotVersion(payload) });
+      if (payload) markModuleProgress(kind, payload, "bootstrap");
+    }
     currentAppData = {
       ...localData,
       drawhunterPayload: withSportLoadingState(drawhunterPayload, drawHunterReady, "football"),
@@ -202,9 +234,9 @@ async function init({ forceSports = false } = {}) {
     // V11.8.4.2 — enqueue NFL first. Its single fixture request must not wait behind
     // the 17 football/rugby competition fixture requests. Scheduler priorities remain
     // the authoritative ordering once all requests are queued.
-    void refreshNflData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
-    void refreshFrenchFlairData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
-    void refreshDrawHunterData({ force: forceSports, reason: forceSports ? "manual" : "startup" });
+    void refreshNflData({ force: forceSports, reason: forceSports ? "manual" : "startup", cycle });
+    void refreshFrenchFlairData({ force: forceSports, reason: forceSports ? "manual" : "startup", cycle });
+    void refreshDrawHunterData({ force: forceSports, reason: forceSports ? "manual" : "startup", cycle });
     return { runId };
   } catch (error) {
     console.error("SportLab init error:", error);
@@ -217,6 +249,11 @@ async function init({ forceSports = false } = {}) {
 function withSportLoadingState(payload, ready, sport) {
   if (payload) return { ...payload, meta: { ...(payload.meta || {}), loading: !ready, sport } };
   return { matches: [], meta: { loading: true, sport, phase: "startup" } };
+}
+
+function hasUsableSnapshot(payload) {
+  return Array.isArray(payload?.matches) && payload?.meta?.error !== true
+    && payload.matches.every(hasUsableAnalysisHistory);
 }
 
 function hasUsableAnalysisHistory(match) {
@@ -273,9 +310,9 @@ function refreshGenerationFor(kind) {
   return nflRefreshGeneration;
 }
 
-function publishSportPayload(kind, payload, { ready = false, reason = "background" } = {}) {
-  markModuleProgress(kind, payload, reason);
-  if (ready) markModuleComplete(kind, payload);
+function publishSportPayload(kind, payload, { ready = false, completed = false, reason = "background" } = {}) {
+  if (completed) markModuleComplete(kind, payload);
+  else markModuleProgress(kind, payload, reason);
   if (kind === "drawhunter") {
     drawhunterPayload = payload;
     drawHunterReady = ready;
@@ -330,12 +367,13 @@ function publishSportPayload(kind, payload, { ready = false, reason = "backgroun
   }));
 }
 
-async function refreshDrawHunterData({ force = false, reason = "background" } = {}) {
-  markModuleStart("drawhunter");
+async function refreshDrawHunterData({ force = false, reason = "background", cycle = startupCycle } = {}) {
   if (drawHunterRefreshPromise) return drawHunterRefreshPromise;
+  if (!loadCycleGuard.claim("drawhunter", cycle, drawhunterPayload)) return drawhunterPayload;
+  markModuleStart("drawhunter", loadCycleGuard.context("drawhunter", cycle));
   const generation = ++drawHunterRefreshGeneration;
-  drawHunterReady = false;
-  publishSportPayload("drawhunter", withSportLoadingState(drawhunterPayload, false, "football"), { ready: false, reason });
+  drawHunterReady = hasUsableSnapshot(drawhunterPayload);
+  publishSportPayload("drawhunter", withSportLoadingState(drawhunterPayload, drawHunterReady, "football"), { ready: drawHunterReady, reason: `${reason}:progress` });
 
   const task = (async () => {
     try {
@@ -348,17 +386,17 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
       if (generation !== drawHunterRefreshGeneration) return null;
       if (isErrorPayload(payload)) {
         const preserved = atomicRefreshFailurePayload(drawhunterPayload, payload, "football");
-        publishSportPayload("drawhunter", preserved, { ready: true, reason: `${reason}:error` });
+        publishSportPayload("drawhunter", preserved, { ready: true, completed: true, reason: `${reason}:error` });
         return preserved;
       }
       void writeSportsSnapshot("drawhunter", payload);
-      publishSportPayload("drawhunter", payload, { ready: true, reason });
+      publishSportPayload("drawhunter", payload, { ready: true, completed: true, reason });
       maybeStartPostSportsTasks();
       return payload;
     } catch (error) {
       console.error("[DrawHunterData] Échec du rafraîchissement :", error);
       if (generation !== drawHunterRefreshGeneration) return null;
-      publishSportPayload("drawhunter", drawhunterPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, reason });
+      publishSportPayload("drawhunter", drawhunterPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, completed: true, reason });
       return null;
     } finally {
       if (generation === drawHunterRefreshGeneration) drawHunterRefreshPromise = null;
@@ -368,12 +406,13 @@ async function refreshDrawHunterData({ force = false, reason = "background" } = 
   return task;
 }
 
-async function refreshFrenchFlairData({ force = false, reason = "background" } = {}) {
-  markModuleStart("frenchflair");
+async function refreshFrenchFlairData({ force = false, reason = "background", cycle = startupCycle } = {}) {
   if (frenchFlairRefreshPromise) return frenchFlairRefreshPromise;
+  if (!loadCycleGuard.claim("frenchflair", cycle, frenchflairPayload)) return frenchflairPayload;
+  markModuleStart("frenchflair", loadCycleGuard.context("frenchflair", cycle));
   const generation = ++frenchFlairRefreshGeneration;
-  frenchFlairReady = false;
-  publishSportPayload("frenchflair", withSportLoadingState(frenchflairPayload, false, "rugby"), { ready: false, reason });
+  frenchFlairReady = hasUsableSnapshot(frenchflairPayload);
+  publishSportPayload("frenchflair", withSportLoadingState(frenchflairPayload, frenchFlairReady, "rugby"), { ready: frenchFlairReady, reason: `${reason}:progress` });
 
   const task = (async () => {
     try {
@@ -386,17 +425,17 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
       if (generation !== frenchFlairRefreshGeneration) return null;
       if (isErrorPayload(payload)) {
         const preserved = atomicRefreshFailurePayload(frenchflairPayload, payload, "rugby");
-        publishSportPayload("frenchflair", preserved, { ready: true, reason: `${reason}:error` });
+        publishSportPayload("frenchflair", preserved, { ready: true, completed: true, reason: `${reason}:error` });
         return preserved;
       }
       void writeSportsSnapshot("frenchflair", payload);
-      publishSportPayload("frenchflair", payload, { ready: true, reason });
+      publishSportPayload("frenchflair", payload, { ready: true, completed: true, reason });
       maybeStartPostSportsTasks();
       return payload;
     } catch (error) {
       console.error("[FrenchFlairData] Échec du rafraîchissement :", error);
       if (generation !== frenchFlairRefreshGeneration) return null;
-      publishSportPayload("frenchflair", frenchflairPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, reason });
+      publishSportPayload("frenchflair", frenchflairPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, completed: true, reason });
       return null;
     } finally {
       if (generation === frenchFlairRefreshGeneration) frenchFlairRefreshPromise = null;
@@ -406,12 +445,13 @@ async function refreshFrenchFlairData({ force = false, reason = "background" } =
   return task;
 }
 
-async function refreshNflData({ force = false, reason = "background" } = {}) {
-  markModuleStart("nfl");
+async function refreshNflData({ force = false, reason = "background", cycle = startupCycle } = {}) {
   if (nflRefreshPromise) return nflRefreshPromise;
+  if (!loadCycleGuard.claim("nfl", cycle, nflPayload)) return nflPayload;
+  markModuleStart("nfl", loadCycleGuard.context("nfl", cycle));
   const generation = ++nflRefreshGeneration;
-  nflReady = false;
-  publishSportPayload("nfl", withSportLoadingState(nflPayload, false, "nfl"), { ready: false, reason });
+  nflReady = hasUsableSnapshot(nflPayload);
+  publishSportPayload("nfl", withSportLoadingState(nflPayload, nflReady, "nfl"), { ready: nflReady, reason: `${reason}:progress` });
   const task = (async () => {
     try {
       const payload = await loadSportWithStartupRetry({
@@ -423,16 +463,16 @@ async function refreshNflData({ force = false, reason = "background" } = {}) {
       if (generation !== nflRefreshGeneration) return null;
       if (isErrorPayload(payload)) {
         const preserved = atomicRefreshFailurePayload(nflPayload, payload, "nfl");
-        publishSportPayload("nfl", preserved, { ready: true, reason: `${reason}:error` });
+        publishSportPayload("nfl", preserved, { ready: true, completed: true, reason: `${reason}:error` });
         return preserved;
       }
       void writeSportsSnapshot("nfl", payload);
-      publishSportPayload("nfl", payload, { ready: true, reason });
+      publishSportPayload("nfl", payload, { ready: true, completed: true, reason });
       return payload;
     } catch (error) {
       console.error("[NFLData] Échec du rafraîchissement :", error);
       if (generation !== nflRefreshGeneration) return null;
-      publishSportPayload("nfl", nflPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, reason });
+      publishSportPayload("nfl", nflPayload || { matches: [], meta: { error: true, errorMessage: error?.message || String(error) } }, { ready: true, completed: true, reason });
       return null;
     } finally { if (generation === nflRefreshGeneration) nflRefreshPromise = null; }
   })();
@@ -1344,14 +1384,19 @@ function closeSportLabMenu() {
   }
 }
 
-window.refreshSportLab = async function() {
+window.refreshSportLab = function() {
+  if (manualRefreshPromise) return manualRefreshPromise;
+  const cycle = loadCycleGuard.createCycle("manual", startupCycle.loadCycleId);
   // V11.3.15 : le bouton Actualiser force réellement la récupération
   // Football/Rugby, sans changer de page ni redémarrer le Cloud.
-  await Promise.allSettled([
-    refreshNflData({ force: true, reason: "manual" }),
-    refreshFrenchFlairData({ force: true, reason: "manual" }),
-    refreshDrawHunterData({ force: true, reason: "manual" })
+  const task = Promise.allSettled([
+    refreshNflData({ force: true, reason: "manual", cycle }),
+    refreshFrenchFlairData({ force: true, reason: "manual", cycle }),
+    refreshDrawHunterData({ force: true, reason: "manual", cycle })
   ]);
+  manualRefreshPromise = task;
+  void task.finally(() => { if (manualRefreshPromise === task) manualRefreshPromise = null; });
+  return task;
 };
 
 window.navigateSportLab = function(page) {
@@ -1397,8 +1442,7 @@ document.addEventListener(
     try {
       await runSettlementDiagnostics();
 
-      const appData =
-        await loadApplicationData();
+      const appData = { ...loadLocalApplicationData(), drawhunterPayload, frenchflairPayload, nflPayload };
 
       drawhunterPayload =
         appData.drawhunterPayload;
@@ -1460,7 +1504,7 @@ window.runSportLabCloudSync = async function() {
   } catch (error) {
     console.error("[Cloud Dashboard] Synchronisation impossible", error);
   } finally {
-    await init();
+    refreshLocalApplicationState();
   }
 };
 
@@ -1520,5 +1564,5 @@ window.savePortfolioInitialCapital = async function() {
   try { settings = JSON.parse(localStorage.getItem("sportlab.v7.settings") || "{}"); } catch { settings = {}; }
   localStorage.setItem("sportlab.v7.settings", JSON.stringify({ ...settings, portfolioInitialCapital: value }));
   window.SportLabCore?.cloud?.markDirty?.("sportlab.v7.settings");
-  await init();
+  refreshLocalApplicationState();
 };

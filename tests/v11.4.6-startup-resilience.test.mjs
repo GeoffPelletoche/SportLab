@@ -7,7 +7,7 @@ const dashboard = fs.readFileSync(new URL("../ui/views/dashboardView.js", import
 
 test("V11.4.6 retries transient startup sport failures without coupling modules", () => {
   assert.match(legacy, /STARTUP_RETRY_DELAYS_MS\s*=\s*\[1200, 2500\]/);
-  assert.match(legacy, /reason === "startup" \? STARTUP_RETRY_DELAYS_MS : \[\]/);
+  assert.match(legacy, /reason === "startup" && !hasUsableSnapshot\(previousPayload\) \? STARTUP_RETRY_DELAYS_MS : \[\]/);
   assert.match(legacy, /loadSportWithStartupRetry/);
   assert.match(legacy, /load: loadDrawHunterApplicationData/);
   assert.match(legacy, /load: loadFrenchFlairApplicationData/);

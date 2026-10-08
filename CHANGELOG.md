@@ -1,3 +1,12 @@
+# V11.8.4.10 — Corrective Refresh / Cycle Guard
+
+- Suppression des relances sportives après synchronisation cloud, modification du capital et diagnostic de règlement.
+- Cycle de démarrage unique, réservation par module, initialisation et Actualiser mutualisés.
+- Snapshot complet immédiatement prêt pendant le réseau ; conservation atomique sur panne et suppression des retries complets lorsque le snapshot suffit.
+- Diagnostic des cycles et déclencheurs ; `readyAtMs` distinct de `completeMs`.
+- Moteurs métier, Worker, données du snapshot et paramètres API inchangés.
+- Tests de runtime avec services simulés ; validation réseau réelle à confirmer après déploiement.
+
 # V11.8.4.9 — Smart Freshness Policy
 
 - 0–30 min: startup fixture refresh skipped when snapshot is complete and fresh.
