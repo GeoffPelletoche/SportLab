@@ -62,11 +62,11 @@ function performanceCard() {
     </article>`).join("");
   return `
     <article class="sl-panel">
-      <h2>⏱️ V11.8.4.5 — Performance Instrumentation</h2>
+      <h2>⏱️ V11.8.4.6 — Performance Instrumentation</h2>
       <p class="sl-muted">Mesures de cette session uniquement. Aucun réglage de débit API n'est modifié.</p>
       <p>Requêtes planifiées : <strong>${n(report.scheduler.enqueued)}</strong> · terminées : <strong>${n(report.scheduler.completed)}</strong> · échecs : <strong>${n(report.scheduler.failed)}</strong></p>
       <p>Attente moyenne scheduler : <strong>${ms(report.scheduler.averageQueueWaitMs)}</strong> · maximum : <strong>${ms(report.scheduler.maxQueueWaitMs)}</strong> · pauses 429 : <strong>${n(report.scheduler.rateLimits)}</strong></p>
-      <div class="diagnostic-performance-table"><table><thead><tr><th>Module</th><th>Fixtures</th><th>1re analyse</th><th>Complet</th><th>Analyses</th></tr></thead><tbody>${rows || '<tr><td colspan="5">Mesures en attente…</td></tr>'}</tbody></table></div>
+      <div class="diagnostic-performance-table"><table><thead><tr><th>Module</th><th>Fixtures</th><th>1re analyse</th><th>Fixtures prêtes</th><th>Complet</th><th>Analyses</th><th>Réutilisés</th><th>Nouveaux</th><th>Historiques</th><th>Erreurs hist.</th></tr></thead><tbody>${rows || '<tr><td colspan="10">Mesures en attente…</td></tr>'}</tbody></table></div>
       <div class="diagnostic-performance-mobile">${mobileCards || '<p class="sl-muted">Mesures en attente…</p>'}</div>
       <button type="button" id="copy-performance-diagnostic">📋 Copier le rapport performance</button>
       <details><summary>Rapport brut</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${escapeHtml(formatPerformanceReport())}</pre></details>
@@ -118,7 +118,7 @@ export function renderDiagnostics({
   return `
     <section class="diagnostics-page sl-page sl-stack">
       <header class="sl-panel">
-        <span class="sl-label">SportLab V11.8.4.5</span>
+        <span class="sl-label">SportLab V11.8.4.6</span>
         <h1>Diagnostics opérationnels</h1>
         <p>Chaque compétition est maintenant distinguée entre fonctionnement normal, période sans match et véritable erreur API.</p>
       </header>

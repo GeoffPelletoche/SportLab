@@ -375,7 +375,7 @@ function renderMatchCard(match, index) {
         </div>
 
         <span class="dh-status dh-status--${state.tone}" data-dh-status-label>
-          ${safe(statusLabel(workflowState)).toUpperCase()}
+          ${safe(statusLabel(workflowState, storedWorkflow)).toUpperCase()}
         </span>
       </header>
 
@@ -476,7 +476,7 @@ function renderMatchCard(match, index) {
       <footer class="dh-match-card__footer">
         ${renderContextActions(workflowState, canReopenAnalysis)}
         <div data-dh-bet-container ${state.isValue ? "" : "hidden"}>
-          ${renderBetForm(index, matchId, analysisEditable)}
+          ${renderBetForm(index, matchId, analysisEditable, storedWorkflow)}
         </div>
         <div data-dh-pass-container ${state.isValue ? "hidden" : ""}>
           ${renderNoBet(state)}
@@ -668,11 +668,14 @@ function renderTimelineStep(label, complete) {
   `;
 }
 
-function renderBetForm(index, matchId, editableBeforeKickoff = true) {
+function renderBetForm(index, matchId, editableBeforeKickoff = true, storedWorkflow = null) {
+  const placed = storedWorkflow?.placed === true;
+  const stake = Number(storedWorkflow?.stake || 0);
+  const editable = editableBeforeKickoff && !placed;
   return `
     <div class="dh-bet-panel">
       <label class="dh-check" for="draw-placed-${matchId}">
-        <input type="checkbox" id="draw-placed-${matchId}" ${editableBeforeKickoff ? "" : "disabled"}>
+        <input type="checkbox" id="draw-placed-${matchId}" ${placed ? "checked" : ""} ${editable ? "" : "disabled"}>
         <span>
           <strong>Pari placé</strong>
           <small>Confirmer le suivi de cette décision.</small>
@@ -689,7 +692,8 @@ function renderBetForm(index, matchId, editableBeforeKickoff = true) {
             step="0.01"
             inputmode="decimal"
             placeholder="Ex : 10"
-            ${editableBeforeKickoff ? "" : "disabled"}
+            value="${stake > 0 ? stake.toFixed(2) : ""}"
+            ${editable ? "" : "disabled"}
           >
           <span>€</span>
         </div>
@@ -699,10 +703,10 @@ function renderBetForm(index, matchId, editableBeforeKickoff = true) {
         type="button"
         class="sl-button sl-button-primary dh-save-button"
         onclick='saveDrawHunterBet(${JSON.stringify(String(matchId))})'
-        ${editableBeforeKickoff ? "" : "disabled"}
+        ${editable ? "" : "disabled"}
       >
-        Enregistrer
-        <span aria-hidden="true">→</span>
+        ${placed ? "Pari enregistré" : "Enregistrer"}
+        <span aria-hidden="true">${placed ? "✓" : "→"}</span>
       </button>
     </div>
   `;
