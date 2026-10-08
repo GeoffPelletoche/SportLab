@@ -19,7 +19,7 @@ test("V11.8.4.2 starts NFL refresh before rugby and football", () => {
   assert.ok(nfl >= 0 && nfl < rugby && rugby < football);
 });
 
-test("V11.8.4.5 removes the regressive browser rolling window", () => {
+test("V11.8.4.6 removes the regressive browser rolling window", () => {
   const scheduler = read("core/api/requestScheduler.js");
   assert.match(scheduler, /if \(IS_SNAPSHOT_BUILD\) await waitForStartWindow\(\)/);
   assert.match(scheduler, /MIN_GAP_MS = IS_SNAPSHOT_BUILD \? 5000 : 900/);

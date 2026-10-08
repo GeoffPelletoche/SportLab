@@ -23,7 +23,7 @@ test("Diagnostics switches to cards on narrow screens", () => {
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
 
-test("V11.8.4.5 cache-busts both app JS and responsive stylesheet", () => {
+test("V11.8.4.6 cache-busts both app JS and responsive stylesheet", () => {
   assert.match(index, /assets\/style\.css\?v=11\.8\.4/);
   assert.match(index, /app\.js\?v=11\.8\.4/);
 });

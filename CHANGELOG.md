@@ -1,3 +1,11 @@
+# V11.8.4.6 — Bet State + Soft Snapshot Bootstrap
+
+- DrawHunter affiche désormais explicitement « Pari en attente » lorsqu’un pari est placé et conserve la mise affichée dans la carte verrouillée.
+- Les snapshots locaux et serveur peuvent servir de bootstrap jusqu’à 14 jours, tout en signalant leur caractère obsolète au-delà de 72 h ; le rafraîchissement fixtures reste prioritaire.
+- Diagnostics enrichis : âge du snapshot, snapshots réutilisés, nouveaux matchs, requêtes historiques, erreurs historiques et moment où la phase fixtures est prête.
+- Les historiques en arrière-plan ne retentent plus un 429 : une limite API-Sports abandonne cet enrichissement ponctuel et préserve le snapshot, tandis que les requêtes fixtures conservent leur protection standard.
+- Aucun changement du scheduler, des moteurs de prédiction, des règles VALUE ou de la Data Integrity.
+
 # V11.8.4.5 — Incremental Background Refresh
 
 - Réutilise les historiques complets du snapshot actif pour les fixtures inchangées.
