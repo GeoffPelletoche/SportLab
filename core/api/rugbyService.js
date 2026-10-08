@@ -7,6 +7,7 @@ const HISTORY_CONCURRENCY = 3;
 
 export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches = [] } = {}) {
   const previousById = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [String(match?.id), match]));
+  const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const activeCompetitions = CONFIG.frenchflair.competitions.filter(c => c.active);
   const allFixtures = [];
@@ -21,7 +22,7 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
     try {
       const data = await fetchFromWorker("/rugby/fixtures", { league: competition.id, from: range.from, to: range.to });
       const raw = Array.isArray(data?.response) ? data.response : [];
-      const fixtures = normalizeRugbyFixtures(raw, competition, data).map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById));
+      const fixtures = normalizeRugbyFixtures(raw, competition, data).map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity));
       const logEntry = {
         competition: competition.name, leagueId: competition.id, season: data?.season || null,
         status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: fixtures.length,
@@ -43,7 +44,7 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
 
   historyDiagnostics.snapshotMatches = previousById.size;
   historyDiagnostics.reusedMatches = allFixtures.filter(hasCompleteHistory).length;
-  historyDiagnostics.newMatches = allFixtures.filter(match => !previousById.has(String(match.id))).length;
+  historyDiagnostics.newMatches = allFixtures.filter(match => !findPreviousMatch(match, previousById, previousByIdentity)).length;
 
   // Phase 2 seulement : enrichissement historique. Les fixtures de toutes les
   // compétitions ont déjà été publiées à l'interface.
@@ -66,7 +67,21 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
   return { fixtures: allFixtures, meta };
 }
 
-function hydrateFixtureFromPreviousOrCache(fixture, previousById) { const previous = previousById.get(String(fixture.id)); const previousHome = Array.isArray(previous?.homeHistory) ? previous.homeHistory : []; const previousAway = Array.isArray(previous?.awayHistory) ? previous.awayHistory : []; return { ...fixture, homeHistory: previousHome.length ? previousHome : readCachedTeamHistory(fixture.homeId, fixture.home, fixture.leagueId), awayHistory: previousAway.length ? previousAway : readCachedTeamHistory(fixture.awayId, fixture.away, fixture.leagueId) }; }
+function hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity) { const previous = findPreviousMatch(fixture, previousById, previousByIdentity); const previousHome = Array.isArray(previous?.homeHistory) ? previous.homeHistory : []; const previousAway = Array.isArray(previous?.awayHistory) ? previous.awayHistory : []; return { ...fixture, homeHistory: previousHome.length ? previousHome : readCachedTeamHistory(fixture.homeId, fixture.home, fixture.leagueId), awayHistory: previousAway.length ? previousAway : readCachedTeamHistory(fixture.awayId, fixture.away, fixture.leagueId) }; }
+function findPreviousMatch(fixture, previousById, previousByIdentity) {
+  return previousById.get(String(fixture?.id)) || previousByIdentity.get(matchIdentity(fixture)) || null;
+}
+function matchIdentity(match) {
+  if (!match) return "";
+  const league = String(match.leagueId ?? "").trim();
+  const home = String(match.homeId ?? match.home ?? "").trim().toLowerCase();
+  const away = String(match.awayId ?? match.away ?? "").trim().toLowerCase();
+  const dateRaw = match.date || match.matchDate || "";
+  const parsed = Date.parse(dateRaw);
+  const date = Number.isFinite(parsed) ? new Date(parsed).toISOString() : String(dateRaw).trim();
+  if (!home || !away || !date) return "";
+  return `${league}|${home}|${away}|${date}`;
+}
 function hasCompleteHistory(match) { return Array.isArray(match?.homeHistory) && match.homeHistory.length > 0 && Array.isArray(match?.awayHistory) && match.awayHistory.length > 0; }
 function readCachedTeamHistory(teamId, teamName, leagueId) {
   const cleanName = decodeHtmlEntities(teamName).trim(); if (!teamId && !cleanName) return [];

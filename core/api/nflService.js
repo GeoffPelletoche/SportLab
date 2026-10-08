@@ -7,6 +7,7 @@ const HISTORY_CONCURRENCY = 2;
 
 export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [] } = {}) {
   const previousById = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [String(match?.id), match]));
+  const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const leagueId = Number(CONFIG.nfl?.leagueId || 1);
   const diagnostics = createHistoryDiagnostics();
@@ -16,8 +17,8 @@ export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [
     const requestStartedAt = new Date().toISOString();
     const data = await fetchFromWorker("/nfl/games", { league: leagueId, from: range.from, to: range.to });
     const fixtures = normalizeNflGames(data?.response || []);
-    const cacheHydrated = fixtures.map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById));
-    diagnostics.snapshotMatches = previousById.size; diagnostics.reusedMatches = cacheHydrated.filter(hasCompleteHistory).length; diagnostics.newMatches = cacheHydrated.filter(match => !previousById.has(String(match.id))).length;
+    const cacheHydrated = fixtures.map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity));
+    diagnostics.snapshotMatches = previousById.size; diagnostics.reusedMatches = cacheHydrated.filter(hasCompleteHistory).length; diagnostics.newMatches = cacheHydrated.filter(match => !findPreviousMatch(match, previousById, previousByIdentity)).length;
     const syncLog = [{ competition: "NFL", leagueId, status: cacheHydrated.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: cacheHydrated.length, season: data?.season || null, message: cacheHydrated.length ? "Rencontres NFL chargées, historiques en cours." : "Aucune rencontre NFL dans la fenêtre d’analyse." }];
     diagnostics.fixtureRequest = { from: range.from, to: range.to, leagueId, status: "OK", returned: cacheHydrated.length, source: data?.source || "unknown", startedAt: requestStartedAt, completedAt: new Date().toISOString() };
     emitProgress(onProgress, cacheHydrated, range, syncLog, diagnostics, true, "fixtures", data?.season);
@@ -40,8 +41,8 @@ export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [
   }
 }
 
-function hydrateFixtureFromPreviousOrCache(fixture, previousById) {
-  const previous = previousById.get(String(fixture.id));
+function hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity) {
+  const previous = findPreviousMatch(fixture, previousById, previousByIdentity);
   const previousHome = Array.isArray(previous?.homeHistory) ? previous.homeHistory : [];
   const previousAway = Array.isArray(previous?.awayHistory) ? previous.awayHistory : [];
   return {
@@ -49,6 +50,20 @@ function hydrateFixtureFromPreviousOrCache(fixture, previousById) {
     homeHistory: previousHome.length ? previousHome : readCachedHistory(fixture.homeId),
     awayHistory: previousAway.length ? previousAway : readCachedHistory(fixture.awayId)
   };
+}
+function findPreviousMatch(fixture, previousById, previousByIdentity) {
+  return previousById.get(String(fixture?.id)) || previousByIdentity.get(matchIdentity(fixture)) || null;
+}
+function matchIdentity(match) {
+  if (!match) return "";
+  const league = String(match.leagueId ?? "").trim();
+  const home = String(match.homeId ?? match.home ?? "").trim().toLowerCase();
+  const away = String(match.awayId ?? match.away ?? "").trim().toLowerCase();
+  const dateRaw = match.date || match.matchDate || "";
+  const parsed = Date.parse(dateRaw);
+  const date = Number.isFinite(parsed) ? new Date(parsed).toISOString() : String(dateRaw).trim();
+  if (!home || !away || !date) return "";
+  return `${league}|${home}|${away}|${date}`;
 }
 function hasCompleteHistory(match) { return Array.isArray(match?.homeHistory) && match.homeHistory.length > 0 && Array.isArray(match?.awayHistory) && match.awayHistory.length > 0; }
 function readCachedHistory(teamId) { return teamId ? readHistoryCache("nfl", `team:${teamId}:league:${CONFIG.nfl.leagueId}`) : []; }
