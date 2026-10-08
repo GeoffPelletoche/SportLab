@@ -16,9 +16,9 @@ test("V11.3.15+ sports loading stays independent from navigation/bootstrap", () 
 });
 
 test("V11.3.15+ manual refresh reloads sports without resetting page", () => {
-  const refresh = legacy.match(/window\.refreshSportLab = function\(\) \{[\s\S]*?\n\};/)?.[0] || "";
-  assert.match(refresh, /refreshDrawHunterData\(\{ force: true, reason: "manual", cycle \}\)/);
-  assert.match(refresh, /refreshFrenchFlairData\(\{ force: true, reason: "manual", cycle \}\)/);
+  const refresh = legacy.match(/window\.refreshSportLab = function\(\{ forceFresh = false \} = \{\}\) \{[\s\S]*?\n\};/)?.[0] || "";
+  assert.match(refresh, /refreshDrawHunterData\(\{ force: true, reason, cycle \}\)/);
+  assert.match(refresh, /refreshFrenchFlairData\(\{ force: true, reason, cycle \}\)/);
   assert.doesNotMatch(refresh, /currentPage = "home"/);
   assert.doesNotMatch(refresh, /syncNow/);
 });

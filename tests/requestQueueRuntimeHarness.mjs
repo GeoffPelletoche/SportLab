@@ -15,7 +15,7 @@ async function environment(fetchImpl, snapshotBuild = false) {
     const id = url.href;
     if (modules.has(id)) return modules.get(id);
     let module;
-    if (url.pathname.endsWith('/config/config.js')) module = new vm.SyntheticModule(['CONFIG'], function() { this.setExport('CONFIG', { api: { workerBaseUrl: 'https://worker.example' } }); }, { context });
+    if (url.pathname.endsWith('/config/config.js')) module = new vm.SyntheticModule(['CONFIG'], function() { this.setExport('CONFIG', { api: { workerBaseUrl: 'https://worker.example' }, analysisWindowDays: 1, drawhunter: { competitions: [{ id: 61, name: 'Ligue 1', active: true }] }, frenchflair: { competitions: [{ id: 16, name: 'Top 14', active: true }] }, nfl: { leagueId: 1 } }); }, { context });
     else module = new vm.SourceTextModule(fs.readFileSync(fileURLToPath(url), 'utf8'), { context, identifier: id });
     modules.set(id, module);
     await module.link((specifier, referencing) => load(new URL(specifier, referencing.identifier)));
@@ -39,7 +39,8 @@ async function environment(fetchImpl, snapshotBuild = false) {
     if (failure) throw failure;
     return result;
   }
-  return { client: client.namespace, scheduler, diagnostics, settle, advance: ms => { time += ms; }, now: () => time };
+  return { client: client.namespace, scheduler, diagnostics, settle,
+    async loadService(name) { const module = await load(new URL(`core/api/${name}.js`, root)); await module.evaluate(); return module.namespace; }, advance: ms => { time += ms; }, now: () => time };
 }
 const ok = () => new Response(JSON.stringify({ response: [{ id: 1 }], source: 'worker' }), { status: 200 });
 {
@@ -55,6 +56,7 @@ const ok = () => new Response(JSON.stringify({ response: [{ id: 1 }], source: 'w
   const cached = await env.settle(env.client.fetchFromWorker('/football/fixtures', { league: 61, from: 'today' }));
   assert.equal(calls, 1);
   assert.equal(cached.clientCacheHit, true);
+  assert.equal(cached.clientVerifiedAt, a.clientVerifiedAt);
   assert.equal(cached.response[0].id, 1);
   const bypass = await env.settle(env.client.fetchFromWorker('/football/fixtures', { league: 61, from: 'today' }, { forceFresh: true }));
   assert.equal(calls, 2);
@@ -117,5 +119,20 @@ const ok = () => new Response(JSON.stringify({ response: [{ id: 1 }], source: 'w
   assert.equal(env.scheduler.applyGlobalRateLimit(0), 60000);
   assert.equal(env.scheduler.applyGlobalRateLimit(0), 60000);
   assert.equal(env.scheduler.applyGlobalRateLimit(120000), 120000);
+}
+{
+  let calls = 0;
+  const env = await environment(() => { calls++; return new Response(JSON.stringify({ response: [] }), { status: 200 }); });
+  for (const [file, method] of [['footballService', 'fetchUpcomingFootballFixtures'], ['rugbyService', 'fetchUpcomingRugbyFixtures'], ['nflService', 'fetchUpcomingNflFixtures']]) {
+    const service = await env.loadService(file);
+    const data = { matches: [], meta: { syncedAt: new Date(env.now() - 240000).toISOString() } };
+    const count = calls;
+    const reused = await env.settle(service[method]({ previousPayload: data, previousMatches: [], refreshMode: 'manual' }));
+    assert.equal(calls, count);
+    assert.equal(reused.meta.fixtureRefreshPolicy.reason, 'recently-verified-snapshot');
+    await env.settle(service[method]({ previousPayload: data, previousMatches: [], refreshMode: 'force' }));
+    await env.settle(service[method]({ previousPayload: data, previousMatches: [], refreshMode: 'force' }));
+    assert.equal(calls, count + 2, 'force bypasses both the persistent snapshot and the one-minute response cache');
+  }
 }
 console.log('Request queue integration passed');
