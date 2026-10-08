@@ -1,15 +1,21 @@
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
 import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
+import { shouldSkipFixtureRefresh } from "./fixtureRefreshPolicy.js";
 
 const HISTORY_LIMIT = Number(CONFIG.nfl?.historyLimit || 30);
 const HISTORY_CONCURRENCY = 2;
 
-export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [] } = {}) {
+export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [], previousPayload = null, refreshMode = "startup" } = {}) {
   const previousById = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [String(match?.id), match]));
   const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const leagueId = Number(CONFIG.nfl?.leagueId || 1);
+  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode })) {
+    const matches = Array.isArray(previousPayload?.matches) ? previousPayload.matches : previousMatches;
+    const meta = { ...(previousPayload?.meta || {}), loading: false, phase: "fixture-cooldown", fixtureRefreshSkipped: true, fixtureRefreshReason: "recent-snapshot" };
+    return { fixtures: matches, meta };
+  }
   const diagnostics = createHistoryDiagnostics();
   const memo = new Map();
 

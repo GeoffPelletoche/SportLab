@@ -12,9 +12,11 @@ import { predictRugbyMatch } from "../core/engines/rugbyPredictionEngine.js";
  * - masque les paris placés
  */
 
-export async function loadFrenchFlairMatches({ onProgress, previousMatches = [] } = {}) {
+export async function loadFrenchFlairMatches({ onProgress, previousMatches = [], previousPayload = null, refreshMode = "startup" } = {}) {
   const { fixtures, meta } = await fetchUpcomingRugbyFixtures({
     previousMatches,
+    previousPayload,
+    refreshMode,
     onProgress: progress => {
       if (typeof onProgress !== "function") return;
       const matches = (progress.fixtures || []).map(match => predictRugbyMatch(match));

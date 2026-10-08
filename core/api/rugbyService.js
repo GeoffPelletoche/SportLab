@@ -1,15 +1,21 @@
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
 import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
+import { shouldSkipFixtureRefresh } from "./fixtureRefreshPolicy.js";
 
 const HISTORY_LIMIT = 30;
 const HISTORY_CONCURRENCY = 3;
 
-export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches = [] } = {}) {
+export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches = [], previousPayload = null, refreshMode = "startup" } = {}) {
   const previousById = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [String(match?.id), match]));
   const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const activeCompetitions = CONFIG.frenchflair.competitions.filter(c => c.active);
+  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode })) {
+    const matches = Array.isArray(previousPayload?.matches) ? previousPayload.matches : previousMatches;
+    const meta = { ...(previousPayload?.meta || {}), loading: false, phase: "fixture-cooldown", fixtureRefreshSkipped: true, fixtureRefreshReason: "recent-snapshot" };
+    return { fixtures: matches, meta };
+  }
   const allFixtures = [];
   const syncLog = [];
   const historyDiagnostics = createHistoryDiagnostics();
