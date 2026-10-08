@@ -1,3 +1,13 @@
+# V11.8.4.11 — DrawHunter terminé / Actualiser maîtrisé
+
+- Les analyses terminées et les paris enregistrés quittent DrawHunter, y compris les anciens statuts et les enregistrements sans value. Les données restent dans les stores, snapshots et historiques.
+- Le bouton Terminer republie la vue locale et conserve la navigation vers la prochaine analyse ; aucune requête sportive n'est déclenchée. Les filtres de l'atelier portent uniquement sur les rencontres encore à traiter.
+- Réutilisation en mémoire des réponses de fixtures réussies pendant 60 secondes, sans prolonger leur expiration lors des lectures. Les échecs ne sont jamais mémorisés. Les builds serveur continuent à demander leurs fixtures.
+- Requêtes réseau identiques simultanées mutualisées ; cache borné et copies indépendantes des réponses.
+- Chaque HTTP 429 applique une pause avant que la file avance, même sans retry disponible. Les deadlines sont revérifiées après une attente et les indications Retry-After longues sont respectées. Pause progressive en cas de 429 répétés.
+- Diagnostic : compteurs de réutilisation des requêtes et détail des pauses API.
+- Moteurs de prédiction, seuils de value, Worker Cloudflare et données du snapshot existant inchangés.
+
 # V11.8.4.10 — Corrective Refresh / Cycle Guard
 
 - Suppression des relances sportives après synchronisation cloud, modification du capital et diagnostic de règlement.

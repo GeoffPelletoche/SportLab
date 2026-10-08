@@ -6,6 +6,7 @@ import { filterUnevaluatedMatches } from "../../core/performance/evaluatedMatchR
 import { getBets } from "../../core/stores/betsStore.js";
 import {
   deriveDrawHunterWorkflowState,
+  isDrawHunterWorkflowOpen,
   getDrawHunterMatchWorkflow,
   statusLabel
 } from "../../core/stores/drawHunterWorkflowStore.js";
@@ -21,7 +22,11 @@ import {
  */
 
 export function renderDrawHunter(payload) {
-  const matches = filterUnevaluatedMatches("drawhunter", payload?.matches || []);
+  const recordedIds = new Set(getBets().filter(isDrawHunterBet)
+    .filter(bet => bet.matchId != null).map(bet => String(bet.matchId)));
+  const matches = filterUnevaluatedMatches("drawhunter", payload?.matches || []).filter(match =>
+    !recordedIds.has(String(match.id)) && isDrawHunterWorkflowOpen(match, getDrawHunterMatchWorkflow(match.id))
+  );
   const meta = payload?.meta && typeof payload.meta === "object"
     ? payload.meta
     : null;
@@ -207,11 +212,7 @@ function renderFilters(matches) {
   const filters = [
     ["all", "Tous", counts.all],
     ["new", "Nouveaux", counts.new],
-    ["pending", "À analyser", counts.pending],
-    ["value", "VALUE", counts.value],
-    ["tracked", "Paris", counts.tracked],
-    ["resulted", "Résultats", counts.resulted],
-    ["archived", "Archives", counts.archived]
+    ["pending", "À analyser", counts.pending]
   ];
 
   return `

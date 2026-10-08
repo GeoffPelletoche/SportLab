@@ -5,6 +5,7 @@ import { explainBookmakerPrice } from "../../core/engines/drawHunterExplainabili
 
 import {
   getDrawHunterContext,
+  isDrawHunterWorkflowOpen,
   saveDrawHunterContext,
   saveDrawHunterMatchWorkflow
 } from "../../core/stores/drawHunterWorkflowStore.js";
@@ -189,7 +190,7 @@ export function initDrawHunterWorkflow() {
   const densityButtons = [...root.querySelectorAll("[data-dh-density]")];
   const cards = [...root.querySelectorAll("[data-dh-card]")];
 
-  let activeFilter = context.filter || "all";
+  let activeFilter = ["all", "new", "pending"].includes(context.filter) ? context.filter : "all";
   let query = context.query || "";
   let sortMode = context.sort || "priority";
   let density = context.density || "comfortable";
@@ -227,7 +228,8 @@ export function initDrawHunterWorkflow() {
       const state = String(card.dataset.workflowState || "");
       const stateMatch = activeFilter === "all" || state === activeFilter;
       const textMatch = !normalized || String(card.dataset.dhSearchText || "").includes(normalized);
-      card.hidden = !(stateMatch && textMatch);
+      const unfinished = isDrawHunterWorkflowOpen(null, { status: state, placed: card.dataset.dhPlaced === "true" });
+      card.hidden = !(unfinished && stateMatch && textMatch);
     });
     sortCards();
     const visible = cards.filter(card => !card.hidden).length;
@@ -355,6 +357,11 @@ export function initDrawHunterWorkflow() {
         }
       });
 
+      if (kind === "complete" && typeof window.finishDrawHunterAnalysis === "function") {
+        window.finishDrawHunterAnalysis(matchId);
+        showToast({ title: "Analyse enregistrée", text: "La rencontre quitte l’atelier DrawHunter.", tone: "success", icon: "✓" });
+        return;
+      }
       updateDrawHunterCardState(card, status);
       applyView();
 

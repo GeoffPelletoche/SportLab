@@ -611,6 +611,9 @@ function applyPendingAnalysisNavigation() {
 // l'atelier sur la prochaine analyse. Aucun appel API sport n'est relancé.
 function commitLocalAnalysisAndNavigate(matchId) {
   queueAnalysisNavigation(matchId);
+  // Explicit validation ends editing on this card, including Safari retaining input focus.
+  const active = document.activeElement;
+  if (String(active?.closest?.('[data-match-id]')?.dataset?.matchId || "") === String(matchId)) active.blur?.();
   protectedInteractionUntil = 0;
   deferredRenderRequested = false;
   clearTimeout(deferredRenderTimer);
@@ -645,6 +648,10 @@ function renderCurrentApplication(app = document.getElementById("app")) {
 /**
  * DRAWHUNTER
  */
+window.finishDrawHunterAnalysis = function(matchId) {
+  commitLocalAnalysisAndNavigate(matchId);
+};
+
 window.saveDrawHunterBet = function(matchId) {
   const match = (drawhunterPayload?.matches || []).find(
     item => String(item?.id) === String(matchId)
