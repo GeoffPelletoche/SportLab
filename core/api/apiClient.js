@@ -1,3 +1,5 @@
+import { createRequestReuseCache } from "./requestReuseCache.js";
+import { recordRequestReuse } from "../diagnostics/performanceInstrumentation.js";
 import { CONFIG } from "../config/config.js";
 import { applyGlobalRateLimit, scheduleApiRequest } from "./requestScheduler.js";
 
@@ -5,7 +7,7 @@ const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_ATTEMPTS = 3;
 const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
 const RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 3 : 1;
-const snapshotInFlight = new Map();
+const requestReuse = createRequestReuseCache();
 
 export async function fetchFromWorker(path, params = {}, options = {}) {
   const url = new URL(CONFIG.api.workerBaseUrl + path);
@@ -13,8 +15,17 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
     if (value !== undefined && value !== null) url.searchParams.set(key, value);
   });
 
-  const dedupeKey = IS_SNAPSHOT_BUILD && /\/team-(?:games|fixtures)$/.test(String(path)) ? url.toString() : null;
-  if (dedupeKey && snapshotInFlight.has(dedupeKey)) return snapshotInFlight.get(dedupeKey);
+  url.searchParams.sort();
+  const recentFixtures = !IS_SNAPSHOT_BUILD && /\/(?:fixtures|games)$/.test(String(path));
+  const cacheKey = url.toString();
+  if (recentFixtures && options.forceFresh !== true) {
+    const cached = requestReuse.read(cacheKey);
+    if (cached) {
+      recordRequestReuse("recent", path);
+      return { ...cached.value, clientCacheHit: true, clientCacheAgeMs: cached.ageMs };
+    }
+  }
+  const dedupeKey = `${cacheKey}|${options.timeoutMs || DEFAULT_TIMEOUT_MS}|${options.attempts || DEFAULT_ATTEMPTS}|${options.rateLimitRetries ?? RATE_LIMIT_RETRIES}`;
 
   const run = async () => {
     const attempts = Math.max(1, Number(options.attempts || DEFAULT_ATTEMPTS));
@@ -25,13 +36,14 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        return await scheduleApiRequest(() => executeRequest(url, options), { priority });
+        const result = await scheduleApiRequest(() => executeRequest(url, options), { priority });
+        if (recentFixtures && Array.isArray(result?.response) && !result?.error) requestReuse.write(cacheKey, result);
+        return result;
       } catch (error) {
         lastError = error;
         const status = Number(error?.status || 0);
         if (status === 429 && rateLimitRetries < maxRateLimitRetries) {
           rateLimitRetries += 1;
-          applyGlobalRateLimit(error?.retryAfterMs);
           attempt -= 1;
           continue;
         }
@@ -43,10 +55,7 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
     throw lastError || new Error("WORKER_UNAVAILABLE");
   };
 
-  if (!dedupeKey) return run();
-  const promise = run().finally(() => snapshotInFlight.delete(dedupeKey));
-  snapshotInFlight.set(dedupeKey, promise);
-  return promise;
+  return requestReuse.run(dedupeKey, run, () => recordRequestReuse("in-flight", path));
 }
 
 async function executeRequest(url, options) {
@@ -57,7 +66,14 @@ async function executeRequest(url, options) {
       headers: { Accept: "application/json" }, signal: controller.signal, cache: "no-store"
     });
     let payload = null;
-    try { payload = await response.json(); } catch { throw new Error(`INVALID_JSON_${response.status}`); }
+    try { payload = await response.json(); } catch {
+      if (response.status === 429) applyGlobalRateLimit(readRetryAfterMs(response, null), { path: url.pathname });
+      const error = new Error(`INVALID_JSON_${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    // Apply even when the caller has exhausted retries, before the queue advances.
+    if (response.status === 429) applyGlobalRateLimit(readRetryAfterMs(response, payload), { path: url.pathname });
     if (!response.ok) {
       const payloadError = payload?.error;
       const code = payload?.code || (typeof payloadError === "object" ? payloadError?.code : payloadError) || `API_ERROR_${response.status}`;
@@ -87,12 +103,13 @@ function inferPriority(path) {
 }
 
 function readRetryAfterMs(response, payload) {
-  const payloadMs = Number(payload?.retryAfterMs || 0);
-  if (payloadMs > 0) return payloadMs;
+  const payloadMs = Math.max(0, Number(payload?.retryAfterMs) || 0);
   const header = response.headers?.get?.("Retry-After");
   const seconds = Number(header);
-  if (Number.isFinite(seconds) && seconds > 0) return seconds * 1000;
-  return 0;
+  const retryAt = Date.parse(header || "");
+  const headerMs = Number.isFinite(seconds) && seconds > 0 ? seconds * 1000
+    : Number.isFinite(retryAt) ? Math.max(0, retryAt - Date.now()) : 0;
+  return Math.max(payloadMs, headerMs);
 }
 
 export function getDateRange(days) {

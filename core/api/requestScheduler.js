@@ -18,6 +18,7 @@ let running = false;
 let sequence = 0;
 let lastStartedAt = 0;
 let blockedUntil = 0;
+let rateLimitStreak = 0;
 let requestStarts = [];
 
 export function scheduleApiRequest(task, { priority = 0 } = {}) {
@@ -29,16 +30,19 @@ export function scheduleApiRequest(task, { priority = 0 } = {}) {
   });
 }
 
-export function applyGlobalRateLimit(retryAfterMs = 0) {
-  const requested = Number(retryAfterMs) || DEFAULT_RATE_LIMIT_PAUSE_MS;
-  const pause = Math.max(DEFAULT_RATE_LIMIT_PAUSE_MS, Math.min(MAX_RATE_LIMIT_PAUSE_MS, requested));
-  recordRateLimit();
+export function applyGlobalRateLimit(retryAfterMs = 0, { path = "" } = {}) {
+  const requested = Math.max(0, Number(retryAfterMs) || 0);
+  rateLimitStreak += 1;
+  const adaptivePause = Math.min(MAX_RATE_LIMIT_PAUSE_MS, DEFAULT_RATE_LIMIT_PAUSE_MS * (2 ** Math.min(8, rateLimitStreak - 1)));
+  // A provider deadline longer than our normal pause must never be shortened.
+  const pause = Math.max(adaptivePause, requested);
   blockedUntil = Math.max(blockedUntil, Date.now() + pause);
+  recordRateLimit({ path, pauseMs: pause, retryAfterMs: requested, blockedUntil });
   return pause;
 }
 
 export function getApiSchedulerState() {
-  return { queued: queue.length, running, blockedUntil, minGapMs: MIN_GAP_MS };
+  return { queued: queue.length, running, blockedUntil, rateLimitStreak, minGapMs: MIN_GAP_MS };
 }
 
 async function drain() {
@@ -52,14 +56,14 @@ async function drain() {
       // item that is actually ready to start.
       if (IS_SNAPSHOT_BUILD) await waitForStartWindow();
       const waitMs = Math.max(0, blockedUntil - Date.now(), MIN_GAP_MS - (Date.now() - lastStartedAt));
-      if (waitMs > 0) await wait(waitMs);
+      if (waitMs > 0) { await wait(waitMs); continue; }
       queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);
       const item = queue.shift();
       if (!item) continue;
       lastStartedAt = Date.now();
       if (IS_SNAPSHOT_BUILD) recordRequestStart(lastStartedAt);
       const perfStartedAt = recordSchedulerStart(item.perfEnqueuedAt);
-      try { item.resolve(await item.task()); recordSchedulerEnd(perfStartedAt, true); }
+      try { item.resolve(await item.task()); rateLimitStreak = 0; recordSchedulerEnd(perfStartedAt, true); }
       catch (error) { recordSchedulerEnd(perfStartedAt, false); item.reject(error); }
     }
   } finally {

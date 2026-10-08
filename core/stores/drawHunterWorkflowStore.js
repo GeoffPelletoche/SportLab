@@ -70,6 +70,12 @@ export function deriveDrawHunterWorkflowState(match, stored = null) {
   return Number.isFinite(Number(match?.probability)) ? "pending" : "new";
 }
 
+// Completed work leaves the workshop; records remain available for settlement/history.
+export function isDrawHunterWorkflowOpen(match, stored = null) {
+  return stored?.placed !== true
+    && ["new", "pending"].includes(deriveDrawHunterWorkflowState(match, stored));
+}
+
 export function statusLabel(status, stored = null) {
   const normalized = normalizeStatus(status);
   if (normalized === "awaiting_result" && stored?.placed === true) return "Pari en attente";

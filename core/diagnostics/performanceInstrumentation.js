@@ -2,7 +2,8 @@ const STARTED_AT = performance.now();
 const wallStartedAt = new Date().toISOString();
 const modules = new Map();
 const contexts = new Map();
-const scheduler = { enqueued: 0, started: 0, completed: 0, failed: 0, rateLimits: 0, totalQueueWaitMs: 0, maxQueueWaitMs: 0, totalRunMs: 0 };
+const requestReuse = { recent: 0, inFlight: 0, events: [] };
+const scheduler = { enqueued: 0, started: 0, completed: 0, failed: 0, rateLimits: 0, rateLimitEvents: [], totalQueueWaitMs: 0, maxQueueWaitMs: 0, totalRunMs: 0 };
 
 function moduleState(name) {
   if (!modules.has(name)) modules.set(name, { startedAtMs: null, readyAtMs: null, cycles: [], firstFixturesMs: null, firstAnalysisMs: null, fixturesReadyMs: null, completeMs: null, fixtureCount: 0, analysisCount: 0, snapshotAgeMs: null, snapshotStale: false, reusedMatches: 0, newMatches: 0, historyRequests: 0, historyErrors: 0, phases: [] });
@@ -56,10 +57,18 @@ export function markModuleComplete(name, payload) {
 export function recordSchedulerEnqueue() { scheduler.enqueued += 1; return performance.now(); }
 export function recordSchedulerStart(enqueuedAt) { const wait=Math.max(0,performance.now()-enqueuedAt); scheduler.started+=1; scheduler.totalQueueWaitMs+=wait; scheduler.maxQueueWaitMs=Math.max(scheduler.maxQueueWaitMs,wait); return performance.now(); }
 export function recordSchedulerEnd(startedAt, ok=true) { scheduler.completed+=1; if(!ok)scheduler.failed+=1; scheduler.totalRunMs+=Math.max(0,performance.now()-startedAt); }
-export function recordRateLimit(){ scheduler.rateLimits+=1; }
+export function recordRequestReuse(kind, path) {
+  if (kind === "recent") requestReuse.recent += 1;
+  else requestReuse.inFlight += 1;
+  if (requestReuse.events.length < 40) requestReuse.events.push({ kind, path, atMs: Math.round(elapsed()) });
+}
+export function recordRateLimit(detail = {}) {
+  scheduler.rateLimits += 1;
+  if (scheduler.rateLimitEvents.length < 40) scheduler.rateLimitEvents.push({ ...detail, atMs: Math.round(elapsed()) });
+}
 export function getPerformanceReport(){
   const moduleReport={}; for(const [name,s] of modules) moduleReport[name]={...s, startedAtMs:r(s.startedAtMs), readyAtMs:r(s.readyAtMs), firstFixturesMs:r(s.firstFixturesMs), firstAnalysisMs:r(s.firstAnalysisMs), fixturesReadyMs:r(s.fixturesReadyMs), completeMs:r(s.completeMs)};
-  return { version:"11.8.4.10", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
+  return { version:"11.8.4.11", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
 }
 export function formatPerformanceReport(){ return JSON.stringify(getPerformanceReport(),null,2); }
 function r(v){return v==null?null:Math.round(v);}
