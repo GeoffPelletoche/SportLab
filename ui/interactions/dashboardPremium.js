@@ -41,7 +41,11 @@ function handleDashboardClick(event) {
   refreshButton.classList.add("is-refreshing");
 
   if (typeof window.refreshSportLab === "function") {
-    window.refreshSportLab();
+    void window.refreshSportLab({ forceFresh: refreshButton.dataset.refreshMode === "force" }).finally(() => {
+      refreshButton.disabled = false;
+      refreshButton.removeAttribute("aria-busy");
+      refreshButton.classList.remove("is-refreshing");
+    });
     return;
   }
 

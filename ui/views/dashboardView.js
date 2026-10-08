@@ -312,6 +312,10 @@ function renderHero({
           >
             ↻ Actualiser
           </button>
+          <button type="button" class="sl-button sl-button-ghost" data-dashboard-refresh data-refresh-mode="force"
+            title="Redemander les données sportives même si elles sont récentes">
+            Forcer
+          </button>
         </div>
 
         <div class="dashboard-v2-hero-meta">

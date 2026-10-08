@@ -1391,15 +1391,15 @@ function closeSportLabMenu() {
   }
 }
 
-window.refreshSportLab = function() {
+window.refreshSportLab = function({ forceFresh = false } = {}) {
   if (manualRefreshPromise) return manualRefreshPromise;
   const cycle = loadCycleGuard.createCycle("manual", startupCycle.loadCycleId);
-  // V11.3.15 : le bouton Actualiser force réellement la récupération
-  // Football/Rugby, sans changer de page ni redémarrer le Cloud.
+  const reason = forceFresh ? "force" : "manual";
+  // Actualiser reuses verified snapshots; Forcer explicitly bypasses both caches.
   const task = Promise.allSettled([
-    refreshNflData({ force: true, reason: "manual", cycle }),
-    refreshFrenchFlairData({ force: true, reason: "manual", cycle }),
-    refreshDrawHunterData({ force: true, reason: "manual", cycle })
+    refreshNflData({ force: true, reason, cycle }),
+    refreshFrenchFlairData({ force: true, reason, cycle }),
+    refreshDrawHunterData({ force: true, reason, cycle })
   ]);
   manualRefreshPromise = task;
   void task.finally(() => { if (manualRefreshPromise === task) manualRefreshPromise = null; });

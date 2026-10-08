@@ -1,3 +1,13 @@
+# V11.8.4.12 — Actualiser avec fraîcheur persistante
+
+- Le premier Actualiser après réouverture réutilise les snapshots complets vérifiés il y a moins de cinq minutes. À moins de quinze minutes du coup d'envoi, cette fenêtre est réduite à une minute.
+- Forcer redemande les fixtures même avec un snapshot ou une réponse réseau récente, tout en respectant le scheduler et les pauses API.
+- Date de dernière vérification privilégiée à la date d'écriture locale ; réutiliser un snapshot ne réécrit plus sa date ni ne repousse son expiration.
+- Rafraîchissement requis si la période change, si un coup d'envoi est passé depuis la vérification, ou si les données portent une erreur ; historiques incomplets exclus de la réutilisation manuelle.
+- Diagnostic refreshDecisions : action, raison, âge et fenêtre retenue, associés au cycle.
+- Bouton de rafraîchissement libéré à la fin du traitement, y compris sans reconstruction de la vue.
+- Filtrage des cartes DrawHunter et garde-fous de cycles conservés ; moteurs et Workers inchangés.
+
 # V11.8.4.11 — DrawHunter terminé / Actualiser maîtrisé
 
 - Les analyses terminées et les paris enregistrés quittent DrawHunter, y compris les anciens statuts et les enregistrements sans value. Les données restent dans les stores, snapshots et historiques.
