@@ -6,7 +6,7 @@ const requestReuse = { recent: 0, inFlight: 0, events: [] };
 const scheduler = { enqueued: 0, started: 0, completed: 0, failed: 0, rateLimits: 0, rateLimitEvents: [], totalQueueWaitMs: 0, maxQueueWaitMs: 0, totalRunMs: 0 };
 
 function moduleState(name) {
-  if (!modules.has(name)) modules.set(name, { startedAtMs: null, readyAtMs: null, cycles: [], firstFixturesMs: null, firstAnalysisMs: null, fixturesReadyMs: null, completeMs: null, fixtureCount: 0, analysisCount: 0, snapshotAgeMs: null, snapshotStale: false, reusedMatches: 0, newMatches: 0, historyRequests: 0, historyErrors: 0, phases: [] });
+  if (!modules.has(name)) modules.set(name, { startedAtMs: null, readyAtMs: null, cycles: [], firstFixturesMs: null, firstAnalysisMs: null, fixturesReadyMs: null, completeMs: null, fixtureCount: 0, analysisCount: 0, snapshotAgeMs: null, snapshotStale: false, reusedMatches: 0, newMatches: 0, historyRequests: 0, historyErrors: 0, refreshDecisions: [], phases: [] });
   return modules.get(name);
 }
 function elapsed() { return Math.max(0, performance.now() - STARTED_AT); }
@@ -36,6 +36,10 @@ export function markModuleProgress(name, payload, reason="") {
   if (Number.isFinite(Number(hd.requested))) s.historyRequests = Math.max(s.historyRequests, Number(hd.requested));
   if (Number.isFinite(Number(hd.errors))) s.historyErrors = Math.max(s.historyErrors, Number(hd.errors));
   s.fixtureCount=Math.max(s.fixtureCount,matches.length); s.analysisCount=Math.max(s.analysisCount,analyses);
+  if (payload?.meta?.fixtureRefreshPolicy && reason === "complete") {
+    const decision = { ...payload.meta.fixtureRefreshPolicy, loadCycleId: contexts.get(name)?.loadCycleId, trigger: contexts.get(name)?.trigger, atMs: Math.round(now) };
+    if (!s.refreshDecisions.some(item => item.loadCycleId === decision.loadCycleId && item.reason === decision.reason)) s.refreshDecisions.push(decision);
+  }
   const context = contexts.get(name) || { module: name, loadCycleId: null, trigger: reason, snapshotVersion: null, parentCycleId: null };
   if (phase === "complete" && reason !== "complete") return;
   const errors = (payload?.meta?.syncLog || []).filter(item => ["ERROR", "RATE_LIMITED"].includes(item.status))
@@ -68,7 +72,7 @@ export function recordRateLimit(detail = {}) {
 }
 export function getPerformanceReport(){
   const moduleReport={}; for(const [name,s] of modules) moduleReport[name]={...s, startedAtMs:r(s.startedAtMs), readyAtMs:r(s.readyAtMs), firstFixturesMs:r(s.firstFixturesMs), firstAnalysisMs:r(s.firstAnalysisMs), fixturesReadyMs:r(s.fixturesReadyMs), completeMs:r(s.completeMs)};
-  return { version:"11.8.4.11", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
+  return { version:"11.8.4.12", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
 }
 export function formatPerformanceReport(){ return JSON.stringify(getPerformanceReport(),null,2); }
 function r(v){return v==null?null:Math.round(v);}

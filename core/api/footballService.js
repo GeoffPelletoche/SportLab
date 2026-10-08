@@ -11,8 +11,8 @@ export async function fetchUpcomingFootballFixtures({ onProgress, previousMatche
   const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const activeCompetitions = CONFIG.drawhunter.competitions.filter(c => c.active);
-  const freshness = fixtureRefreshPolicy({ previousPayload, refreshMode });
-  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode })) {
+  const freshness = fixtureRefreshPolicy({ previousPayload, refreshMode, range });
+  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode, range })) {
     const matches = Array.isArray(previousPayload?.matches) ? previousPayload.matches : previousMatches;
     const meta = { ...(previousPayload?.meta || {}), loading: false, phase: "fixture-cooldown", fixtureRefreshSkipped: true, fixtureRefreshReason: freshness.reason, fixtureRefreshPolicy: freshness };
     return { fixtures: matches, meta };
@@ -26,11 +26,11 @@ export async function fetchUpcomingFootballFixtures({ onProgress, previousMatche
   // immédiatement; aucun historique d'équipe ne bloque le championnat suivant.
   const fixtureResults = await Promise.all(activeCompetitions.map(async competition => {
     try {
-      const data = await fetchFromWorker("/football/fixtures", { league: competition.id, from: range.from, to: range.to });
+      const data = await fetchFromWorker("/football/fixtures", { league: competition.id, from: range.from, to: range.to }, { forceFresh: refreshMode === "force" });
       const fixtures = normalizeFootballFixtures(data?.response || [], competition).map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity));
       const logEntry = {
         competition: competition.name, leagueId: competition.id,
-        status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: fixtures.length,
+        status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", verifiedAt: data?.clientVerifiedAt || new Date().toISOString(), count: fixtures.length,
         season: data?.season ?? null,
         message: fixtures.length ? "Rencontres chargées, historiques en arrière-plan." : "Aucune rencontre dans la fenêtre d’analyse."
       };
@@ -63,7 +63,7 @@ export async function fetchUpcomingFootballFixtures({ onProgress, previousMatche
     emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
   }));
 
-  const meta = buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete");
+  const meta = { ...buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete"), fixtureRefreshPolicy: freshness };
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
   return { fixtures: allFixtures, meta };
 }
@@ -113,7 +113,7 @@ function emitProgress(callback, fixtures, range, competitions, syncLog, historyD
 function buildMeta(range, competitions, fixtures, syncLog, historyDiagnostics, loading, phase) {
   return {
     sport: "football", from: range.from, to: range.to, competitions: competitions.length, total: fixtures.length,
-    syncedAt: new Date().toISOString(), syncLog: syncLog.map(item => ({ ...item })),
+    syncedAt: new Date().toISOString(), fixturesVerifiedAt: oldestVerificationTime(syncLog), syncLog: syncLog.map(item => ({ ...item })),
     historyDiagnostics: { ...historyDiagnostics }, loading, phase
   };
 }
@@ -176,4 +176,9 @@ function classifyFootballError(error) {
   if (/season/i.test(message)) return "Saison football introuvable ou non transmise.";
   if (/abort|timeout/i.test(message)) return "Délai de réponse dépassé.";
   return "Échec de la récupération des rencontres football.";
+}
+
+function oldestVerificationTime(syncLog) {
+  const times = syncLog.map(item => Date.parse(item.verifiedAt || "")).filter(Number.isFinite);
+  return times.length ? new Date(Math.min(...times)).toISOString() : null;
 }

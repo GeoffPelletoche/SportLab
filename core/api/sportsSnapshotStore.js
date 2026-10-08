@@ -42,7 +42,7 @@ export async function readSportsSnapshot(sport) {
 }
 
 export async function writeSportsSnapshot(sport, payload) {
-  if (!sport || !payload || payload?.meta?.error === true || payload?.meta?.loading === true) return false;
+  if (!sport || !payload || payload?.meta?.error === true || payload?.meta?.loading === true || payload?.meta?.fixtureRefreshSkipped === true) return false;
   try {
     const db = await openDb();
     const record = { sport, schemaVersion: SCHEMA_VERSION, savedAt: Date.now(), payload };

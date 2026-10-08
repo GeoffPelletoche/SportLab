@@ -11,8 +11,8 @@ export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [
   const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const leagueId = Number(CONFIG.nfl?.leagueId || 1);
-  const freshness = fixtureRefreshPolicy({ previousPayload, refreshMode });
-  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode })) {
+  const freshness = fixtureRefreshPolicy({ previousPayload, refreshMode, range });
+  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode, range })) {
     const matches = Array.isArray(previousPayload?.matches) ? previousPayload.matches : previousMatches;
     const meta = { ...(previousPayload?.meta || {}), loading: false, phase: "fixture-cooldown", fixtureRefreshSkipped: true, fixtureRefreshReason: freshness.reason, fixtureRefreshPolicy: freshness };
     return { fixtures: matches, meta };
@@ -22,11 +22,11 @@ export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [
 
   try {
     const requestStartedAt = new Date().toISOString();
-    const data = await fetchFromWorker("/nfl/games", { league: leagueId, from: range.from, to: range.to });
+    const data = await fetchFromWorker("/nfl/games", { league: leagueId, from: range.from, to: range.to }, { forceFresh: refreshMode === "force" });
     const fixtures = normalizeNflGames(data?.response || []);
     const cacheHydrated = fixtures.map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity));
     diagnostics.snapshotMatches = previousById.size; diagnostics.reusedMatches = cacheHydrated.filter(hasCompleteHistory).length; diagnostics.newMatches = cacheHydrated.filter(match => !findPreviousMatch(match, previousById, previousByIdentity)).length;
-    const syncLog = [{ competition: "NFL", leagueId, status: cacheHydrated.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: cacheHydrated.length, season: data?.season || null, message: cacheHydrated.length ? "Rencontres NFL chargées, historiques en cours." : "Aucune rencontre NFL dans la fenêtre d’analyse." }];
+    const syncLog = [{ competition: "NFL", leagueId, status: cacheHydrated.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", verifiedAt: data?.clientVerifiedAt || new Date().toISOString(), count: cacheHydrated.length, season: data?.season || null, message: cacheHydrated.length ? "Rencontres NFL chargées, historiques en cours." : "Aucune rencontre NFL dans la fenêtre d’analyse." }];
     diagnostics.fixtureRequest = { from: range.from, to: range.to, leagueId, status: "OK", returned: cacheHydrated.length, source: data?.source || "unknown", startedAt: requestStartedAt, completedAt: new Date().toISOString() };
     emitProgress(onProgress, cacheHydrated, range, syncLog, diagnostics, true, "fixtures", data?.season);
 
@@ -38,7 +38,7 @@ export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [
     syncLog[0].status = enriched.length ? "OK" : "EMPTY";
     syncLog[0].message = null;
     emitProgress(onProgress, enriched, range, syncLog, diagnostics, false, "complete", data?.season);
-    return { fixtures: enriched, meta: buildMeta(range, enriched, syncLog, diagnostics, false, "complete", data?.season) };
+    return { fixtures: enriched, meta: { ...buildMeta(range, enriched, syncLog, diagnostics, false, "complete", data?.season), fixtureRefreshPolicy: freshness } };
   } catch (error) {
     const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
     const syncLog = [{ competition: "NFL", leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error?.message || String(error), code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null }];
@@ -103,5 +103,10 @@ function normalizeNflGames(items) {
 }
 function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0, fixtureRequest: null }; }
 function emitProgress(callback, fixtures, range, syncLog, diagnostics, loading, phase, season) { if (typeof callback === "function") callback({ fixtures: [...fixtures], meta: buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) }); }
-function buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) { return { sport: "nfl", from: range.from, to: range.to, competitions: 1, total: fixtures.length, season: season || fixtures[0]?.season || null, syncedAt: new Date().toISOString(), syncLog: syncLog.map(x => ({...x})), historyDiagnostics: {...diagnostics}, loading, phase }; }
+function buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) { return { sport: "nfl", from: range.from, to: range.to, competitions: 1, total: fixtures.length, season: season || fixtures[0]?.season || null, syncedAt: new Date().toISOString(), fixturesVerifiedAt: oldestVerificationTime(syncLog), syncLog: syncLog.map(x => ({...x})), historyDiagnostics: {...diagnostics}, loading, phase }; }
 async function mapWithConcurrency(items, limit, mapper) { const results = new Array(items.length); let next=0; const workers=Array.from({length:Math.min(limit,items.length)}, async()=>{ while(next<items.length){ const i=next++; results[i]=await mapper(items[i],i); }}); await Promise.all(workers); return results; }
+
+function oldestVerificationTime(syncLog) {
+  const times = syncLog.map(item => Date.parse(item.verifiedAt || "")).filter(Number.isFinite);
+  return times.length ? new Date(Math.min(...times)).toISOString() : null;
+}

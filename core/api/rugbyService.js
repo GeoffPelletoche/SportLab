@@ -11,8 +11,8 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
   const previousByIdentity = new Map((Array.isArray(previousMatches) ? previousMatches : []).map(match => [matchIdentity(match), match]).filter(([key]) => Boolean(key)));
   const range = getDateRange(CONFIG.analysisWindowDays);
   const activeCompetitions = CONFIG.frenchflair.competitions.filter(c => c.active);
-  const freshness = fixtureRefreshPolicy({ previousPayload, refreshMode });
-  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode })) {
+  const freshness = fixtureRefreshPolicy({ previousPayload, refreshMode, range });
+  if (shouldSkipFixtureRefresh({ previousPayload, refreshMode, range })) {
     const matches = Array.isArray(previousPayload?.matches) ? previousPayload.matches : previousMatches;
     const meta = { ...(previousPayload?.meta || {}), loading: false, phase: "fixture-cooldown", fixtureRefreshSkipped: true, fixtureRefreshReason: freshness.reason, fixtureRefreshPolicy: freshness };
     return { fixtures: matches, meta };
@@ -27,12 +27,12 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
   // compétition située plus bas dans la liste (notamment Bunnings NPC).
   const fixtureResults = await Promise.all(activeCompetitions.map(async competition => {
     try {
-      const data = await fetchFromWorker("/rugby/fixtures", { league: competition.id, from: range.from, to: range.to });
+      const data = await fetchFromWorker("/rugby/fixtures", { league: competition.id, from: range.from, to: range.to }, { forceFresh: refreshMode === "force" });
       const raw = Array.isArray(data?.response) ? data.response : [];
       const fixtures = normalizeRugbyFixtures(raw, competition, data).map(fixture => hydrateFixtureFromPreviousOrCache(fixture, previousById, previousByIdentity));
       const logEntry = {
         competition: competition.name, leagueId: competition.id, season: data?.season || null,
-        status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", count: fixtures.length,
+        status: fixtures.length ? "LOADING_HISTORY" : "EMPTY", source: data?.source || "unknown", verifiedAt: data?.clientVerifiedAt || new Date().toISOString(), count: fixtures.length,
         rawResults: data?.rawResults ?? null, filteredResults: data?.filteredResults ?? null,
         message: fixtures.length ? "Rencontres chargées, historiques en arrière-plan." : (data?.warning || null)
       };
@@ -69,7 +69,7 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
     emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
   }));
 
-  const meta = buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete");
+  const meta = { ...buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete"), fixtureRefreshPolicy: freshness };
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
   return { fixtures: allFixtures, meta };
 }
@@ -101,7 +101,7 @@ function emitProgress(callback, fixtures, range, competitions, syncLog, historyD
   callback({ fixtures: [...fixtures], meta: buildMeta(range, competitions, fixtures, syncLog, historyDiagnostics, loading, phase) });
 }
 function buildMeta(range, competitions, fixtures, syncLog, historyDiagnostics, loading, phase) {
-  return { sport: "rugby", from: range.from, to: range.to, competitions: competitions.length, total: fixtures.length, syncedAt: new Date().toISOString(), syncLog: syncLog.map(item => ({ ...item })), historyDiagnostics: { ...historyDiagnostics }, loading, phase };
+  return { sport: "rugby", from: range.from, to: range.to, competitions: competitions.length, total: fixtures.length, syncedAt: new Date().toISOString(), fixturesVerifiedAt: oldestVerificationTime(syncLog), syncLog: syncLog.map(item => ({ ...item })), historyDiagnostics: { ...historyDiagnostics }, loading, phase };
 }
 async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics, memo) {
   const cleanName = decodeHtmlEntities(teamName).trim(); if ((!teamId && !cleanName) || !season) return [];
@@ -126,3 +126,8 @@ function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cach
 function normalizeRugbyFixtures(items, competition, data) { return items.map(item => ({ id: item.id, homeId: item.homeId || null, awayId: item.awayId || null, homeLogo: item.homeLogo || (item.homeId ? `https://media.api-sports.io/rugby/teams/${item.homeId}.png` : ""), awayLogo: item.awayLogo || (item.awayId ? `https://media.api-sports.io/rugby/teams/${item.awayId}.png` : ""), home: decodeHtmlEntities(item.home), away: decodeHtmlEntities(item.away), competition: decodeHtmlEntities(item.competition || competition.name), date: item.date, status: item.status, leagueId: item.leagueId || competition.id, season: item.season || data?.season || null, source: "FrenchFlair", sport: "rugby", homeHistory: [], awayHistory: [] })); }
 function decodeHtmlEntities(value) { return String(value || "").replace(/&apos;|&#39;|&#039;/gi, "'").replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&nbsp;/gi, " "); }
 function normalizeTeamName(value) { return decodeHtmlEntities(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/&/g, " and ").replace(/\b(rugby|football|club|union|team)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim(); }
+
+function oldestVerificationTime(syncLog) {
+  const times = syncLog.map(item => Date.parse(item.verifiedAt || "")).filter(Number.isFinite);
+  return times.length ? new Date(Math.min(...times)).toISOString() : null;
+}

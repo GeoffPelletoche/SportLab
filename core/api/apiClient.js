@@ -22,7 +22,7 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
     const cached = requestReuse.read(cacheKey);
     if (cached) {
       recordRequestReuse("recent", path);
-      return { ...cached.value, clientCacheHit: true, clientCacheAgeMs: cached.ageMs };
+      return { ...cached.value, clientCacheHit: true, clientCacheAgeMs: cached.ageMs, clientVerifiedAt: cached.value.clientVerifiedAt || new Date(Date.now() - cached.ageMs).toISOString() };
     }
   }
   const dedupeKey = `${cacheKey}|${options.timeoutMs || DEFAULT_TIMEOUT_MS}|${options.attempts || DEFAULT_ATTEMPTS}|${options.rateLimitRetries ?? RATE_LIMIT_RETRIES}`;
@@ -37,6 +37,7 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
         const result = await scheduleApiRequest(() => executeRequest(url, options), { priority });
+        if (result && typeof result === "object") result.clientVerifiedAt = new Date().toISOString();
         if (recentFixtures && Array.isArray(result?.response) && !result?.error) requestReuse.write(cacheKey, result);
         return result;
       } catch (error) {
