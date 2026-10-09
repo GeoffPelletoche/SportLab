@@ -1,3 +1,9 @@
+# SportLab V11.8.4.13 — Protection contre les 429 répétés
+
+Version actuelle : **11.8.4.13**. Déploiement : voir `docs/DEPLOIEMENT_V11.8.4.13.md`. Cette livraison nécessite aussi le déploiement du **Bridge API 3.11.1**, fourni dans `cloudflare-worker/sportlab-api-bridge-v3.11.1.js`. Le Worker de synchronisation est conservé.
+
+## Notes historiques
+
 # SportLab V11.7.9 — NFL Match Layout Fix
 
 # SportLab V11.7.0

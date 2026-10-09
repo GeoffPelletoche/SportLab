@@ -123,6 +123,7 @@ async function loadSportWithStartupRetry({ load, previousPayload, sport, reason,
       lastError = null;
       if (!isErrorPayload(lastPayload)) return lastPayload;
       lastError = new Error(lastPayload?.meta?.errorMessage || `Synchronisation ${sport} temporairement indisponible.`);
+      if (lastPayload?.meta?.refreshDeferred === true) break;
     } catch (error) {
       lastError = error;
     }
@@ -298,6 +299,10 @@ function atomicRefreshFailurePayload(previousPayload, failedPayload, sport) {
       sport,
       loading: false,
       refreshError: true,
+      refreshDeferred: failedPayload?.meta?.refreshDeferred === true,
+      syncLog: failedPayload?.meta?.syncLog || [],
+      historyDiagnostics: failedPayload?.meta?.historyDiagnostics || {},
+      fixtureRefreshPolicy: failedPayload?.meta?.fixtureRefreshPolicy,
       refreshErrorMessage: failedPayload?.meta?.errorMessage || "Rafraîchissement temporairement indisponible.",
       lastRefreshPhase: failedPayload?.meta?.phase || "error"
     }
