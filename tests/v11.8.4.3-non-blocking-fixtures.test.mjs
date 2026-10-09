@@ -12,9 +12,9 @@ test("V11.8.4.6 removes the browser 10/60 start window", () => {
 
 test("V11.8.4.6 re-evaluates priority after scheduler pauses", () => {
   const source = read("core/api/requestScheduler.js");
-  const waitIndex = source.indexOf("if (waitMs > 0) { await wait(waitMs); continue; }");
+  const waitIndex = source.indexOf("if (gap > 0) { await waitForChange(gap); continue; }");
   const sortIndex = source.indexOf("queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);", waitIndex);
-  const shiftIndex = source.indexOf("const item = queue.shift();", waitIndex);
+  const shiftIndex = source.indexOf("const [item] = queue.splice(index, 1);", waitIndex);
   assert.ok(waitIndex >= 0 && sortIndex > waitIndex && shiftIndex > sortIndex);
 });
 

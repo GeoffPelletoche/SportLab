@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 const root = new URL('../', import.meta.url);
-async function environment(fetchImpl, snapshotBuild = false, localStorage = undefined) {
+async function environment(fetchImpl, snapshotBuild = false, localStorage = undefined, competitionCount = 1) {
   let time = Date.parse('2026-10-08T14:00:00Z');
   let sequence = 0;
   const timers = new Map();
@@ -15,7 +15,7 @@ async function environment(fetchImpl, snapshotBuild = false, localStorage = unde
     const id = url.href;
     if (modules.has(id)) return modules.get(id);
     let module;
-    if (url.pathname.endsWith('/config/config.js')) module = new vm.SyntheticModule(['CONFIG'], function() { this.setExport('CONFIG', { api: { workerBaseUrl: 'https://worker.example' }, analysisWindowDays: 1, drawhunter: { competitions: [{ id: 61, name: 'Ligue 1', active: true }] }, frenchflair: { competitions: [{ id: 16, name: 'Top 14', active: true }] }, nfl: { leagueId: 1 } }); }, { context });
+    if (url.pathname.endsWith('/config/config.js')) module = new vm.SyntheticModule(['CONFIG'], function() { this.setExport('CONFIG', { api: { workerBaseUrl: 'https://worker.example' }, analysisWindowDays: 1, drawhunter: { competitions: Array.from({ length: competitionCount }, (_, i) => ({ id: 61 + i, name: 'Football ' + i, active: true })) }, frenchflair: { competitions: Array.from({ length: competitionCount }, (_, i) => ({ id: 16 + i, name: 'Rugby ' + i, active: true })) }, nfl: { leagueId: 1 } }); }, { context });
     else module = new vm.SourceTextModule(fs.readFileSync(fileURLToPath(url), 'utf8'), { context, identifier: id });
     modules.set(id, module);
     await module.link((specifier, referencing) => load(new URL(specifier, referencing.identifier)));
@@ -149,15 +149,15 @@ console.log('Request queue integration passed');
   await assert.rejects(env.settle(env.client.fetchFromWorker('/nfl/games', { id: 1 })), e => e.status === 429);
   await env.settle(env.client.fetchFromWorker('/nfl/games', { id: 2 }));
   const denied = env.client.fetchFromWorker('/nfl/games', { id: 3 });
-  const waiting = env.client.fetchFromWorker('/rugby/team-games', { team: 4 });
+  const waiting = env.client.fetchFromWorker('/nfl/team-games', { team: 4 });
   const results = await env.settle(Promise.allSettled([denied, waiting]));
   assert.equal(calls, 3);
   assert.equal(results[0].reason.status, 429);
   assert.equal(results[1].reason.code, 'API_QUEUE_CIRCUIT_OPEN');
-  await assert.rejects(env.settle(env.client.fetchFromWorker('/football/fixtures', {})), e => e.deferred === true);
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/nfl/games', { id: 5 })), e => e.deferred === true);
   assert.equal(calls, 3);
   env.advance(120000);
-  await assert.rejects(env.settle(env.client.fetchFromWorker('/football/fixtures', {})), e => e.status === 429);
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/nfl/games', { id: 6 })), e => e.status === 429);
   assert.equal(calls, 4, 'circuit releases after the deadline');
 }
 // A long provider deadline expires queued work without sending it or retrying it.
@@ -175,7 +175,7 @@ console.log('Request queue integration passed');
   let calls = 0;
   const env = await environment(() => { calls++; return new Response(JSON.stringify({ code: 'API_SPORTS_COOLDOWN', retryAfterMs: 90000, apiDiagnostics: { bridgeVersion: '3.11.1', quotas: [] } }), { status: 503 }); });
   const results = await env.settle(Promise.allSettled([
-    env.client.fetchFromWorker('/nfl/games', {}), env.client.fetchFromWorker('/rugby/fixtures', {})
+    env.client.fetchFromWorker('/nfl/games', {}), env.client.fetchFromWorker('/nfl/team-games', {})
   ]));
   assert.equal(results.every(r => r.status === 'rejected' && r.reason.deferred), true);
   assert.equal(calls, 1);
@@ -206,4 +206,59 @@ console.log('Request queue integration passed');
   reopened.advance(120000);
   await reopened.settle(reopened.client.fetchFromWorker('/nfl/games', {}));
   assert.equal(calls, 1);
+}
+
+// Integration: stop rugby histories after the refusal, let football complete.
+{
+  const paths = [];
+  const fixture = (id, leagueId) => ({ id, leagueId, homeId: id * 2, awayId: id * 2 + 1, home: 'Home', away: 'Away', date: '2026-10-09T20:00:00Z', season: 2026 });
+  const env = await environment((time, url) => {
+    const parsed = new URL(url); const path = parsed.pathname; paths.push(path); const league = Number(parsed.searchParams.get('league'));
+    if (path === '/rugby/team-games') return new Response(JSON.stringify({ code: 'API_SPORTS_RATE_LIMIT', retryAfterMs: 60000 }), { status: 429 });
+    const response = path === '/rugby/fixtures' ? Array.from({ length: 10 }, (_, i) => fixture(10000 + league * 100 + i, league))
+      : path === '/football/fixtures' ? [fixture(500 + league, league)] : [{ id: 1000 }];
+    return new Response(JSON.stringify({ response, season: 2026 }), { status: 200 });
+  }, false, undefined, 3);
+  const rugby = await env.loadService('rugbyService');
+  const football = await env.loadService('footballService');
+  const [r, f] = await env.settle(Promise.all([rugby.fetchUpcomingRugbyFixtures({ refreshMode: 'force' }), football.fetchUpcomingFootballFixtures({ refreshMode: 'force' })]));
+  assert.equal(paths.filter(p => p === '/rugby/team-games').length, 1);
+  assert.ok(r.meta.historyDiagnostics.requested <= 3, 'at most the already active rugby workers submitted calls');
+  assert.ok(r.meta.historyDiagnostics.skipped >= 17);
+  assert.equal(r.meta.historyDiagnostics.stopped, true);
+  assert.equal(r.meta.error, true);
+  assert.equal(f.meta.error, undefined);
+  assert.equal(paths.filter(p => p === '/football/team-fixtures').length, 6);
+  assert.equal(f.fixtures[0].homeHistory.length, 1);
+  assert.equal(f.fixtures[0].awayHistory.length, 1);
+  assert.equal(env.scheduler.getApiSchedulerState().queued, 0);
+  await env.settle(env.client.fetchFromWorker('/nfl/games', {}));
+  assert.equal(paths.at(-1), '/nfl/games');
+}
+// A scoped pause persists across reopening without blocking another sport.
+{
+  const values = new Map();
+  const storage = { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value) };
+  const first = await environment(() => ok(), false, storage);
+  first.scheduler.applyApiCooldown(60000, { path: '/rugby/team-games' });
+  let calls = 0;
+  const reopened = await environment(() => { calls++; return ok(); }, false, storage);
+  await assert.rejects(reopened.settle(reopened.client.fetchFromWorker('/rugby/fixtures', {})), e => e.deferred);
+  await reopened.settle(reopened.client.fetchFromWorker('/football/fixtures', {}));
+  assert.equal(calls, 1);
+  reopened.advance(60000);
+  await reopened.settle(reopened.client.fetchFromWorker('/rugby/fixtures', {}));
+  assert.equal(calls, 2);
+}
+// A low-priority eligible sport wakes the drain during a high-priority sport pause.
+{
+  const env = await environment(() => ok());
+  env.scheduler.applyGlobalRateLimit(0, { path: '/rugby/fixtures' });
+  const rugby = env.scheduler.scheduleApiRequest(() => 'rugby', { path: '/rugby/fixtures', priority: 110 });
+  await new Promise(resolve => setImmediate(resolve));
+  const before = env.now();
+  const football = env.scheduler.scheduleApiRequest(() => 'football', { path: '/football/team-fixtures' });
+  assert.equal(await env.settle(football), 'football');
+  assert.ok(env.now() - before < 15000, 'football never waits for the rugby cooldown');
+  assert.equal(await env.settle(rugby), 'rugby');
 }

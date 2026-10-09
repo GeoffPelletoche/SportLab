@@ -14,7 +14,7 @@ test("V10.1 worker adds season to football fixtures", async () => {
 test("V10.1 diagnostics distinguish empty from errors", async () => {
   const service = await readFile(new URL("core/api/footballService.js", root), "utf8");
   const view = await readFile(new URL("ui/views/diagnosticsView.js", root), "utf8");
-  assert.match(service, /status = enrichedFixtures\.length > 0 \? "OK" : "EMPTY"/);
+  assert.match(service, /if \(fixtures\.length\) logEntry\.status = historyDiagnostics\.stopped \? "DEFERRED" : "OK"/);
   assert.match(view, /Compétitions sans match/);
   assert.match(view, /Détail par compétition/);
 });
