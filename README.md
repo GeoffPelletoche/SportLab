@@ -1,6 +1,6 @@
-# SportLab V11.8.4.13 — Protection contre les 429 répétés
+# SportLab V11.8.4.14 — Pauses API indépendantes et arrêt des historiques
 
-Version actuelle : **11.8.4.13**. Déploiement : voir `docs/DEPLOIEMENT_V11.8.4.13.md`. Cette livraison nécessite aussi le déploiement du **Bridge API 3.11.1**, fourni dans `cloudflare-worker/sportlab-api-bridge-v3.11.1.js`. Le Worker de synchronisation est conservé.
+Version actuelle : **11.8.4.14**. Déploiement : voir `docs/DEPLOIEMENT_V11.8.4.14.md`. Cette livraison nécessite aussi le déploiement du **Bridge API 3.11.2**, fourni dans `cloudflare-worker/sportlab-api-bridge-v3.11.2.js`. Le Worker de synchronisation est conservé.
 
 ## Notes historiques
 
