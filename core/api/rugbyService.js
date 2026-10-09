@@ -1,3 +1,4 @@
+import { getApiPauseUntil } from "./requestScheduler.js";
 import { completeRefreshMeta } from "./refreshCompletion.js";
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
@@ -56,19 +57,17 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
 
   // Phase 2 seulement : enrichissement historique. Les fixtures de toutes les
   // compétitions ont déjà été publiées à l'interface.
-  await Promise.all(fixtureResults.map(async ({ fixtures, logEntry, data }) => {
-    if (!fixtures.length) return;
-    const enrichedFixtures = await mapWithConcurrency(fixtures, HISTORY_CONCURRENCY, async fixture => {
-      const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
-      const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
-      return { ...fixture, homeHistory, awayHistory };
-    });
-    const byId = new Map(enrichedFixtures.map(item => [String(item.id), item]));
-    for (let i = 0; i < allFixtures.length; i += 1) { const replacement = byId.get(String(allFixtures[i].id)); if (replacement) allFixtures[i] = replacement; }
-    logEntry.status = "OK";
-    logEntry.message = data?.warning || null;
-    emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
-  }));
+  // One history pool per sport, rather than one pool per competition.
+  const enrichedFixtures = await mapWithConcurrency(allFixtures, HISTORY_CONCURRENCY, async fixture => {
+    const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+    const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+    return { ...fixture, homeHistory, awayHistory };
+  });
+  allFixtures.splice(0, allFixtures.length, ...enrichedFixtures);
+  for (const { fixtures, logEntry } of fixtureResults) {
+    if (fixtures.length) logEntry.status = historyDiagnostics.stopped ? "DEFERRED" : "OK";
+  }
+  emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
 
   const meta = completeRefreshMeta({ ...buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete"), fixtureRefreshPolicy: freshness });
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
@@ -110,6 +109,9 @@ async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics,
   const cacheKey = `${identity}:${normalizeTeamName(cleanName) || "unknown"}:${leagueId || "all"}`;
   const cached = readHistoryCache("rugby", cacheKey);
   if (cached.length) { diagnostics.cacheFallback += 1; diagnostics.gamesLoaded += cached.length; return cached; }
+  if (diagnostics.stopped || getApiPauseUntil("/rugby") > Date.now()) {
+    diagnostics.stopped = true; diagnostics.skipped += 1; return [];
+  }
   const promise = (async () => {
     diagnostics.requested += 1;
     try {
@@ -117,13 +119,13 @@ async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics,
       const history = Array.isArray(data?.response) ? data.response : [];
       if (history.length) { diagnostics.apiSuccess += 1; diagnostics.gamesLoaded += history.length; writeHistoryCache("rugby", cacheKey, history); return history; }
       diagnostics.emptyResponses += 1;
-    } catch (error) { diagnostics.errors += 1; console.warn("Rugby history error:", identity, cleanName, error); }
+    } catch (error) { diagnostics.errors += 1; if (error?.deferred || Number(error?.status) === 429) diagnostics.stopped = true; console.warn("Rugby history error:", identity, cleanName, error); }
     return [];
   })();
   memo.set(memoKey, promise); return promise;
 }
 async function mapWithConcurrency(items, limit, mapper) { const results = new Array(items.length); let nextIndex = 0; const workers = Array.from({ length: Math.min(limit, items.length) }, async () => { while (nextIndex < items.length) { const index = nextIndex++; results[index] = await mapper(items[index], index); } }); await Promise.all(workers); return results; }
-function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0 }; }
+function createHistoryDiagnostics() { return { requested: 0, skipped: 0, stopped: false, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0 }; }
 function normalizeRugbyFixtures(items, competition, data) { return items.map(item => ({ id: item.id, homeId: item.homeId || null, awayId: item.awayId || null, homeLogo: item.homeLogo || (item.homeId ? `https://media.api-sports.io/rugby/teams/${item.homeId}.png` : ""), awayLogo: item.awayLogo || (item.awayId ? `https://media.api-sports.io/rugby/teams/${item.awayId}.png` : ""), home: decodeHtmlEntities(item.home), away: decodeHtmlEntities(item.away), competition: decodeHtmlEntities(item.competition || competition.name), date: item.date, status: item.status, leagueId: item.leagueId || competition.id, season: item.season || data?.season || null, source: "FrenchFlair", sport: "rugby", homeHistory: [], awayHistory: [] })); }
 function decodeHtmlEntities(value) { return String(value || "").replace(/&apos;|&#39;|&#039;/gi, "'").replace(/&amp;/gi, "&").replace(/&quot;/gi, '"').replace(/&nbsp;/gi, " "); }
 function normalizeTeamName(value) { return decodeHtmlEntities(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/&/g, " and ").replace(/\b(rugby|football|club|union|team)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim(); }

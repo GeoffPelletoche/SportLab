@@ -4,7 +4,7 @@ import { recordRateLimit, recordSchedulerQueueSize, recordSchedulerDefer, record
  *
  * File centrale pour tous les appels vers l'API Bridge (Football/Rugby/NFL).
  * Objectifs : supprimer les rafales, prioriser les fixtures et appliquer une
- * pause globale lorsqu'API-Sports répond 429.
+ * pause par sport lorsqu'API-Sports répond 429.
  */
 const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
 const MIN_GAP_MS = IS_SNAPSHOT_BUILD ? 5000 : 900;
@@ -17,33 +17,56 @@ let queue = [];
 let running = false;
 let sequence = 0;
 let lastStartedAt = 0;
-let blockedUntil = 0;
-let rateLimitStreak = 0;
 let requestStarts = [];
-let lastRateLimitAt = 0;
-let circuitUntil = 0;
+const pauses = new Map();
 const RATE_LIMIT_MEMORY_MS = 120000;
 const CIRCUIT_PAUSE_MS = 120000;
-const CIRCUIT_STORAGE_KEY = "sportlab:api-pause:v1";
-try {
-  const saved = JSON.parse(globalThis.localStorage?.getItem(CIRCUIT_STORAGE_KEY) || "null");
-  if (!IS_SNAPSHOT_BUILD && saved?.until > Date.now() && saved.until <= Date.now() + 86400000) {
-    circuitUntil = blockedUntil = saved.until;
-  }
-} catch { /* Storage is optional, including private browsing. */ }
-
-function saveCircuit() {
-  try { globalThis.localStorage?.setItem(CIRCUIT_STORAGE_KEY, JSON.stringify({ until: circuitUntil })); } catch {}
+const CIRCUIT_STORAGE_KEY = "sportlab:api-pause:v2";
+function scopeFor(path = "") { return /^\/(football|rugby|nfl)(?:\/|$)/.exec(path)?.[1] || "global"; }
+function pauseFor(scope) {
+  if (!pauses.has(scope)) pauses.set(scope, { blockedUntil: 0, circuitUntil: 0, rateLimitStreak: 0, lastRateLimitAt: 0 });
+  return pauses.get(scope);
 }
-
+try {
+  const saved = JSON.parse(globalThis.localStorage?.getItem(CIRCUIT_STORAGE_KEY) || "{}");
+  // Preserve a still-active protection from the previous release, once only.
+  const old = JSON.parse(globalThis.localStorage?.getItem("sportlab:api-pause:v1") || "null");
+  if (old?.until > Date.now()) saved.global = Math.max(saved.global || 0, old.until);
+  if (!IS_SNAPSHOT_BUILD) for (const scope of ["global", "rugby", "football", "nfl"]) {
+    if (saved[scope] > Date.now() && saved[scope] <= Date.now() + 86400000) {
+      Object.assign(pauseFor(scope), { blockedUntil: saved[scope], circuitUntil: saved[scope] });
+    }
+  }
+} catch {}
+function saveCircuit() {
+  try { globalThis.localStorage?.setItem(CIRCUIT_STORAGE_KEY, JSON.stringify(Object.fromEntries([...pauses].map(([scope, state]) => [scope, state.circuitUntil])))); } catch {}
+}
+export function getApiPauseUntil(path = "") {
+  return Math.max(pauseFor(scopeFor(path)).blockedUntil, pauseFor("global").blockedUntil);
+}
+function circuitDeadline(path) {
+  return Math.max(pauseFor(scopeFor(path)).circuitUntil, pauseFor("global").circuitUntil);
+}
+let wakeDrain = null;
+function wake() { wakeDrain?.(); }
+function waitForChange(ms) {
+  return new Promise(resolve => {
+    const finish = () => { clearTimeout(timer); if (wakeDrain === finish) wakeDrain = null; resolve(); };
+    const timer = setTimeout(finish, ms);
+    wakeDrain = finish;
+  });
+}
 export function applyApiCooldown(retryAfterMs, { path = "" } = {}) {
-  circuitUntil = Math.max(circuitUntil, Date.now() + Math.max(1000, Number(retryAfterMs) || 60000));
-  blockedUntil = Math.max(blockedUntil, circuitUntil);
+  const scope = scopeFor(path);
+  const state = pauseFor(scope);
+  state.circuitUntil = Math.max(state.circuitUntil, Date.now() + Math.max(1000, Number(retryAfterMs) || 60000));
+  state.blockedUntil = Math.max(state.blockedUntil, state.circuitUntil);
   saveCircuit();
-  const pending = queue;
-  queue = [];
-  recordSchedulerQueueSize(0);
-  for (const item of pending) rejectItem(item, deferredError("API_QUEUE_CIRCUIT_OPEN", circuitUntil - Date.now()));
+  const pending = queue.filter(item => scope === "global" || scopeFor(item.path) === scope);
+  queue = queue.filter(item => !pending.includes(item));
+  recordSchedulerQueueSize(queue.length);
+  for (const item of pending) rejectItem(item, deferredError("API_QUEUE_CIRCUIT_OPEN", state.circuitUntil - Date.now()));
+  wake();
 }
 
 function deferredError(code, retryAfterMs = 0) {
@@ -60,9 +83,9 @@ function rejectItem(item, error) {
 
 export function scheduleApiRequest(task, { priority = 0, path = "", maxQueueWaitMs = IS_SNAPSHOT_BUILD ? 600000 : 45000 } = {}) {
   return new Promise((resolve, reject) => {
-    if (!IS_SNAPSHOT_BUILD && circuitUntil > Date.now()) {
-      recordSchedulerDefer({ code: "API_QUEUE_CIRCUIT_OPEN", path, retryAfterMs: circuitUntil - Date.now() });
-      reject(deferredError("API_QUEUE_CIRCUIT_OPEN", circuitUntil - Date.now()));
+    if (!IS_SNAPSHOT_BUILD && circuitDeadline(path) > Date.now()) {
+      recordSchedulerDefer({ code: "API_QUEUE_CIRCUIT_OPEN", path, retryAfterMs: circuitDeadline(path) - Date.now() });
+      reject(deferredError("API_QUEUE_CIRCUIT_OPEN", circuitDeadline(path) - Date.now()));
       return;
     }
     const perfEnqueuedAt = recordSchedulerEnqueue();
@@ -72,9 +95,10 @@ export function scheduleApiRequest(task, { priority = 0, path = "", maxQueueWait
       if (index < 0) return;
       queue.splice(index, 1);
       recordSchedulerQueueSize(queue.length);
-      rejectItem(item, deferredError("API_QUEUE_WAIT_EXPIRED", Math.max(0, blockedUntil - Date.now())));
+      rejectItem(item, deferredError("API_QUEUE_WAIT_EXPIRED", Math.max(0, getApiPauseUntil(path) - Date.now())));
     }, Math.max(1, Number(maxQueueWaitMs) || 45000));
     queue.push(item);
+    wake();
     recordSchedulerQueueSize(queue.length);
     queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);
     void drain();
@@ -82,23 +106,24 @@ export function scheduleApiRequest(task, { priority = 0, path = "", maxQueueWait
 }
 
 export function applyGlobalRateLimit(retryAfterMs = 0, { path = "" } = {}) {
+  const scope = scopeFor(path);
+  const state = pauseFor(scope);
   const requested = Math.max(0, Number(retryAfterMs) || 0);
-  if (Date.now() - lastRateLimitAt >= RATE_LIMIT_MEMORY_MS) rateLimitStreak = 0;
-  lastRateLimitAt = Date.now();
-  rateLimitStreak += 1;
-  const adaptivePause = Math.min(MAX_RATE_LIMIT_PAUSE_MS, DEFAULT_RATE_LIMIT_PAUSE_MS * (2 ** Math.min(8, rateLimitStreak - 1)));
-  // A provider deadline longer than our normal pause must never be shortened.
+  if (Date.now() - state.lastRateLimitAt >= RATE_LIMIT_MEMORY_MS) state.rateLimitStreak = 0;
+  state.lastRateLimitAt = Date.now();
+  state.rateLimitStreak += 1;
+  const adaptivePause = Math.min(MAX_RATE_LIMIT_PAUSE_MS, DEFAULT_RATE_LIMIT_PAUSE_MS * (2 ** Math.min(8, state.rateLimitStreak - 1)));
   const pause = Math.max(adaptivePause, requested);
-  blockedUntil = Math.max(blockedUntil, Date.now() + pause);
-  if (!IS_SNAPSHOT_BUILD && (rateLimitStreak >= 2 || requested >= 45000)) {
-    applyApiCooldown(Math.max(blockedUntil - Date.now(), rateLimitStreak >= 2 ? CIRCUIT_PAUSE_MS : requested), { path });
+  state.blockedUntil = Math.max(state.blockedUntil, Date.now() + pause);
+  if (!IS_SNAPSHOT_BUILD && (state.rateLimitStreak >= 2 || requested >= 45000)) {
+    applyApiCooldown(Math.max(state.blockedUntil - Date.now(), state.rateLimitStreak >= 2 ? CIRCUIT_PAUSE_MS : requested), { path });
   }
-  recordRateLimit({ path, pauseMs: blockedUntil - Date.now(), retryAfterMs: requested, blockedUntil, circuitOpen: circuitUntil > Date.now() });
+  recordRateLimit({ path, scope, pauseMs: state.blockedUntil - Date.now(), retryAfterMs: requested, blockedUntil: state.blockedUntil, circuitOpen: state.circuitUntil > Date.now() });
+  wake();
   return pause;
 }
-
 export function getApiSchedulerState() {
-  return { queued: queue.length, running, blockedUntil, circuitUntil, rateLimitStreak, minGapMs: MIN_GAP_MS };
+  return { queued: queue.length, running, ...pauseFor("global"), scopes: Object.fromEntries(pauses), minGapMs: MIN_GAP_MS };
 }
 
 async function drain() {
@@ -111,10 +136,15 @@ async function drain() {
       // lists); once the pause expires, re-sort and select the highest priority
       // item that is actually ready to start.
       if (IS_SNAPSHOT_BUILD) await waitForStartWindow();
-      const waitMs = Math.max(0, blockedUntil - Date.now(), MIN_GAP_MS - (Date.now() - lastStartedAt));
-      if (waitMs > 0) { await wait(waitMs); continue; }
+      const gap = Math.max(0, MIN_GAP_MS - (Date.now() - lastStartedAt));
+      if (gap > 0) { await waitForChange(gap); continue; }
       queue.sort((a, b) => b.priority - a.priority || a.sequence - b.sequence);
-      const item = queue.shift();
+      const index = queue.findIndex(item => getApiPauseUntil(item.path) <= Date.now());
+      if (index < 0) {
+        await waitForChange(Math.max(1, Math.min(...queue.map(item => getApiPauseUntil(item.path))) - Date.now()));
+        continue;
+      }
+      const [item] = queue.splice(index, 1);
       recordSchedulerQueueSize(queue.length);
       if (!item) continue;
       clearTimeout(item.timer);

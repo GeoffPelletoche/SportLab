@@ -1,3 +1,4 @@
+import { getApiPauseUntil } from "./requestScheduler.js";
 import { completeRefreshMeta } from "./refreshCompletion.js";
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
@@ -81,6 +82,9 @@ async function fetchTeamHistory(teamId, teamName, season, diagnostics, memo) {
   const cached = readHistoryCache("nfl", key);
   if (cached.length) { diagnostics.cacheFallback += 1; diagnostics.gamesLoaded += cached.length; return cached; }
   if (memo.has(key)) return memo.get(key);
+  if (diagnostics.stopped || getApiPauseUntil("/nfl") > Date.now()) {
+    diagnostics.stopped = true; diagnostics.skipped += 1; return [];
+  }
   const promise = (async () => {
     diagnostics.requested += 1;
     try {
@@ -88,7 +92,7 @@ async function fetchTeamHistory(teamId, teamName, season, diagnostics, memo) {
       const history = Array.isArray(data?.response) ? data.response : [];
       if (history.length) { diagnostics.apiSuccess += 1; diagnostics.gamesLoaded += history.length; writeHistoryCache("nfl", key, history); return history; }
       diagnostics.emptyResponses += 1;
-    } catch (error) { diagnostics.errors += 1; console.warn("NFL history error:", teamId, teamName, error); }
+    } catch (error) { diagnostics.errors += 1; if (error?.deferred || Number(error?.status) === 429) diagnostics.stopped = true; console.warn("NFL history error:", teamId, teamName, error); }
     return [];
   })();
   memo.set(key, promise); return promise;
@@ -102,7 +106,7 @@ function normalizeNflGames(items) {
     source: "NFL Totals", sport: "nfl", homeHistory: [], awayHistory: []
   }));
 }
-function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0, fixtureRequest: null }; }
+function createHistoryDiagnostics() { return { requested: 0, skipped: 0, stopped: false, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0, fixtureRequest: null }; }
 function emitProgress(callback, fixtures, range, syncLog, diagnostics, loading, phase, season) { if (typeof callback === "function") callback({ fixtures: [...fixtures], meta: buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) }); }
 function buildMeta(range, fixtures, syncLog, diagnostics, loading, phase, season) { return { sport: "nfl", from: range.from, to: range.to, competitions: 1, total: fixtures.length, season: season || fixtures[0]?.season || null, syncedAt: new Date().toISOString(), fixturesVerifiedAt: oldestVerificationTime(syncLog), syncLog: syncLog.map(x => ({...x})), historyDiagnostics: {...diagnostics}, loading, phase }; }
 async function mapWithConcurrency(items, limit, mapper) { const results = new Array(items.length); let next=0; const workers=Array.from({length:Math.min(limit,items.length)}, async()=>{ while(next<items.length){ const i=next++; results[i]=await mapper(items[i],i); }}); await Promise.all(workers); return results; }

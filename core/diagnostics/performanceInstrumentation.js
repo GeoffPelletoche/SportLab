@@ -36,6 +36,8 @@ export function markModuleProgress(name, payload, reason="") {
   if (Number.isFinite(Number(hd.newMatches))) s.newMatches = Math.max(s.newMatches, Number(hd.newMatches));
   if (Number.isFinite(Number(hd.requested))) s.historyRequests = Math.max(s.historyRequests, Number(hd.requested));
   if (Number.isFinite(Number(hd.errors))) s.historyErrors = Math.max(s.historyErrors, Number(hd.errors));
+  if (Number.isFinite(Number(hd.skipped))) s.historySkipped = Math.max(s.historySkipped || 0, Number(hd.skipped));
+  if (typeof hd.stopped === "boolean") s.historyStopped = hd.stopped;
   s.fixtureCount=Math.max(s.fixtureCount,matches.length); s.analysisCount=Math.max(s.analysisCount,analyses);
   if (payload?.meta?.fixtureRefreshPolicy && reason === "complete") {
     const decision = { ...payload.meta.fixtureRefreshPolicy, loadCycleId: contexts.get(name)?.loadCycleId, trigger: contexts.get(name)?.trigger, atMs: Math.round(now) };
@@ -43,7 +45,7 @@ export function markModuleProgress(name, payload, reason="") {
   }
   const context = contexts.get(name) || { module: name, loadCycleId: null, trigger: reason, snapshotVersion: null, parentCycleId: null };
   if (phase === "complete" && reason !== "complete") return;
-  const errors = (payload?.meta?.syncLog || []).filter(item => ["ERROR", "RATE_LIMITED"].includes(item.status))
+  const errors = (payload?.meta?.syncLog || []).filter(item => ["ERROR", "RATE_LIMITED", "DEFERRED"].includes(item.status))
     .map(({ competition, leagueId, message, code, httpStatus }) => ({ competition, leagueId, message, code, httpStatus }));
   const last = s.phases.at(-1);
   if (last?.loadCycleId === context.loadCycleId && last.reason === reason && last.phase === phase
@@ -83,7 +85,7 @@ export function recordRateLimit(detail = {}) {
 }
 export function getPerformanceReport(){
   const moduleReport={}; for(const [name,s] of modules) moduleReport[name]={...s, startedAtMs:r(s.startedAtMs), readyAtMs:r(s.readyAtMs), firstFixturesMs:r(s.firstFixturesMs), firstAnalysisMs:r(s.firstAnalysisMs), fixturesReadyMs:r(s.fixturesReadyMs), completeMs:r(s.completeMs)};
-  return { version:"11.8.4.13", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, bridgeDiagnostics, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
+  return { version:"11.8.4.14", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, bridgeDiagnostics, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
 }
 export function formatPerformanceReport(){ return JSON.stringify(getPerformanceReport(),null,2); }
 function r(v){return v==null?null:Math.round(v);}

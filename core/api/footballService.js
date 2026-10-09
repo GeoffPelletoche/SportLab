@@ -1,3 +1,4 @@
+import { getApiPauseUntil } from "./requestScheduler.js";
 import { completeRefreshMeta } from "./refreshCompletion.js";
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
@@ -51,18 +52,17 @@ export async function fetchUpcomingFootballFixtures({ onProgress, previousMatche
   historyDiagnostics.reusedMatches = allFixtures.filter(hasCompleteHistory).length;
   historyDiagnostics.newMatches = allFixtures.filter(match => !findPreviousMatch(match, previousById, previousByIdentity)).length;
 
-  await Promise.all(fixtureResults.map(async ({ fixtures, logEntry }) => {
-    if (!fixtures.length) return;
-    const enrichedFixtures = await mapWithConcurrency(fixtures, HISTORY_CONCURRENCY, async fixture => {
-      const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
-      const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
-      return { ...fixture, homeHistory, awayHistory };
-    });
-    const byId = new Map(enrichedFixtures.map(item => [String(item.id), item]));
-    for (let i = 0; i < allFixtures.length; i += 1) { const replacement = byId.get(String(allFixtures[i].id)); if (replacement) allFixtures[i] = replacement; }
-    logEntry.status = enrichedFixtures.length > 0 ? "OK" : "EMPTY"; logEntry.message = null;
-    emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
-  }));
+  // One history pool per sport, rather than one pool per competition.
+  const enrichedFixtures = await mapWithConcurrency(allFixtures, HISTORY_CONCURRENCY, async fixture => {
+    const homeHistory = fixture.homeHistory?.length ? fixture.homeHistory : await fetchTeamHistory(fixture.homeId, fixture.home, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+    const awayHistory = fixture.awayHistory?.length ? fixture.awayHistory : await fetchTeamHistory(fixture.awayId, fixture.away, fixture.leagueId, fixture.season, historyDiagnostics, requestMemo);
+    return { ...fixture, homeHistory, awayHistory };
+  });
+  allFixtures.splice(0, allFixtures.length, ...enrichedFixtures);
+  for (const { fixtures, logEntry } of fixtureResults) {
+    if (fixtures.length) logEntry.status = historyDiagnostics.stopped ? "DEFERRED" : "OK";
+  }
+  emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
 
   const meta = completeRefreshMeta({ ...buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete"), fixtureRefreshPolicy: freshness });
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
@@ -130,6 +130,9 @@ async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics,
   const cached = readHistoryCache("football", cacheKey);
   if (cached.length) { diagnostics.cacheFallback += 1; diagnostics.gamesLoaded += cached.length; return cached; }
 
+  if (diagnostics.stopped || getApiPauseUntil("/football") > Date.now()) {
+    diagnostics.stopped = true; diagnostics.skipped += 1; return [];
+  }
   const promise = (async () => {
     diagnostics.requested += 1;
     try {
@@ -137,7 +140,7 @@ async function fetchTeamHistory(teamId, teamName, leagueId, season, diagnostics,
       const history = Array.isArray(data?.response) ? data.response : [];
       if (history.length) { diagnostics.apiSuccess += 1; diagnostics.gamesLoaded += history.length; writeHistoryCache("football", cacheKey, history); return history; }
       diagnostics.emptyResponses += 1;
-    } catch (error) { diagnostics.errors += 1; console.warn("Football history error:", identity, cleanName, error); }
+    } catch (error) { diagnostics.errors += 1; if (error?.deferred || Number(error?.status) === 429) diagnostics.stopped = true; console.warn("Football history error:", identity, cleanName, error); }
     return [];
   })();
 
@@ -153,7 +156,7 @@ async function mapWithConcurrency(items, limit, mapper) {
   return results;
 }
 
-function createHistoryDiagnostics() { return { requested: 0, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0 }; }
+function createHistoryDiagnostics() { return { requested: 0, skipped: 0, stopped: false, apiSuccess: 0, cacheFallback: 0, emptyResponses: 0, errors: 0, gamesLoaded: 0 }; }
 
 function normalizeFootballFixtures(items, competition) {
   return items.map(item => ({

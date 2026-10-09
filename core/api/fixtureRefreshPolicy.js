@@ -19,7 +19,7 @@ export function fixtureRefreshPolicy({ previousPayload, refreshMode = "startup",
   if (!Number.isFinite(verifiedAt) || verifiedAt > Number(now)) return { action: "refresh", reason: "missing-or-invalid-verification-time" };
   if (meta.snapshotStale === true) return { action: "refresh", reason: "stale-snapshot" };
   if (!Array.isArray(previousPayload?.matches) || meta.error === true || meta.refreshError === true
-      || (meta.syncLog || []).some(item => ["ERROR", "RATE_LIMITED"].includes(item.status))) {
+      || (meta.syncLog || []).some(item => ["ERROR", "RATE_LIMITED", "DEFERRED"].includes(item.status))) {
     return { action: "refresh", reason: "incomplete-snapshot" };
   }
   if (range && ((meta.from && meta.from !== range.from) || (meta.to && meta.to !== range.to))) {
