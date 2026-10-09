@@ -1,3 +1,4 @@
+import { completeRefreshMeta } from "./refreshCompletion.js";
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
 import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
@@ -42,7 +43,7 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
       return { competition, data, fixtures, logEntry };
     } catch (error) {
       const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
-      const logEntry = { competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error.message, code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null };
+      const logEntry = { competition: competition.name, leagueId: competition.id, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error.message, code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. Utilisez Actualiser après la pause." : null };
       syncLog.push(logEntry);
       emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "error");
       return { competition, data: null, fixtures: [], logEntry, error };
@@ -69,7 +70,7 @@ export async function fetchUpcomingRugbyFixtures({ onProgress, previousMatches =
     emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, true, "history");
   }));
 
-  const meta = { ...buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete"), fixtureRefreshPolicy: freshness };
+  const meta = completeRefreshMeta({ ...buildMeta(range, activeCompetitions, allFixtures, syncLog, historyDiagnostics, false, "complete"), fixtureRefreshPolicy: freshness });
   emitProgress(onProgress, allFixtures, range, activeCompetitions, syncLog, historyDiagnostics, false, "complete");
   return { fixtures: allFixtures, meta };
 }

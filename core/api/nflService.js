@@ -1,3 +1,4 @@
+import { completeRefreshMeta } from "./refreshCompletion.js";
 import { CONFIG } from "../config/config.js";
 import { fetchFromWorker, getDateRange } from "./apiClient.js";
 import { readHistoryCache, writeHistoryCache } from "./historyCache.js";
@@ -38,10 +39,10 @@ export async function fetchUpcomingNflFixtures({ onProgress, previousMatches = [
     syncLog[0].status = enriched.length ? "OK" : "EMPTY";
     syncLog[0].message = null;
     emitProgress(onProgress, enriched, range, syncLog, diagnostics, false, "complete", data?.season);
-    return { fixtures: enriched, meta: { ...buildMeta(range, enriched, syncLog, diagnostics, false, "complete", data?.season), fixtureRefreshPolicy: freshness } };
+    return { fixtures: enriched, meta: completeRefreshMeta({ ...buildMeta(range, enriched, syncLog, diagnostics, false, "complete", data?.season), fixtureRefreshPolicy: freshness }) };
   } catch (error) {
     const rateLimited = Number(error?.status || 0) === 429 || error?.code === "API_SPORTS_RATE_LIMIT";
-    const syncLog = [{ competition: "NFL", leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error?.message || String(error), code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. SportLab reprendra automatiquement après temporisation." : null }];
+    const syncLog = [{ competition: "NFL", leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", source: "api", count: 0, message: error?.message || String(error), code: error?.code || null, httpStatus: error?.status || null, detail: rateLimited ? "Différé — limite API-Sports. Utilisez Actualiser après la pause." : null }];
     diagnostics.fixtureRequest = { from: range.from, to: range.to, leagueId, status: rateLimited ? "RATE_LIMITED" : "ERROR", returned: 0, httpStatus: error?.status || null, code: error?.code || null, message: error?.message || String(error), completedAt: new Date().toISOString() };
     emitProgress(onProgress, [], range, syncLog, diagnostics, false, "error", null);
     throw error;

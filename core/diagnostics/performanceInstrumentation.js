@@ -3,7 +3,8 @@ const wallStartedAt = new Date().toISOString();
 const modules = new Map();
 const contexts = new Map();
 const requestReuse = { recent: 0, inFlight: 0, events: [] };
-const scheduler = { enqueued: 0, started: 0, completed: 0, failed: 0, rateLimits: 0, rateLimitEvents: [], totalQueueWaitMs: 0, maxQueueWaitMs: 0, totalRunMs: 0 };
+const bridgeDiagnostics = [];
+const scheduler = { enqueued: 0, queued: 0, started: 0, completed: 0, failed: 0, deferred: 0, deferredEvents: [], rateLimits: 0, rateLimitEvents: [], totalQueueWaitMs: 0, maxQueueWaitMs: 0, totalRunMs: 0 };
 
 function moduleState(name) {
   if (!modules.has(name)) modules.set(name, { startedAtMs: null, readyAtMs: null, cycles: [], firstFixturesMs: null, firstAnalysisMs: null, fixturesReadyMs: null, completeMs: null, fixtureCount: 0, analysisCount: 0, snapshotAgeMs: null, snapshotStale: false, reusedMatches: 0, newMatches: 0, historyRequests: 0, historyErrors: 0, refreshDecisions: [], phases: [] });
@@ -59,6 +60,16 @@ export function markModuleComplete(name, payload) {
   }
 }
 export function recordSchedulerEnqueue() { scheduler.enqueued += 1; return performance.now(); }
+export function recordSchedulerQueueSize(size) { scheduler.queued = size; }
+export function recordSchedulerDefer(detail) {
+  scheduler.deferred = (scheduler.deferred || 0) + 1;
+  scheduler.deferredEvents ||= [];
+  if (scheduler.deferredEvents.length < 60) scheduler.deferredEvents.push({ ...detail, atMs: Math.round(elapsed()) });
+}
+export function recordBridgeDiagnostics(path, detail) {
+  if (bridgeDiagnostics.length >= 40) bridgeDiagnostics.shift();
+  bridgeDiagnostics.push({ path, ...detail, atMs: Math.round(elapsed()) });
+}
 export function recordSchedulerStart(enqueuedAt) { const wait=Math.max(0,performance.now()-enqueuedAt); scheduler.started+=1; scheduler.totalQueueWaitMs+=wait; scheduler.maxQueueWaitMs=Math.max(scheduler.maxQueueWaitMs,wait); return performance.now(); }
 export function recordSchedulerEnd(startedAt, ok=true) { scheduler.completed+=1; if(!ok)scheduler.failed+=1; scheduler.totalRunMs+=Math.max(0,performance.now()-startedAt); }
 export function recordRequestReuse(kind, path) {
@@ -72,7 +83,7 @@ export function recordRateLimit(detail = {}) {
 }
 export function getPerformanceReport(){
   const moduleReport={}; for(const [name,s] of modules) moduleReport[name]={...s, startedAtMs:r(s.startedAtMs), readyAtMs:r(s.readyAtMs), firstFixturesMs:r(s.firstFixturesMs), firstAnalysisMs:r(s.firstAnalysisMs), fixturesReadyMs:r(s.fixturesReadyMs), completeMs:r(s.completeMs)};
-  return { version:"11.8.4.12", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
+  return { version:"11.8.4.13", sessionStartedAt:wallStartedAt, elapsedMs:Math.round(elapsed()), requestReuse, bridgeDiagnostics, scheduler:{...scheduler,totalQueueWaitMs:Math.round(scheduler.totalQueueWaitMs),maxQueueWaitMs:Math.round(scheduler.maxQueueWaitMs),totalRunMs:Math.round(scheduler.totalRunMs),averageQueueWaitMs:scheduler.started?Math.round(scheduler.totalQueueWaitMs/scheduler.started):0}, modules:moduleReport };
 }
 export function formatPerformanceReport(){ return JSON.stringify(getPerformanceReport(),null,2); }
 function r(v){return v==null?null:Math.round(v);}

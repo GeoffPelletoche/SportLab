@@ -1,12 +1,12 @@
 import { createRequestReuseCache } from "./requestReuseCache.js";
-import { recordRequestReuse } from "../diagnostics/performanceInstrumentation.js";
+import { recordRequestReuse, recordBridgeDiagnostics } from "../diagnostics/performanceInstrumentation.js";
 import { CONFIG } from "../config/config.js";
-import { applyGlobalRateLimit, scheduleApiRequest } from "./requestScheduler.js";
+import { applyApiCooldown, applyGlobalRateLimit, scheduleApiRequest } from "./requestScheduler.js";
 
 const DEFAULT_TIMEOUT_MS = 15000;
 const DEFAULT_ATTEMPTS = 3;
 const IS_SNAPSHOT_BUILD = typeof process !== "undefined" && process?.env?.SPORTLAB_SNAPSHOT_BUILD === "1";
-const RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 3 : 1;
+const RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 3 : 0;
 const requestReuse = createRequestReuseCache();
 
 export async function fetchFromWorker(path, params = {}, options = {}) {
@@ -36,12 +36,13 @@ export async function fetchFromWorker(path, params = {}, options = {}) {
 
     for (let attempt = 1; attempt <= attempts; attempt += 1) {
       try {
-        const result = await scheduleApiRequest(() => executeRequest(url, options), { priority });
+        const result = await scheduleApiRequest(() => executeRequest(url, options), { priority, path, maxQueueWaitMs: options.maxQueueWaitMs });
         if (result && typeof result === "object") result.clientVerifiedAt = new Date().toISOString();
         if (recentFixtures && Array.isArray(result?.response) && !result?.error) requestReuse.write(cacheKey, result);
         return result;
       } catch (error) {
         lastError = error;
+        if (error?.deferred === true) break;
         const status = Number(error?.status || 0);
         if (status === 429 && rateLimitRetries < maxRateLimitRetries) {
           rateLimitRetries += 1;
@@ -74,7 +75,9 @@ async function executeRequest(url, options) {
       throw error;
     }
     // Apply even when the caller has exhausted retries, before the queue advances.
-    if (response.status === 429) applyGlobalRateLimit(readRetryAfterMs(response, payload), { path: url.pathname });
+    if (payload?.apiDiagnostics) recordBridgeDiagnostics(url.pathname, payload.apiDiagnostics);
+    if (payload?.code === "API_SPORTS_COOLDOWN") applyApiCooldown(readRetryAfterMs(response, payload), { path: url.pathname });
+    if (response.status === 429 && payload?.code !== "API_SPORTS_COOLDOWN") applyGlobalRateLimit(readRetryAfterMs(response, payload), { path: url.pathname });
     if (!response.ok) {
       const payloadError = payload?.error;
       const code = payload?.code || (typeof payloadError === "object" ? payloadError?.code : payloadError) || `API_ERROR_${response.status}`;
@@ -84,6 +87,7 @@ async function executeRequest(url, options) {
       error.code = code;
       error.retryAfterMs = readRetryAfterMs(response, payload);
       error.payload = payload;
+      error.deferred = payload?.code === "API_SPORTS_COOLDOWN";
       error.url = url.toString();
       throw error;
     }
