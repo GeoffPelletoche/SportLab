@@ -3,12 +3,12 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 const root = new URL('../', import.meta.url);
-async function environment(fetchImpl, snapshotBuild = false) {
+async function environment(fetchImpl, snapshotBuild = false, localStorage = undefined) {
   let time = Date.parse('2026-10-08T14:00:00Z');
   let sequence = 0;
   const timers = new Map();
   const ClockDate = class extends Date { constructor(...args) { super(...(args.length ? args : [time])); } static now() { return time; } };
-  const context = vm.createContext({ console, URL, AbortController, Response, Date: ClockDate, performance: { now: () => time }, process: { env: { SPORTLAB_SNAPSHOT_BUILD: snapshotBuild ? '1' : '' } },
+  const context = vm.createContext({ console, URL, AbortController, Response, localStorage, Date: ClockDate, performance: { now: () => time }, process: { env: { SPORTLAB_SNAPSHOT_BUILD: snapshotBuild ? '1' : '' } },
     setTimeout(fn, ms) { const id = ++sequence; timers.set(id, { at: time + ms, fn }); return id; }, clearTimeout(id) { timers.delete(id); }, fetch: (...args) => fetchImpl(time, ...args) });
   const modules = new Map();
   async function load(url) {
@@ -77,7 +77,9 @@ const ok = () => new Response(JSON.stringify({ response: [{ id: 1 }], source: 'w
     return ok();
   });
   await assert.rejects(env.settle(env.client.fetchFromWorker('/football/fixtures', { league: 39 }, { attempts: 1, rateLimitRetries: 0 })), error => error.status === 429);
-  await env.settle(env.client.fetchFromWorker('/football/fixtures', { league: 39 }, { attempts: 1, rateLimitRetries: 0 }));
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/football/fixtures', { league: 39 })), e => e.deferred);
+  env.advance(120000);
+  await env.settle(env.client.fetchFromWorker('/football/fixtures', { league: 39 }));
   assert.equal(calls, 2); // failure never cached; even no-retry caller blocks subsequent traffic
   assert.ok(starts[1] - starts[0] >= 120000);
   assert.equal(env.diagnostics.getPerformanceReport().scheduler.rateLimits, 1);
@@ -87,12 +89,12 @@ const ok = () => new Response(JSON.stringify({ response: [{ id: 1 }], source: 'w
   const starts = [];
   const env = await environment(time => {
     starts.push(time);
-    if (++calls === 1) return new Response(JSON.stringify({ code: 'API_SPORTS_RATE_LIMIT' }), { status: 429, headers: { 'Retry-After': new Date(time + 45000).toUTCString() } });
+    if (++calls === 1) return new Response(JSON.stringify({ code: 'API_SPORTS_RATE_LIMIT' }), { status: 429, headers: { 'Retry-After': new Date(time + 30000).toUTCString() } });
     return ok();
   });
-  await env.settle(env.client.fetchFromWorker('/nfl/games', {}));
+  await env.settle(env.client.fetchFromWorker('/nfl/games', {}, { rateLimitRetries: 1, maxQueueWaitMs: 90000 }));
   assert.equal(calls, 2);
-  assert.ok(starts[1] - starts[0] >= 45000);
+  assert.ok(starts[1] - starts[0] >= 30000);
   assert.equal(env.diagnostics.getPerformanceReport().scheduler.rateLimits, 1);
 }
 {
@@ -136,3 +138,72 @@ const ok = () => new Response(JSON.stringify({ response: [{ id: 1 }], source: 'w
   }
 }
 console.log('Request queue integration passed');
+
+// Two refusals separated by a success still open the circuit; no hidden retries.
+{
+  let calls = 0;
+  const env = await environment(() => {
+    calls++;
+    return calls === 2 ? ok() : new Response(JSON.stringify({ code: 'API_SPORTS_RATE_LIMIT' }), { status: 429 });
+  });
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/nfl/games', { id: 1 })), e => e.status === 429);
+  await env.settle(env.client.fetchFromWorker('/nfl/games', { id: 2 }));
+  const denied = env.client.fetchFromWorker('/nfl/games', { id: 3 });
+  const waiting = env.client.fetchFromWorker('/rugby/team-games', { team: 4 });
+  const results = await env.settle(Promise.allSettled([denied, waiting]));
+  assert.equal(calls, 3);
+  assert.equal(results[0].reason.status, 429);
+  assert.equal(results[1].reason.code, 'API_QUEUE_CIRCUIT_OPEN');
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/football/fixtures', {})), e => e.deferred === true);
+  assert.equal(calls, 3);
+  env.advance(120000);
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/football/fixtures', {})), e => e.status === 429);
+  assert.equal(calls, 4, 'circuit releases after the deadline');
+}
+// A long provider deadline expires queued work without sending it or retrying it.
+{
+  let calls = 0;
+  const env = await environment(() => { calls++; return new Response(JSON.stringify({ code: 'API_SPORTS_RATE_LIMIT', retryAfterMs: 60000 }), { status: 429 }); });
+  env.scheduler.applyGlobalRateLimit(0);
+  await assert.rejects(env.settle(env.client.fetchFromWorker('/rugby/fixtures', {}, { maxQueueWaitMs: 5000 })), e => e.code === 'API_QUEUE_WAIT_EXPIRED');
+  assert.equal(calls, 0);
+  assert.equal(env.scheduler.getApiSchedulerState().queued, 0);
+  assert.equal(env.diagnostics.getPerformanceReport().scheduler.deferred, 1);
+}
+// A Worker cooldown flushes other queued work, without counting a new upstream 429.
+{
+  let calls = 0;
+  const env = await environment(() => { calls++; return new Response(JSON.stringify({ code: 'API_SPORTS_COOLDOWN', retryAfterMs: 90000, apiDiagnostics: { bridgeVersion: '3.11.1', quotas: [] } }), { status: 503 }); });
+  const results = await env.settle(Promise.allSettled([
+    env.client.fetchFromWorker('/nfl/games', {}), env.client.fetchFromWorker('/rugby/fixtures', {})
+  ]));
+  assert.equal(results.every(r => r.status === 'rejected' && r.reason.deferred), true);
+  assert.equal(calls, 1);
+  assert.equal(env.diagnostics.getPerformanceReport().scheduler.rateLimits, 0);
+  assert.equal(env.diagnostics.getPerformanceReport().bridgeDiagnostics[0].bridgeVersion, '3.11.1');
+}
+// Real services mark partial sweeps as failed, never as a complete verified refresh.
+{
+  const env = await environment(() => new Response(JSON.stringify({ code: 'API_SPORTS_COOLDOWN', retryAfterMs: 90000 }), { status: 503 }));
+  for (const [name, method] of [['rugbyService', 'fetchUpcomingRugbyFixtures'], ['footballService', 'fetchUpcomingFootballFixtures']]) {
+    const service = await env.loadService(name);
+    const result = await env.settle(service[method]({ refreshMode: 'force' }));
+    assert.equal(result.meta.error, true);
+    assert.equal(result.meta.refreshDeferred, true);
+  }
+}
+
+// The persisted pause survives reopening, and expires without extending itself.
+{
+  const values = new Map();
+  const storage = { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value) };
+  const first = await environment(() => ok(), false, storage);
+  first.scheduler.applyApiCooldown(120000);
+  let calls = 0;
+  const reopened = await environment(() => { calls++; return ok(); }, false, storage);
+  await assert.rejects(reopened.settle(reopened.client.fetchFromWorker('/nfl/games', {})), e => e.deferred);
+  assert.equal(calls, 0);
+  reopened.advance(120000);
+  await reopened.settle(reopened.client.fetchFromWorker('/nfl/games', {}));
+  assert.equal(calls, 1);
+}

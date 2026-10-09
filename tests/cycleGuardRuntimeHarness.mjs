@@ -9,6 +9,8 @@ const events = [];
 const renders = [];
 const pending = new Map();
 const calls = { drawhunter: 0, frenchflair: 0, nfl: 0 };
+const writes = [];
+const deferredStartup = process.argv.includes('--startup-deferred');
 const capital = { value: '1000' };
 const document = { addEventListener() {}, getElementById(id) { return id === 'portfolio-initial-capital' ? capital : {}; }, querySelector() { return null; }, querySelectorAll() { return []; }, activeElement: null };
 const window = { addEventListener() {}, dispatchEvent(event) { events.push(event); }, setTimeout, SportLabCore: { cloud: { async syncNow() {}, markDirty() {} } } };
@@ -29,7 +31,7 @@ const overrides = {
   loadDrawHunterApplicationData: loader('drawhunter'), loadFrenchFlairApplicationData: loader('frenchflair'), loadNflApplicationData: loader('nfl'),
   readSportsSnapshot: async kind => ({ payload: payload(sizes[kind]), savedAt: Date.now() - 64 * 60000, ageMs: 64 * 60000, stale: false }),
   snapshotPayloadForDisplay: record => ({ ...record.payload, meta: { ...record.payload.meta, snapshot: true, snapshotSavedAt: new Date(record.savedAt).toISOString(), loading: false } }),
-  writeSportsSnapshot: async () => true,
+  writeSportsSnapshot: async kind => { writes.push(kind); return true; },
   evaluatePendingPredictions: async () => ({ evaluated: 0 }), runAutomaticSettlement: async () => ({ settledCount: 0 }),
   renderApplication: (app, data) => renders.push(data),
   loadApplicationData: () => { throw new Error('unguarded sports load'); }
@@ -61,9 +63,15 @@ assert.equal(runtime.namespace.getLegacyRuntimeState().nflReady, true);
 assert.equal(renders.at(-1).drawhunterPayload.matches.length, 8);
 assert.equal(renders.at(-1).drawhunterPayload.meta.loading, false);
 const tick = () => new Promise(resolve => setImmediate(resolve));
-for (const [kind, resolve] of pending) resolve(process.argv.includes('--startup-error') && kind === 'drawhunter'
-  ? { matches: [], meta: { error: true, errorMessage: 'startup offline', phase: 'error' } } : payload(sizes[kind]));
+for (const [kind, resolve] of pending) resolve((process.argv.includes('--startup-error') || deferredStartup) && kind === 'drawhunter'
+  ? { matches: [], meta: { error: true, errorMessage: 'startup offline', phase: 'error', refreshDeferred: deferredStartup, syncLog: [{ status: 'ERROR', code: 'API_QUEUE_CIRCUIT_OPEN' }] } } : payload(sizes[kind]));
 await tick();
+if (deferredStartup) {
+  assert.equal(writes.includes('drawhunter'), false);
+  assert.equal(renders.at(-1).drawhunterPayload.matches.length, 8);
+  assert.equal(renders.at(-1).drawhunterPayload.meta.refreshDeferred, true);
+  assert.equal(renders.at(-1).drawhunterPayload.meta.syncLog[0].code, 'API_QUEUE_CIRCUIT_OPEN');
+}
 assert.equal(runtime.namespace.getLegacyRuntimeState().sportsRefreshInFlight, false);
 await window.runSportLabCloudSync();
 await window.savePortfolioInitialCapital();

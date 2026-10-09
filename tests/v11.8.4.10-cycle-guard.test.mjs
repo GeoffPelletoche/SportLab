@@ -40,7 +40,7 @@ test('diagnostics distinguish snapshot readiness from cycle completion and attri
 
 import { spawnSync } from 'node:child_process';
 test('runtime keeps snapshots ready, avoids local/cloud reloads, coalesces manual clicks and preserves failure fallback', () => {
-  for (const extra of [[], ['--startup-error']]) {
+  for (const extra of [[], ['--startup-error'], ['--startup-deferred']]) {
     const result = spawnSync(process.execPath, ['--experimental-vm-modules', new URL('./cycleGuardRuntimeHarness.mjs', import.meta.url).pathname, ...extra], { encoding: 'utf8', timeout: 10000 });
     assert.equal(result.status, 0, result.stderr + result.stdout);
   }

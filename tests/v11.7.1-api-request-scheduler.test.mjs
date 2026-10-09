@@ -13,7 +13,7 @@ test("V11.7.1 centralizes API-Sports requests and rate-limit recovery", () => {
   assert.ok(scheduler.includes("DEFAULT_RATE_LIMIT_PAUSE_MS = IS_SNAPSHOT_BUILD ? 90000 : 15000"));
   assert.match(client, /scheduleApiRequest/);
   assert.match(client, /applyGlobalRateLimit/);
-  assert.ok(client.includes("RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 3 : 1"));
+  assert.ok(client.includes("RATE_LIMIT_RETRIES = IS_SNAPSHOT_BUILD ? 3 : 0"));
   assert.match(client, /\/\\\/fixtures\$\|\\\/games\$\//);
   assert.match(legacy, /if \(drawHunterRefreshPromise\) return drawHunterRefreshPromise/);
   assert.match(legacy, /if \(frenchFlairRefreshPromise\) return frenchFlairRefreshPromise/);
